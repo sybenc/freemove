@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <style>
+    .node-style {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: #C5947C;
+    }
+
+    .container {
+      width: 1000px;
+      height: 1000px;
+      background-color: #AADAFA;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="example" class="container" style="position: relative;">
+    <div class="node-style" style="top: 40px;left: 20px; width: 100px;
+      height: 100px;"></div>
+    <div class="node-style" style="top: 140px;left: 333px; width: 200px;
+      height: 100px;"></div>
+    <div class="node-style" style="top: 190px;left: 222px; width: 150px;
+      height: 100px;"></div>
+    <div class="node-style" style="top: 234px;left: 111px; width: 100px;
+      height: 100px;"></div>
+  </div>
+  <script src="../dist/freemove.umd.js"></script>
+  <script>
+    const dom = document.getElementById('example')
+    console.log(dom)
+    const svg = createFreeMove(
+      dom,
+      Array.from(dom.getElementsByTagName('div'))
+    )
+    dom.append(svg)
+  </script>
+</body>
+
+</html>

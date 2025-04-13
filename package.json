@@ -1,0 +1,24 @@
+{
+  "name": "@sybenc/freemove",
+  "version": "1.0.0",
+  "main": "dist/freemove.umd.js",
+  "module": "dist/freemove.es.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.2.6",
+    "vite-plugin-dts": "^4.5.3"
+  },
+  "dependencies": {
+    "nanoid": "^5.1.5"
+  }
+}
