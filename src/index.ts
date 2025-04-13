@@ -1,3 +1,4 @@
+import { CLASS_PREFIX } from "./const";
 import Rect from "./rect";
 import { initStore, Store } from "./store";
 import { toPx } from "./utils";
@@ -26,7 +27,10 @@ export default function createFreeMove(container: HTMLElement, nodes: HTMLElemen
     store.setSelected(seleted.node);
     store.alignLine.reRender(store);
 
-    if (selectedDom.classList.contains("__freemove-container") || !selectedDom.classList.contains("__freemove-movable-node")) return;
+    if (
+      selectedDom.classList.contains(`${CLASS_PREFIX}-container`) ||
+     !selectedDom.classList.contains(`${CLASS_PREFIX}-movable-node`)
+    ) return;
 
     const rect = selectedDom.getBoundingClientRect();
     let startX = e.clientX - rect.left;
@@ -57,6 +61,7 @@ export default function createFreeMove(container: HTMLElement, nodes: HTMLElemen
         selectedDom.style.left = toPx(newX);
         selectedDom.style.top = toPx(newY);
         store.alignLine.reRender(store);
+        store.seletedBorder.reRender(store);
 
         // 存储该次坐标
         prevX = newX;
@@ -69,7 +74,6 @@ export default function createFreeMove(container: HTMLElement, nodes: HTMLElemen
       document.removeEventListener("pointermove", handlePointerMove);
       document.removeEventListener("pointerup", handlePointerUp);
       store.alignLine.clear();
-      store.setSelected(null);
 
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);

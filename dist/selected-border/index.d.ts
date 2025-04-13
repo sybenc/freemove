@@ -1,7 +1,5 @@
 import { Store } from '../store';
-import { AlignLineType } from './type';
-export declare const alignLineTypes: AlignLineType[];
-export declare class AlignLine {
+export declare class SeletedBorder {
     g: SVGGElement;
     constructor(svg: SVGSVGElement);
     clear(): void;

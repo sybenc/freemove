@@ -1,4 +1,4 @@
-import { ABSORB_DELTA } from "../const";
+import { ABSORB_DELTA, CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { epsilonEqual, toPx } from "../utils";
@@ -13,7 +13,7 @@ function createAlignLineDom(store: Store): SVGLineElement[] {
 
   alignLineTypes.forEach((type) => {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("class", `__freemove-alignLine-${type}`);
+    line.setAttribute("class", `${CLASS_PREFIX}-alignLine-${type}`);
     line.setAttribute("stroke", ALIGNLINE_COLOR);
     line.setAttribute("stroke-width", String(ALIGNLINE_WIDTH));
     line.style.display = "none";
@@ -137,7 +137,7 @@ function renderAlignLine(store: Store) {
     const alternateNodesFlat = Object.values(alternateNodes).flat();
     alternateNodesFlat.forEach((item) => {
       const { source, target, type } = item;
-      const line = store.alignLine.g.getElementsByClassName(`__freemove-alignLine-${type}`)[0];
+      const line = store.alignLine.g.getElementsByClassName(`${CLASS_PREFIX}-alignLine-${type}`)[0];
 
       if (/^h/.test(type)) {
         line?.setAttribute("x1", String(source));
@@ -195,12 +195,8 @@ export class AlignLine {
 
   constructor(svg: SVGSVGElement) {
     this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", "__freemove-alignLine");
+    this.g.setAttribute("class", `${CLASS_PREFIX}-alignLine`);
     svg.append(this.g);
-  }
-
-  get nodes() {
-    return this.g;
   }
 
   // 清除分组内所有对齐线

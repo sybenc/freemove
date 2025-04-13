@@ -18,7 +18,5 @@
     "vite": "^6.2.6",
     "vite-plugin-dts": "^4.5.3"
   },
-  "dependencies": {
-    "nanoid": "^5.1.5"
-  }
+  "dependencies": {}
 }

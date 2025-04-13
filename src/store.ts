@@ -1,31 +1,36 @@
 import { AlignLine } from "./align-line";
+import { CLASS_PREFIX } from "./const";
+import { SeletedBorder } from "./selected-border";
 import { toPx } from "./utils";
 
 export interface Store {
   container: HTMLElement;
   nodes: HTMLElement[];
   selected: HTMLElement | null;
-  moveDelta: [number, number]
+  moveDelta: [number, number];
   svg: SVGSVGElement;
   alignLine: AlignLine;
+  seletedBorder: SeletedBorder;
   setSelected: (target: HTMLElement | null) => void;
 }
 
-
-export const initStore = (
-  container: HTMLElement,
-  nodes: HTMLElement[]
-): Store => {
+export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "__freemove-svg");
+  svg.setAttribute("class", `${CLASS_PREFIX}-svg`);
 
-  const containerRect = container.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect();
   // this.render(config.nodes);
   svg.setAttribute("width", toPx(containerRect.width));
   svg.setAttribute("height", toPx(containerRect.height));
   svg.style = "position: absolute; inset: 0;";
-  container.className += " __freemove-container";
-  nodes.forEach((node) => (node.className += " __freemove-movable-node"));
+  container.className += ` ${CLASS_PREFIX}-container`;
+  nodes.forEach((node) => {
+    node.className += ` ${CLASS_PREFIX}-movable-node`;
+    if (/%$/.test(node.style.x)) node.style.x = toPx((containerRect.width * parseInt(node.style.x)) / 100);
+    if (/%$/.test(node.style.y)) node.style.y = toPx((containerRect.height * parseInt(node.style.y)) / 100);
+    if (/%$/.test(node.style.width)) node.style.width = toPx((containerRect.width * parseInt(node.style.width)) / 100);
+    if (/%$/.test(node.style.height)) node.style.height = toPx((containerRect.height * parseInt(node.style.height)) / 100);
+  });
 
   return {
     container,
@@ -33,12 +38,16 @@ export const initStore = (
     svg,
     selected: null,
     alignLine: new AlignLine(svg),
+    seletedBorder: new SeletedBorder(svg),
     moveDelta: [0, 0],
     setSelected(target: HTMLElement | null) {
       this.selected = target;
-      if (!target) return;
-      // const targetRect = Rect.from(target);
-      // this.alignLine.reRender(targetRect);
+      if (!target) {
+        this.seletedBorder.clear();
+        return;
+      }
+      this.seletedBorder.reRender(this);
+      console.log(this.seletedBorder);
     },
   };
 };

@@ -77,10 +77,10 @@ export default class Rect {
   // 从dom元素的style构建Rect对象
   static from(node: HTMLElement): Rect {
     return new Rect({
-      x: parseFloat(node.style.left),
-      y: parseFloat(node.style.top),
-      w: parseFloat(node.style.width),
-      h: parseFloat(node.style.height),
+      x: node.offsetLeft,
+      y: node.offsetTop,
+      w: node.offsetWidth,
+      h: node.offsetHeight,
       node,
     });
   }

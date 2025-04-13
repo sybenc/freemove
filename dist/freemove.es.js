@@ -1,14 +1,15 @@
-var E = Object.defineProperty;
-var _ = (i, t, r) => t in i ? E(i, t, { enumerable: !0, configurable: !0, writable: !0, value: r }) : i[t] = r;
-var x = (i, t, r) => _(i, typeof t != "symbol" ? t + "" : t, r);
-class v {
-  constructor({ x: t, y: r, h: c, w: a, node: e }) {
-    x(this, "x");
-    x(this, "y");
-    x(this, "w");
-    x(this, "h");
-    x(this, "node");
-    this.x = t, this.y = r, this.h = c, this.w = a, this.node = e;
+var k = Object.defineProperty;
+var $ = (n, t, i) => t in n ? k(n, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : n[t] = i;
+var A = (n, t, i) => $(n, typeof t != "symbol" ? t + "" : t, i);
+const y = "__freemove";
+class S {
+  constructor({ x: t, y: i, h: o, w: c, node: e }) {
+    A(this, "x");
+    A(this, "y");
+    A(this, "w");
+    A(this, "h");
+    A(this, "node");
+    this.x = t, this.y = i, this.h = o, this.w = c, this.node = e;
   }
   // 判断一个点是否在矩形里面
   isInSide(t) {
@@ -19,8 +20,8 @@ class v {
   }
   // 判断两个矩形是否相交，Tolerance为容差
   isIntersect(t) {
-    const r = this.x + 3, c = this.y + 3, a = this.x + this.w - 3, e = this.y + this.h - 3, u = t.x, s = t.y, f = t.x + t.w, l = t.y + t.h;
-    return !(a < u || r > f || e < s || c > l);
+    const i = this.x + 3, o = this.y + 3, c = this.x + this.w - 3, e = this.y + this.h - 3, a = t.x, s = t.y, l = t.x + t.w, h = t.y + t.h;
+    return !(c < a || i > l || e < s || o > h);
   }
   getAlignLinePostion() {
     return {
@@ -34,28 +35,27 @@ class v {
   }
   // 从dom元素的style构建Rect对象
   static from(t) {
-    return new v({
-      x: parseFloat(t.style.left),
-      y: parseFloat(t.style.top),
-      w: parseFloat(t.style.width),
-      h: parseFloat(t.style.height),
+    return new S({
+      x: t.offsetLeft,
+      y: t.offsetTop,
+      w: t.offsetWidth,
+      h: t.offsetHeight,
       node: t
     });
   }
 }
-const A = 3;
-function d(i) {
-  return typeof i == "number" ? `${i}px` : String(i);
+function g(n) {
+  return typeof n == "number" ? `${n}px` : String(n);
 }
-const k = 1.5, R = "#EA3", p = ["vl", "vc", "vr", "ht", "hc", "hb"];
-function F(i) {
+const T = 1.5, D = "#EA3", L = ["vl", "vc", "vr", "ht", "hc", "hb"];
+function N(n) {
   const t = [];
-  return p.forEach((r) => {
-    const c = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    c.setAttribute("class", `__freemove-alignLine-${r}`), c.setAttribute("stroke", R), c.setAttribute("stroke-width", String(k)), c.style.display = "none", t.push(c);
+  return L.forEach((i) => {
+    const o = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    o.setAttribute("class", `${y}-alignLine-${i}`), o.setAttribute("stroke", D), o.setAttribute("stroke-width", String(T)), o.style.display = "none", t.push(o);
   }), t;
 }
-function N(i) {
+function I(n) {
   const t = {
     ht: [],
     hc: [],
@@ -64,162 +64,212 @@ function N(i) {
     vc: [],
     vr: []
   };
-  function r() {
-    let e = v.from(i.selected);
-    t.hb = [], t.hc = [], t.ht = [], t.vc = [], t.vl = [], t.vr = [], i.nodes.forEach((u) => {
-      const s = v.from(u);
+  function i() {
+    let e = S.from(n.selected);
+    t.hb = [], t.hc = [], t.ht = [], t.vc = [], t.vl = [], t.vr = [], n.nodes.forEach((a) => {
+      const s = S.from(a);
       if (e.isIntersect(s)) return;
-      const f = e.getAlignLinePostion();
-      p.forEach((l) => {
-        let o = 1e4, n = 1e4, g;
-        /^h/.test(l) && (e.x > s.x + s.w ? (o = e.x + e.w, n = s.x) : e.x + e.w < s.x ? (o = e.x, n = s.x + s.w) : (o = Math.min(e.x, s.x), n = Math.max(e.x + e.w, s.x + s.w)), [s.y, s.y + s.h / 2, s.y + s.h].forEach((y) => {
-          g = Math.abs(f[l] - y), g <= A && t[l].push({
-            type: l,
-            source: o,
-            target: n,
-            absorbDistance: g,
-            absorbPosition: y,
+      const l = e.getAlignLinePostion();
+      L.forEach((h) => {
+        let u = 1e4, r = 1e4, b;
+        /^h/.test(h) && (e.x > s.x + s.w ? (u = e.x + e.w, r = s.x) : e.x + e.w < s.x ? (u = e.x, r = s.x + s.w) : (u = Math.min(e.x, s.x), r = Math.max(e.x + e.w, s.x + s.w)), [s.y, s.y + s.h / 2, s.y + s.h].forEach((x) => {
+          b = Math.abs(l[h] - x), b <= 3 && t[h].push({
+            type: h,
+            source: u,
+            target: r,
+            absorbDistance: b,
+            absorbPosition: x,
             nodeRects: [s]
           });
-        })), /^v/.test(l) && (e.y > s.y + s.h ? (o = e.y + e.h, n = s.y) : e.y + e.h < s.y ? (o = e.y, n = s.y + s.h) : (o = Math.min(e.y, s.y), n = Math.max(e.y + e.h, s.y + s.h)), [s.x, s.x + s.w / 2, s.x + s.w].forEach((y) => {
-          g = Math.abs(f[l] - y), g <= A && t[l].push({
-            type: l,
-            source: o,
-            target: n,
-            absorbDistance: g,
-            absorbPosition: y,
+        })), /^v/.test(h) && (e.y > s.y + s.h ? (u = e.y + e.h, r = s.y) : e.y + e.h < s.y ? (u = e.y, r = s.y + s.h) : (u = Math.min(e.y, s.y), r = Math.max(e.y + e.h, s.y + s.h)), [s.x, s.x + s.w / 2, s.x + s.w].forEach((x) => {
+          b = Math.abs(l[h] - x), b <= 3 && t[h].push({
+            type: h,
+            source: u,
+            target: r,
+            absorbDistance: b,
+            absorbPosition: x,
             nodeRects: [s]
           });
         }));
       });
-    }), t.hb.length && t.hc.length && t.ht.length;
-  }
-  function c(e) {
-    if (!i.selected || !e) return;
-    const { absorbPosition: u, type: s } = e;
-    switch (s) {
-      case "ht":
-        i.selected.style.top = d(u);
-        break;
-      case "hc":
-        i.selected.style.top = d(u - parseFloat(i.selected.style.height) / 2);
-        break;
-      case "hb":
-        i.selected.style.top = d(u - parseFloat(i.selected.style.height));
-        break;
-      case "vl":
-        i.selected.style.left = d(u);
-        break;
-      case "vc":
-        i.selected.style.left = d(u - parseFloat(i.selected.style.width) / 2);
-        break;
-      case "vr":
-        i.selected.style.left = d(u - parseFloat(i.selected.style.width));
-        break;
-    }
-    r();
-  }
-  function a() {
-    if (!i.selected) return;
-    const e = v.from(i.selected);
-    Object.values(t).flat().forEach((s) => {
-      const { source: f, target: l, type: o } = s, n = i.alignLine.g.getElementsByClassName(`__freemove-alignLine-${o}`)[0];
-      if (/^h/.test(o))
-        switch (n == null || n.setAttribute("x1", String(f)), n == null || n.setAttribute("x2", String(l)), o) {
-          case "ht":
-            n.setAttribute("y1", String(e.y)), n.setAttribute("y2", String(e.y));
-            break;
-          case "hc":
-            n.setAttribute("y1", String(e.y + e.h / 2)), n.setAttribute("y2", String(e.y + e.h / 2));
-            break;
-          case "hb":
-            n.setAttribute("y1", String(e.y + e.h)), n.setAttribute("y2", String(e.y + e.h));
-            break;
-        }
-      if (/^v/.test(o))
-        switch (n == null || n.setAttribute("y1", String(f)), n == null || n.setAttribute("y2", String(l)), o) {
-          case "vl":
-            n.setAttribute("x1", String(e.x)), n.setAttribute("x2", String(e.x));
-            break;
-          case "vc":
-            n.setAttribute("x1", String(e.x + e.w / 2)), n.setAttribute("x2", String(e.x + e.w / 2));
-            break;
-          case "vr":
-            n.setAttribute("x1", String(e.x + e.w)), n.setAttribute("x2", String(e.x + e.w));
-            break;
-        }
-      n == null || n.setAttribute("style", "display: 'block");
     });
   }
-  r(), [...t.ht, ...t.hc, ...t.hb].forEach((e) => {
-    c(e);
+  function o(e) {
+    if (!n.selected || !e) return;
+    const { absorbPosition: a, type: s } = e;
+    switch (s) {
+      case "ht":
+        n.selected.style.top = g(a);
+        break;
+      case "hc":
+        n.selected.style.top = g(a - parseFloat(n.selected.style.height) / 2);
+        break;
+      case "hb":
+        n.selected.style.top = g(a - parseFloat(n.selected.style.height));
+        break;
+      case "vl":
+        n.selected.style.left = g(a);
+        break;
+      case "vc":
+        n.selected.style.left = g(a - parseFloat(n.selected.style.width) / 2);
+        break;
+      case "vr":
+        n.selected.style.left = g(a - parseFloat(n.selected.style.width));
+        break;
+    }
+    i();
+  }
+  function c() {
+    if (!n.selected) return;
+    const e = S.from(n.selected);
+    Object.values(t).flat().forEach((s) => {
+      const { source: l, target: h, type: u } = s, r = n.alignLine.g.getElementsByClassName(`${y}-alignLine-${u}`)[0];
+      if (/^h/.test(u))
+        switch (r == null || r.setAttribute("x1", String(l)), r == null || r.setAttribute("x2", String(h)), u) {
+          case "ht":
+            r.setAttribute("y1", String(e.y)), r.setAttribute("y2", String(e.y));
+            break;
+          case "hc":
+            r.setAttribute("y1", String(e.y + e.h / 2)), r.setAttribute("y2", String(e.y + e.h / 2));
+            break;
+          case "hb":
+            r.setAttribute("y1", String(e.y + e.h)), r.setAttribute("y2", String(e.y + e.h));
+            break;
+        }
+      if (/^v/.test(u))
+        switch (r == null || r.setAttribute("y1", String(l)), r == null || r.setAttribute("y2", String(h)), u) {
+          case "vl":
+            r.setAttribute("x1", String(e.x)), r.setAttribute("x2", String(e.x));
+            break;
+          case "vc":
+            r.setAttribute("x1", String(e.x + e.w / 2)), r.setAttribute("x2", String(e.x + e.w / 2));
+            break;
+          case "vr":
+            r.setAttribute("x1", String(e.x + e.w)), r.setAttribute("x2", String(e.x + e.w));
+            break;
+        }
+      r == null || r.setAttribute("style", "display: 'block");
+    });
+  }
+  i(), [...t.ht, ...t.hc, ...t.hb].forEach((e) => {
+    o(e);
   }), [...t.vl, ...t.vc, ...t.vr].forEach((e) => {
-    c(e);
-  }), a();
+    o(e);
+  }), c();
 }
 class M {
   constructor(t) {
-    x(this, "g");
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g"), this.g.setAttribute("class", "__freemove-alignLine"), t.append(this.g);
-  }
-  get nodes() {
-    return this.g;
+    A(this, "g");
+    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g"), this.g.setAttribute("class", `${y}-alignLine`), t.append(this.g);
   }
   // 清除分组内所有对齐线
   clear() {
     this.g.innerHTML = "";
   }
   reRender(t) {
-    t.selected && (this.clear(), this.g.append(...F()), N(t));
+    t.selected && (this.clear(), this.g.append(...N()), I(t));
   }
 }
-const B = (i, t) => {
-  const r = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  r.setAttribute("class", "__freemove-svg");
-  const c = i.getBoundingClientRect();
-  return r.setAttribute("width", d(c.width)), r.setAttribute("height", d(c.height)), r.style = "position: absolute; inset: 0;", i.className += " __freemove-container", t.forEach((a) => a.className += " __freemove-movable-node"), {
-    container: i,
+const f = 1.5, F = "#000", _ = ["left", "top", "right", "bottom"], m = ["ew-resize", "ns-resize", "ew-resize", "ns-resize"];
+function E(n) {
+  const t = S.from(n.selected), i = [];
+  return _.forEach((o, c) => {
+    const e = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    e.setAttribute("class", `${y}-selected-border-line-${o}`), e.setAttribute("stroke", F), e.setAttribute("stroke-width", g(f)), e.setAttribute("style", `cursor: ${m[c]}`);
+    const a = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    a.setAttribute("class", `${y}-selected-border-line-action-${o}`), a.setAttribute("stroke", "transparent"), a.setAttribute("stroke-width", "5px"), a.setAttribute("style", `cursor: ${m[c]}`);
+    const s = [e, a];
+    switch (o) {
+      case "left":
+        s.forEach((l) => {
+          l.setAttribute("x1", String(t.x)), l.setAttribute("y1", String(t.y - f / 2)), l.setAttribute("x2", String(t.x)), l.setAttribute("y2", String(t.y + t.h + f / 2));
+        });
+        break;
+      case "right":
+        s.forEach((l) => {
+          l.setAttribute("x1", String(t.x + t.w)), l.setAttribute("y1", String(t.y - f / 2)), l.setAttribute("x2", String(t.x + t.w)), l.setAttribute("y2", String(t.y + t.h + f / 2));
+        });
+        break;
+      case "top":
+        s.forEach((l) => {
+          l.setAttribute("x1", String(t.x - f / 2)), l.setAttribute("y1", String(t.y)), l.setAttribute("x2", String(t.x + t.w + f / 2)), l.setAttribute("y2", String(t.y));
+        });
+        break;
+      case "bottom":
+        s.forEach((l) => {
+          l.setAttribute("x1", String(t.x - f / 2)), l.setAttribute("y1", String(t.y + t.h)), l.setAttribute("x2", String(t.x + t.w + f / 2)), l.setAttribute("y2", String(t.y + t.h));
+        });
+        break;
+    }
+    i.push(e, a);
+  }), i;
+}
+class C {
+  constructor(t) {
+    A(this, "g");
+    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g"), this.g.setAttribute("class", `${y}-seleted-border`), t.append(this.g);
+  }
+  clear() {
+    this.g.innerHTML = "";
+  }
+  reRender(t) {
+    t.selected && (this.clear(), this.g.append(...E(t)), E(t));
+  }
+}
+const O = (n, t) => {
+  const i = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  i.setAttribute("class", `${y}-svg`);
+  const o = n.getBoundingClientRect();
+  return i.setAttribute("width", g(o.width)), i.setAttribute("height", g(o.height)), i.style = "position: absolute; inset: 0;", n.className += ` ${y}-container`, t.forEach((c) => {
+    c.className += ` ${y}-movable-node`, /%$/.test(c.style.x) && (c.style.x = g(o.width * parseInt(c.style.x) / 100)), /%$/.test(c.style.y) && (c.style.y = g(o.height * parseInt(c.style.y) / 100)), /%$/.test(c.style.width) && (c.style.width = g(o.width * parseInt(c.style.width) / 100)), /%$/.test(c.style.height) && (c.style.height = g(o.height * parseInt(c.style.height) / 100));
+  }), {
+    container: n,
     nodes: t,
-    svg: r,
+    svg: i,
     selected: null,
-    alignLine: new M(r),
+    alignLine: new M(i),
+    seletedBorder: new C(i),
     moveDelta: [0, 0],
-    setSelected(a) {
-      this.selected = a;
+    setSelected(c) {
+      if (this.selected = c, !c) {
+        this.seletedBorder.clear();
+        return;
+      }
+      this.seletedBorder.reRender(this), console.log(this.seletedBorder);
     }
   };
 };
-let h;
-function T(i, t) {
-  return h = B(i, t), h.svg.addEventListener("pointerdown", (r) => {
-    const c = h.container.getBoundingClientRect();
-    r.preventDefault();
-    let a = null;
-    for (const w of h.nodes) {
-      const b = v.from(w);
-      if (b.isInSide({ x: r.offsetX, y: r.offsetY })) {
-        a = b;
+let d;
+function H(n, t) {
+  return d = O(n, t), d.svg.addEventListener("pointerdown", (i) => {
+    const o = d.container.getBoundingClientRect();
+    i.preventDefault();
+    let c = null;
+    for (const p of d.nodes) {
+      const w = S.from(p);
+      if (w.isInSide({ x: i.offsetX, y: i.offsetY })) {
+        c = w;
         break;
       }
     }
-    if (!a) return;
-    const e = a.node;
-    if (h.setSelected(a.node), h.alignLine.reRender(h), e.classList.contains("__freemove-container") || !e.classList.contains("__freemove-movable-node")) return;
-    const u = e.getBoundingClientRect();
-    let s = r.clientX - u.left, f = r.clientY - u.top, l = null, o = null, n = null;
-    function g(w) {
-      l || (l = requestAnimationFrame(() => {
-        let b = w.clientX - c.left - s, m = w.clientY - c.top - f;
-        const L = h.container.clientWidth - e.offsetWidth, S = h.container.clientHeight - e.offsetHeight;
-        b = Math.max(0, Math.min(b, L)), m = Math.max(0, Math.min(m, S)), h.moveDelta = [o !== null ? b - o : 0, n !== null ? m - n : 0], e.style.left = d(b), e.style.top = d(m), h.alignLine.reRender(h), o = b, n = m, l = null;
+    if (!c) return;
+    const e = c.node;
+    if (d.setSelected(c.node), d.alignLine.reRender(d), e.classList.contains(`${y}-container`) || !e.classList.contains(`${y}-movable-node`)) return;
+    const a = e.getBoundingClientRect();
+    let s = i.clientX - a.left, l = i.clientY - a.top, h = null, u = null, r = null;
+    function b(p) {
+      h || (h = requestAnimationFrame(() => {
+        let w = p.clientX - o.left - s, v = p.clientY - o.top - l;
+        const R = d.container.clientWidth - e.offsetWidth, B = d.container.clientHeight - e.offsetHeight;
+        w = Math.max(0, Math.min(w, R)), v = Math.max(0, Math.min(v, B)), d.moveDelta = [u !== null ? w - u : 0, r !== null ? v - r : 0], e.style.left = g(w), e.style.top = g(v), d.alignLine.reRender(d), d.seletedBorder.reRender(d), u = w, r = v, h = null;
       }));
     }
-    function y() {
-      document.removeEventListener("pointermove", g), document.removeEventListener("pointerup", y), h.alignLine.clear(), h.setSelected(null), l !== null && (cancelAnimationFrame(l), l = null);
+    function x() {
+      document.removeEventListener("pointermove", b), document.removeEventListener("pointerup", x), d.alignLine.clear(), h !== null && (cancelAnimationFrame(h), h = null);
     }
-    document.addEventListener("pointermove", g), document.addEventListener("pointerup", y);
-  }), h.svg;
+    document.addEventListener("pointermove", b), document.addEventListener("pointerup", x);
+  }), d.svg;
 }
 export {
-  T as default
+  H as default
 };
