@@ -26,5 +26,7 @@ export interface AlignLineData {
   absorbDistance: number
   // 吸附位置
   absorbPosition: number
+  // 相关联矩形
+  nodeRects: Rect[]
 }
 

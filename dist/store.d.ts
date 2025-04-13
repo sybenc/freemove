@@ -3,6 +3,7 @@ export interface Store {
     container: HTMLElement;
     nodes: HTMLElement[];
     selected: HTMLElement | null;
+    moveDelta: [number, number];
     svg: SVGSVGElement;
     alignLine: AlignLine;
     setSelected: (target: HTMLElement | null) => void;

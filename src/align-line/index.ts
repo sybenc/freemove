@@ -1,7 +1,7 @@
 import { ABSORB_DELTA } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
-import { toPx } from "../utils";
+import { epsilonEqual, toPx } from "../utils";
 import { ALIGNLINE_COLOR, ALIGNLINE_WIDTH } from "./const";
 import { AlignLineData, AlignLineType } from "./type";
 
@@ -23,7 +23,6 @@ function createAlignLineDom(store: Store): SVGLineElement[] {
 }
 
 function renderAlignLine(store: Store) {
-  const seletedRect = Rect.from(store.selected!);
   const alternateNodes: Record<AlignLineType, AlignLineData[]> = {
     ht: [],
     hc: [],
@@ -34,12 +33,13 @@ function renderAlignLine(store: Store) {
   };
 
   function handleSearchAlternateNodes() {
-    alternateNodes.hb = []
-    alternateNodes.hc = []
-    alternateNodes.ht = []
-    alternateNodes.vc = []
-    alternateNodes.vl = []
-    alternateNodes.vr = []
+    let seletedRect = Rect.from(store.selected!);
+    alternateNodes.hb = [];
+    alternateNodes.hc = [];
+    alternateNodes.ht = [];
+    alternateNodes.vc = [];
+    alternateNodes.vl = [];
+    alternateNodes.vr = [];
     // 查找全部符合条件的备选元素
     store.nodes.forEach((item) => {
       const nodeRect = Rect.from(item);
@@ -69,6 +69,7 @@ function renderAlignLine(store: Store) {
                 target,
                 absorbDistance,
                 absorbPosition: item,
+                nodeRects: [nodeRect],
               });
             }
           });
@@ -77,7 +78,7 @@ function renderAlignLine(store: Store) {
           if (seletedRect.y > nodeRect.y + nodeRect.h) {
             source = seletedRect.y + seletedRect.h;
             target = nodeRect.y;
-          } else if (seletedRect.y + seletedRect.h > nodeRect.y) {
+          } else if (seletedRect.y + seletedRect.h < nodeRect.y) {
             source = seletedRect.y;
             target = nodeRect.y + nodeRect.h;
           } else {
@@ -93,44 +94,12 @@ function renderAlignLine(store: Store) {
                 target,
                 absorbDistance,
                 absorbPosition: position,
+                nodeRects: [nodeRect],
               });
             }
           });
         }
       });
-    });
-
-    // 吸附优先级，吸附距离最小 > 对齐线最长，根据这个优先级找到符合条件的唯一节点
-    alignLineTypes.forEach((type) => {
-      if (!alternateNodes[type].length) return;
-      // 寻找最小吸附距离
-      let minAbsorbDistance = Infinity;
-      let absorbPosition = Infinity;
-      alternateNodes[type].forEach((item) => {
-        if (item.absorbDistance < minAbsorbDistance) minAbsorbDistance = item.absorbDistance;
-        absorbPosition = item.absorbPosition;
-      });
-      // 在最小吸附距离的情况下，寻找最长对齐线
-      let min = Infinity,
-        max = 0;
-      alternateNodes[type]
-        .filter((item) => item.absorbDistance === minAbsorbDistance)
-        .forEach((item) => {
-          if (item.source < min) min = item.source;
-          if (item.source > max) max = item.source;
-          if (item.target < min) min = item.target;
-          if (item.target > max) max = item.target;
-        });
-      // 保证存在备选节点的项都有且只有一个目标元素
-      alternateNodes[type] = [
-        {
-          type,
-          source: min,
-          target: max,
-          absorbDistance: minAbsorbDistance,
-          absorbPosition,
-        },
-      ];
     });
   }
 
