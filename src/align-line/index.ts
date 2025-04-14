@@ -41,7 +41,7 @@ function renderAlignLine(store: Store) {
     alternateNodes.vl = [];
     alternateNodes.vr = [];
     // 查找全部符合条件的备选元素
-    store.nodes.forEach((item) => {
+    store.nodes.forEach(item => {
       const nodeRect = Rect.from(item);
       if (seletedRect.isIntersect(nodeRect)) return;
       const seletedAlignLinePosition = seletedRect.getAlignLinePostion();
@@ -101,6 +101,34 @@ function renderAlignLine(store: Store) {
         }
       });
     });
+
+    // 对于同一个吸附距离上存在多个目标节点时，会发生对齐线没有对准所有的目标节点，处理办法是
+    // 根据吸附距离创建吸附距离和对齐线数据的映射，循环对齐线数据，找到对齐线的原点（最小值）和终点（最大值）
+    // 由于找到了原点（最小值）和终点（最大值），我们不在关心其他对齐线的原点和终点
+    // 为了免去过滤的烦恼，直接将所有节点的原点和终点，更改为最大值和最小值
+    alignLineTypes.forEach(type=>{
+      const map = new Map<number, AlignLineData[]>()
+      alternateNodes[type].forEach(item=>{
+        if(!map.has(item.absorbDistance)) map.set(item.absorbDistance, [item])
+        else map.get(item.absorbDistance)?.push(item)
+      })
+      let min = Infinity, max = 0
+      map.forEach(item=>{
+        item.forEach(i => {
+          min = Math.min(i.source, min)
+          min = Math.min(i.target, min)
+          max = Math.max(i.source, max)
+          max = Math.max(i.target, max)
+        })
+      })
+      map.forEach(item=>{
+        item.forEach(i => {
+          i.source = min
+          i.target = max
+        })
+      })
+      alternateNodes[type] = Array.from(map.values()).flat()
+    })
   }
 
   function handleAbsorb(data: AlignLineData) {
@@ -195,13 +223,10 @@ function renderAlignLine(store: Store) {
   }
 
   handleSearchAlternateNodes();
-  // 先处理水平方向的吸附， 然后处理竖直方向的吸附
-  [...alternateNodes["ht"], ...alternateNodes["hc"], ...alternateNodes["hb"]].forEach((item) => {
+  // 处理吸附
+  Object.values(alternateNodes).flat().forEach(item=>{
     handleAbsorb(item);
-  });
-  [...alternateNodes["vl"], ...alternateNodes["vc"], ...alternateNodes["vr"]].forEach((item) => {
-    handleAbsorb(item);
-  });
+  })
   handleDraw();
 }
 
