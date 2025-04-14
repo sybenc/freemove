@@ -3,7 +3,8 @@ import { AlignLineType } from './type';
 export declare const alignLineTypes: AlignLineType[];
 export declare class AlignLine {
     g: SVGGElement;
+    lines: Record<AlignLineType, SVGLineElement>;
     constructor(svg: SVGSVGElement);
-    clear(): void;
+    hidden(): void;
     reRender(store: Store): void;
 }

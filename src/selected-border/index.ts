@@ -1,4 +1,4 @@
-import { CLASS_PREFIX } from "../const";
+import { NODE_CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { toPx } from "../utils";
@@ -27,15 +27,38 @@ const selectedBorderLineCursor = [
   "ew-resize",
 ];
 
-function createSeletedBorderDom(store: Store): SVGElement[] {
-  const seletedRect = Rect.from(store.selected!);
-  const nodes: SVGElement[] = [];
-  selectedBorderLineTypes.forEach((type, index) => {
+function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElement[]] {
+  const points: SVGRectElement[] = [];
+  const lines: SVGLineElement[] = [];
+  selectedBorderLineTypes.forEach((type) => {
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("class", `${CLASS_PREFIX}-selected-border-line-${type}`);
+    line.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-line-${type}`);
     line.setAttribute("stroke", SELECTED_BORDER_COLOR);
     line.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
 
+    lines.push(line);
+  });
+
+  selectedBorderPointTypes.forEach((type, index) => {
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-point-${type}`);
+    rect.setAttribute("fill", "white");
+    rect.setAttribute("stroke", SELECTED_BORDER_COLOR);
+    rect.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
+    rect.setAttribute("width", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
+    rect.setAttribute("height", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
+    rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
+    rect.setAttribute("data-direction", type);
+    points.push(rect);
+  });
+
+  return [points, lines];
+}
+
+function renderSelectedBorder(store: Store) {
+  const seletedRect = Rect.from(store.selected!);
+  selectedBorderLineTypes.forEach((type) => {
+    const line = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
     switch (type) {
       case "left":
         line.setAttribute("x1", String(seletedRect.x));
@@ -62,86 +85,71 @@ function createSeletedBorderDom(store: Store): SVGElement[] {
         line.setAttribute("y2", String(seletedRect.y + seletedRect.h));
         break;
     }
-
-    nodes.push(line);
   });
-
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("class", `${CLASS_PREFIX}-selected-border-point-${type}`);
-    rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", SELECTED_BORDER_COLOR);
-    rect.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
-    rect.setAttribute("width", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("height", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
-    rect.setAttribute("data-direction", type)
-    rect.setAttribute("data-owner-id", store.selected!.dataset.id!)
+    const rect = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
+    rect.setAttribute("data-owner-id", store.selected!.dataset.id!);
     // 往左上角的偏移量，为边长的一半
-    const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2
-
+    const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
     switch (type) {
       case "left-top":
-        rect.setAttribute("x", String(seletedRect.x -  offset ));
-        rect.setAttribute("y", String(seletedRect.y -  offset ));
+        rect.setAttribute("x", String(seletedRect.x - offset));
+        rect.setAttribute("y", String(seletedRect.y - offset));
         break;
       case "top":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 -  offset ));
-        rect.setAttribute("y", String(seletedRect.y -  offset ));
+        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - offset));
+        rect.setAttribute("y", String(seletedRect.y - offset));
         break;
       case "right-top":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w -  offset ));
-        rect.setAttribute("y", String(seletedRect.y -  offset ));
+        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
+        rect.setAttribute("y", String(seletedRect.y - offset));
         break;
       case "right":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w -  offset ));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 -  offset ));
+        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
+        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - offset));
         break;
       case "right-bottom":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w -  offset ));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h -  offset ));
+        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
+        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
         break;
       case "bottom":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 -  offset ));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h -  offset ));
+        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - offset));
+        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
         break;
       case "left-bottom":
-        rect.setAttribute("x", String(seletedRect.x -  offset ));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h -  offset ));
+        rect.setAttribute("x", String(seletedRect.x - offset));
+        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
         break;
       case "left":
-        rect.setAttribute("x", String(seletedRect.x -  offset ));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 -  offset ));
+        rect.setAttribute("x", String(seletedRect.x - offset));
+        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - offset));
         break;
     }
-    nodes.push(rect);
   });
-
-  return nodes;
-}
-
-function addResizeListener(svg: SVGSVGElement) {
-  const points = svg.querySelectorAll(`rect[class^="${CLASS_PREFIX}-selected-border-point-"]`);
-  
 }
 
 export class SeletedBorder {
   g: SVGGElement;
+  points: SVGRectElement[];
+  lines: SVGLineElement[];
 
   constructor(svg: SVGSVGElement) {
     this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${CLASS_PREFIX}-seleted-border`);
+    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-seleted-border`);
     svg.append(this.g);
+    const [points, lines] = createSeletedBorderDom();
+    this.points = points;
+    this.lines = lines;
+    this.g.append(...lines, ...points);
   }
 
-  clear() {
-    this.g.innerHTML = "";
+  hidden() {
+    this.g.style.display = "none";
   }
 
   reRender(store: Store) {
     if (!store.selected) return;
-    this.clear();
-    this.g.append(...createSeletedBorderDom(store));
-    createSeletedBorderDom(store);
+    this.g.style.display = "block";
+    renderSelectedBorder(store);
   }
 }

@@ -1,7 +1,9 @@
 import { Store } from '../store';
 export declare class SeletedBorder {
     g: SVGGElement;
+    points: SVGRectElement[];
+    lines: SVGLineElement[];
     constructor(svg: SVGSVGElement);
-    clear(): void;
+    hidden(): void;
     reRender(store: Store): void;
 }

@@ -1,4 +1,4 @@
-import { CLASS_PREFIX } from "./const";
+import { NODE_CLASS_PREFIX, NODE_MIM_HEIGHT, NODE_MIN_WIDTH } from "./const";
 import Rect from "./rect";
 import { Store } from "./store";
 import { toPx } from "./utils";
@@ -49,7 +49,7 @@ function handleMoveNode(store: Store, event: MouseEvent) {
   function handlePointerUp() {
     document.removeEventListener("pointermove", handlePointerMove);
     document.removeEventListener("pointerup", handlePointerUp);
-    store.alignLine.clear();
+    store.alignLine.hidden();
 
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
@@ -100,10 +100,15 @@ function handleResizeNode(store: Store, event: PointerEvent) {
       newTop = startTop + deltaY;
     }
 
-    store.selected!.style.width = toPx(newWidth);
-    store.selected!.style.height = toPx(newHeight);
-    store.selected!.style.left = toPx(newLeft);
-    store.selected!.style.top = toPx(newTop);
+    if (newHeight > NODE_MIM_HEIGHT) {
+      store.selected!.style.height = toPx(newHeight);
+      store.selected!.style.top = toPx(newTop);
+    }
+    if (newWidth > NODE_MIN_WIDTH) {
+      store.selected!.style.width = toPx(newWidth);
+      store.selected!.style.left = toPx(newLeft);
+    }
+    
     store.seletedBorder.reRender(store);
   }
 
@@ -123,7 +128,7 @@ export function addPointerListener(store: Store) {
     const target = event.target as HTMLElement;
 
     // 如果点击啊到被选择边框的resize点
-    if (target.classList[0].includes(`${CLASS_PREFIX}-selected-border-point-`)) {
+    if (target.classList[0].includes(`${NODE_CLASS_PREFIX}-selected-border-point-`)) {
       const ownerId = target.dataset.ownerId;
       for (let i = 0; i < store.nodes.length; i++) {
         if (ownerId === store.nodes[i].dataset.ownerId) {
@@ -133,12 +138,12 @@ export function addPointerListener(store: Store) {
       if (store.selected) {
         handleResizeNode(store, event);
       }
-      return
+      return;
     }
 
-    console.log(1111)
+    console.log(1111);
     // 如果点击到svg画布
-    if (target.classList.contains(`${CLASS_PREFIX}-svg`)) {
+    if (target.classList.contains(`${NODE_CLASS_PREFIX}-svg`)) {
       // 判断点击位置是否在某个节点内部
       let seleted: Rect | null = null;
 
@@ -152,11 +157,11 @@ export function addPointerListener(store: Store) {
       }
 
       // 如果点击到节点，处理节点拖拽动作
-      if (seleted && seleted.node.classList.contains(`${CLASS_PREFIX}-movable-node`)) {
+      if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
         store.setSelected(seleted.node);
         handleMoveNode(store, event);
       }
-      
+
       // todo: 此外，绘画选择框
       if (!seleted) {
       }

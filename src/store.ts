@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { AlignLine } from "./align-line";
-import { CLASS_PREFIX } from "./const";
+import { NODE_CLASS_PREFIX } from "./const";
 import { SeletedBorder } from "./selected-border";
 import { toPx } from "./utils";
 
@@ -17,16 +17,16 @@ export interface Store {
 
 export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store => {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", `${CLASS_PREFIX}-svg`);
+  svg.setAttribute("class", `${NODE_CLASS_PREFIX}-svg`);
 
   const containerRect = container.getBoundingClientRect();
   // this.render(config.nodes);
   svg.setAttribute("width", toPx(containerRect.width));
   svg.setAttribute("height", toPx(containerRect.height));
   svg.style = "position: absolute; inset: 0;";
-  container.className += ` ${CLASS_PREFIX}-container`;
+  container.className += ` ${NODE_CLASS_PREFIX}-container`;
   nodes.forEach((node) => {
-    node.className += ` ${CLASS_PREFIX}-movable-node`;
+    node.className += ` ${NODE_CLASS_PREFIX}-movable-node`;
     node.setAttribute('data-id', nanoid())
     if (/%$/.test(node.style.x)) node.style.x = toPx((containerRect.width * parseInt(node.style.x)) / 100);
     if (/%$/.test(node.style.y)) node.style.y = toPx((containerRect.height * parseInt(node.style.y)) / 100);
@@ -45,7 +45,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
     setSelected(target: HTMLElement | null) {
       this.selected = target;
       if (!target) {
-        this.seletedBorder.clear();
+        this.seletedBorder.hidden();
         return;
       }
       this.seletedBorder.reRender(this);
