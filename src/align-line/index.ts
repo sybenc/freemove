@@ -128,6 +128,21 @@ function renderAlignLine(store: Store) {
     }
     // 由于更改了位置，重新查找对齐线
     handleSearchAlternateNodes();
+    store.seletedBorder.reRender(store)
+    // console.log(alternateNodes)
+    // 在两个吸附点很近，且两个矩形的长宽差距很小的时候，会造成对齐线显示异常
+    // 修复方法是找到最小的吸附距离，只显示吸附距离最小的对齐线
+    let min = Infinity
+    alignLineTypes.forEach(type=>{
+      alternateNodes[type].forEach(item=>{
+        if (item.absorbDistance < min) min = item.absorbDistance
+      })
+    })
+    alignLineTypes.forEach(type=>{
+      alternateNodes[type].forEach(item=>{
+        if (item.absorbDistance - min > 0.1) alternateNodes[type] = []
+      })
+    })
   }
 
   function handleDraw() {

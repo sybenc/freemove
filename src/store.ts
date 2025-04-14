@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { AlignLine } from "./align-line";
 import { CLASS_PREFIX } from "./const";
 import { SeletedBorder } from "./selected-border";
@@ -26,6 +27,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
   container.className += ` ${CLASS_PREFIX}-container`;
   nodes.forEach((node) => {
     node.className += ` ${CLASS_PREFIX}-movable-node`;
+    node.setAttribute('data-id', nanoid())
     if (/%$/.test(node.style.x)) node.style.x = toPx((containerRect.width * parseInt(node.style.x)) / 100);
     if (/%$/.test(node.style.y)) node.style.y = toPx((containerRect.height * parseInt(node.style.y)) / 100);
     if (/%$/.test(node.style.width)) node.style.width = toPx((containerRect.width * parseInt(node.style.width)) / 100);
@@ -47,7 +49,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
         return;
       }
       this.seletedBorder.reRender(this);
-      console.log(this.seletedBorder);
+      // console.log(this.seletedBorder);
     },
   };
 };
