@@ -57,16 +57,16 @@ function renderResizeLine(store: Store) {
     widthLine.setAttribute("x2", String(nodeRect.x + nodeRect.w));
     widthLine.setAttribute("y2", String(nodeRect.y - RESIZE_OFFSET));
 
-    widthLineStart.setAttribute("x", String(nodeRect.x - RESIZE_WIDTH / 2))
-    widthLineStart.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2))
-    widthLineStart.setAttribute("width", String(RESIZE_WIDTH))
-    widthLineStart.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH))
-    widthLineStart.setAttribute("fill", String(RESIZE_COLOR))
-    
-    widthLineEnd.setAttribute("x", String(nodeRect.x + nodeRect.w - RESIZE_WIDTH / 2))
-    widthLineEnd.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2))
-    widthLineEnd.setAttribute("width", String(RESIZE_WIDTH))
-    widthLineEnd.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH))
+    widthLineStart.setAttribute("x", String(nodeRect.x - RESIZE_WIDTH / 2));
+    widthLineStart.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
+    widthLineStart.setAttribute("width", String(RESIZE_WIDTH));
+    widthLineStart.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
+    widthLineStart.setAttribute("fill", String(RESIZE_COLOR));
+
+    widthLineEnd.setAttribute("x", String(nodeRect.x + nodeRect.w - RESIZE_WIDTH / 2));
+    widthLineEnd.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
+    widthLineEnd.setAttribute("width", String(RESIZE_WIDTH));
+    widthLineEnd.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
     widthLineEnd.setAttribute("fill", String(RESIZE_COLOR));
 
     widthLineText.textContent = `${nodeRect.w}`;
@@ -101,7 +101,10 @@ function renderResizeLine(store: Store) {
     heightLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
     heightLineText.setAttribute("text-anchor", "middle");
     heightLineText.setAttribute("alignment-baseline", "middle");
-    heightLineText.setAttribute("transform", `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`);
+    heightLineText.setAttribute(
+      "transform",
+      `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`
+    );
 
     [widthLine, heightLine].forEach((line) => {
       line.setAttribute("stroke", RESIZE_COLOR);
@@ -123,7 +126,7 @@ export class Resize {
       const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line`);
       g.setAttribute("data-ower-id", nodeRect.id);
-      g.innerHTML= `
+      g.innerHTML = `
         <g class="${NODE_CLASS_PREFIX}-resize-line-group-width">
           <line class="${NODE_CLASS_PREFIX}-resize-line-group-width-line"></line>
           <text class="${NODE_CLASS_PREFIX}-resize-line-group-width-text"></text>
@@ -136,7 +139,7 @@ export class Resize {
           <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-start"></rect>
           <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-end"></rect>
         </g>
-      `
+      `;
       result.push(g);
     });
     this.lines = result;
@@ -148,7 +151,7 @@ export class Resize {
   hidden() {
     this.lines.forEach((lineGroup) => {
       Array.from(lineGroup.children).forEach((item) => {
-        item.setAttribute("style", "display: none");
+        (item as SVGElement).style.display = "none";
       });
     });
   }
@@ -165,16 +168,15 @@ export class Resize {
   ) {
     if (!store.selected) return;
     this.hidden();
-  
-    // Find absorbing sizes
+
+    // 查找可吸附的尺寸
     const { widthMap, heightMap } = searchSameWidthHeight(store);
     const alternateAbsorbWidth: number[] = [];
     const alternateAbsorbHeight: number[] = [];
-  
+
     widthMap.forEach((value, key) => {
       if (value.length === 1) {
-        if(value[0].nodeRect.id === store.selected?.dataset.id)
-          return
+        if (value[0].nodeRect.id === store.selected?.dataset.id) return;
       }
       if (Math.abs(newWidth - key) <= NODE_ABSORB_DELTA) {
         alternateAbsorbWidth.push(key);
@@ -182,61 +184,65 @@ export class Resize {
     });
     heightMap.forEach((value, key) => {
       if (value.length === 1) {
-        if(value[0].nodeRect.id === store.selected?.dataset.id)
-          return
+        if (value[0].nodeRect.id === store.selected?.dataset.id) return;
       }
       if (Math.abs(newHeight - key) <= NODE_ABSORB_DELTA) {
         alternateAbsorbHeight.push(key);
       }
     });
-    // debugger
+
+    // 强制最小尺寸
     const absorbWidth = alternateAbsorbWidth.length === 0 ? newWidth : Math.max(...alternateAbsorbWidth);
     const absorbHeight = alternateAbsorbHeight.length === 0 ? newHeight : Math.max(...alternateAbsorbHeight);
-  
-    // Enforce minimum size
+
+    // 根据拖拽方向设置大小和位置
     const finalWidth = Math.max(absorbWidth, NODE_MIN_WIDTH);
     const finalHeight = Math.max(absorbHeight, NODE_MIN_HEIGHT);
-  
-    // Set size and position based on direction
+
+    // 保持右边缘不动
     if (direction.includes("left")) {
-      const rightEdge = startLeft + startWidth; // Right edge remains fixed
+      const rightEdge = startLeft + startWidth; // 向右或向下拉伸时左边缘固定
       store.selected.style.left = toPx(rightEdge - finalWidth);
     } else {
-      store.selected.style.left = toPx(startLeft); // Left edge fixed for right/bottom resizes
+      store.selected.style.left = toPx(startLeft); // 向右或向下拉伸时左边缘固定
     }
     store.selected.style.width = toPx(finalWidth);
-  
+
+    // 保持下边缘不动
     if (direction.includes("top")) {
-      const bottomEdge = startTop + startHeight; // Bottom edge remains fixed
+      const bottomEdge = startTop + startHeight; // 向右或向下拉伸时上边缘固定
       store.selected.style.top = toPx(bottomEdge - finalHeight);
     } else {
-      store.selected.style.top = toPx(startTop); // Top edge fixed for bottom/right resizes
+      store.selected.style.top = toPx(startTop); // 向右或向下拉伸时上边缘固定
     }
     store.selected.style.height = toPx(finalHeight);
-  
-    // Update resize lines based on final size
+
+    // 根据最终尺寸更新辅助线
     const currentWidth = parseFloat(store.selected.style.width);
     const currentHeight = parseFloat(store.selected.style.height);
     // console.log(widthMap, finalWidth, newWidth, absorbWidth)
 
     const { widthMap: newWidthMap, heightMap: newHeightMap } = searchSameWidthHeight(store);
-  
+
     newWidthMap.get(currentWidth)?.forEach((item) => {
-      if (item.nodeRect.id !== store.selected!.dataset.ownerId) {
-        const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-        const widthLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
-        widthLine.style.display = "block";
-      }
+      const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
+      const widthLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+      widthLine.style.display = "block";
     });
-  
+
     newHeightMap.get(currentHeight)?.forEach((item) => {
-      if (item.nodeRect.id !== store.selected!.dataset.ownerId) {
-        const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-        const heightLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
-        heightLine.style.display = "block";
-      }
+      const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
+      const heightLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+      heightLine.style.display = "block";
     });
-  
+
+    // * 确保当前选择的节点宽高一直显示，不加的话safari和chrome显示不一致，不知道原因
+    const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`)!;
+    const widthLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+    const heightLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+    heightLine.style.display = "block";
+    widthLine.style.display = "block";
+
     renderResizeLine(store);
     store.seletedBorder.reRender(store);
   }

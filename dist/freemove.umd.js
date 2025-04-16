@@ -683,7 +683,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       heightLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
       heightLineText.setAttribute("text-anchor", "middle");
       heightLineText.setAttribute("alignment-baseline", "middle");
-      heightLineText.setAttribute("transform", `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`);
+      heightLineText.setAttribute(
+        "transform",
+        `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`
+      );
       [widthLine, heightLine].forEach((line) => {
         line.setAttribute("stroke", RESIZE_COLOR);
         line.setAttribute("stroke-width", String(RESIZE_WIDTH));
@@ -726,7 +729,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     hidden() {
       this.lines.forEach((lineGroup) => {
         Array.from(lineGroup.children).forEach((item) => {
-          item.setAttribute("style", "display: none");
+          item.style.display = "none";
         });
       });
     }
@@ -740,8 +743,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       widthMap.forEach((value, key) => {
         var _a2;
         if (value.length === 1) {
-          if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id))
-            return;
+          if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id)) return;
         }
         if (Math.abs(newWidth - key) <= NODE_ABSORB_DELTA) {
           alternateAbsorbWidth.push(key);
@@ -750,8 +752,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       heightMap.forEach((value, key) => {
         var _a2;
         if (value.length === 1) {
-          if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id))
-            return;
+          if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id)) return;
         }
         if (Math.abs(newHeight - key) <= NODE_ABSORB_DELTA) {
           alternateAbsorbHeight.push(key);
@@ -779,19 +780,20 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       const currentHeight = parseFloat(store.selected.style.height);
       const { widthMap: newWidthMap, heightMap: newHeightMap } = searchSameWidthHeight(store);
       (_a = newWidthMap.get(currentWidth)) == null ? void 0 : _a.forEach((item) => {
-        if (item.nodeRect.id !== store.selected.dataset.ownerId) {
-          const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
-          const widthLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
-          widthLine.style.display = "block";
-        }
+        const lineGroup2 = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
+        const widthLine2 = getElement(lineGroup2, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+        widthLine2.style.display = "block";
       });
       (_b = newHeightMap.get(currentHeight)) == null ? void 0 : _b.forEach((item) => {
-        if (item.nodeRect.id !== store.selected.dataset.ownerId) {
-          const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
-          const heightLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
-          heightLine.style.display = "block";
-        }
+        const lineGroup2 = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
+        const heightLine2 = getElement(lineGroup2, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+        heightLine2.style.display = "block";
       });
+      const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`);
+      const widthLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+      const heightLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+      heightLine.style.display = "block";
+      widthLine.style.display = "block";
       renderResizeLine(store);
       store.seletedBorder.reRender(store);
     }
