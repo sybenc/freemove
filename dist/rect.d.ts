@@ -19,7 +19,12 @@ export default class Rect {
     });
     isInSide(position: Position): boolean;
     isEquel(rect: Rect): boolean;
-    isIntersect(rect: Rect): boolean;
+    isIntersect(rect: {
+        x: number;
+        y: number;
+        h: number;
+        w: number;
+    }): boolean;
     getAlignLinePostion(): Record<AlignLineType, number>;
     static from(node: HTMLElement): Rect;
 }

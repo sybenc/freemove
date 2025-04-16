@@ -36,7 +36,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       if (this.h === rect.h && this.w === rect.w && this.x === rect.x && this.y === rect.y && this.node === rect.node) return true;
       return false;
     }
-    // 判断两个矩形是否相交，Tolerance为容差
     isIntersect(rect) {
       const x1A = this.x + Tolerance;
       const y1A = this.y + Tolerance;
@@ -176,16 +175,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
       newWidth = Math.max(newWidth, NODE_MIN_WIDTH);
       newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
-      store.resize.reRender(
-        store,
-        newWidth,
-        newHeight,
-        direction,
-        startLeft,
-        startTop,
-        startWidth,
-        startHeight
-      );
+      store.resize.reRender(store, newWidth, newHeight, direction, startLeft, startTop, startWidth, startHeight);
       store.seletedBorder.reRender(store);
     }
     function stopResize() {
@@ -195,6 +185,23 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     }
     document.addEventListener("pointermove", resize);
     document.addEventListener("pointerup", stopResize);
+  }
+  function handleSelector(store, event) {
+    const containerRect = store.container.getBoundingClientRect();
+    const startX = event.clientX - containerRect.left;
+    const startY = event.clientY - containerRect.top;
+    function select(ep) {
+      const endX = ep.clientX - containerRect.left;
+      const endY = ep.clientY - containerRect.top;
+      store.selector.reRender(store, startX, startY, endX, endY);
+    }
+    function stopSelect() {
+      store.selector.hiddenSelector();
+      document.removeEventListener("pointermove", select);
+      document.removeEventListener("pointerup", stopSelect);
+    }
+    document.addEventListener("pointermove", select);
+    document.addEventListener("pointerup", stopSelect);
   }
   function addPointerListener(store) {
     store.svg.addEventListener("pointerdown", (event) => {
@@ -227,6 +234,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
         }
         if (!seleted) {
           store.seletedBorder.hidden();
+          handleSelector(store, event);
         }
       }
     });
@@ -500,10 +508,10 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     });
     return [points, lines];
   }
-  function renderSelectedBorder(store) {
-    const seletedRect = Rect.from(store.selected);
+  function renderSelectedBorder(g, selected) {
+    const seletedRect = Rect.from(selected);
     selectedBorderLineTypes.forEach((type) => {
-      const line = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
+      const line = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
       switch (type) {
         case "left":
           line.setAttribute("x1", String(seletedRect.x));
@@ -532,8 +540,8 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       }
     });
     selectedBorderPointTypes.forEach((type, index) => {
-      const rect = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
-      rect.setAttribute("data-owner-id", store.selected.dataset.id);
+      const rect = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
+      rect.setAttribute("data-owner-id", selected.dataset.id);
       const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
       switch (type) {
         case "left-top":
@@ -591,7 +599,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     reRender(store) {
       if (!store.selected) return;
       this.g.style.display = "block";
-      renderSelectedBorder(store);
+      renderSelectedBorder(this.g, store.selected);
     }
   }
   const RESIZE_WIDTH = 1;
@@ -798,6 +806,102 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       store.seletedBorder.reRender(store);
     }
   }
+  function getQuadrant(startX, startY, endX, endY) {
+    if (endX - startX > 0 && endY - startY > 0) return "4";
+    if (endX - startX < 0 && endY - startY > 0) return "3";
+    if (endX - startX < 0 && endY - startY < 0) return "2";
+    if (endX - startX > 0 && endY - startY < 0) return "1";
+    return "0";
+  }
+  class Selector {
+    constructor(svg) {
+      __publicField(this, "g");
+      // 选择框矩形
+      __publicField(this, "selectorRect");
+      __publicField(this, "previewRect");
+      __publicField(this, "selectedGroup", []);
+      this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-selector`);
+      this.selectorRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      this.selectorRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-rect`);
+      this.selectorRect.setAttribute("stroke", "#919191");
+      this.selectorRect.setAttribute("stroke-width", "1px");
+      this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)");
+      this.selectorRect.style.display = "none";
+      this.previewRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      this.previewRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-preview`);
+      this.previewRect.setAttribute("stroke", "#000");
+      this.previewRect.setAttribute("stroke-width", "1.5px");
+      this.previewRect.setAttribute("fill", "transparent");
+      this.previewRect.style.display = "none";
+      this.g.append(this.selectorRect, this.previewRect);
+      svg.append(this.g);
+    }
+    hiddenSelector() {
+      this.selectorRect.style.display = "none";
+    }
+    hiddenPreview() {
+      this.previewRect.style.display = "none";
+    }
+    reRender(store, startX, startY, endX, endY) {
+      this.selectorRect.style.display = "block";
+      this.selectedGroup = [];
+      const quadrant = getQuadrant(startX, startY, endX, endY);
+      const width = Math.abs(startX - endX);
+      const height = Math.abs(startY - endY);
+      this.selectorRect.setAttribute("width", String(width));
+      this.selectorRect.setAttribute("height", String(height));
+      let x = startX;
+      let y = startY;
+      switch (quadrant) {
+        case "3": {
+          x = x - width;
+          break;
+        }
+        case "2": {
+          x = x - width;
+          y = y - height;
+          break;
+        }
+        case "1": {
+          y = y - height;
+          break;
+        }
+      }
+      this.selectorRect.setAttribute("x", String(x));
+      this.selectorRect.setAttribute("y", String(y));
+      store.nodes.forEach((node) => {
+        const nodeRect = Rect.from(node);
+        if (nodeRect.isIntersect({
+          x,
+          y,
+          w: width,
+          h: height
+        })) {
+          this.selectedGroup.push(node);
+        }
+      });
+      const alternateX1 = [];
+      const alternateY1 = [];
+      const alternateX2 = [];
+      const alternateY2 = [];
+      this.selectedGroup.forEach((node) => {
+        const { x: x2, y: y2, w, h } = Rect.from(node);
+        console.log(Rect.from(node));
+        alternateX1.push(x2);
+        alternateY1.push(y2);
+        alternateX2.push(x2 + w);
+        alternateY2.push(y2 + h);
+      });
+      const x1 = Math.min(...alternateX1);
+      const y1 = Math.min(...alternateY1);
+      this.previewRect.setAttribute("x", String(alternateX1.length ? x1 : 0));
+      this.previewRect.setAttribute("y", String(alternateY1.length ? y1 : 0));
+      this.previewRect.setAttribute("width", String(alternateX2.length ? Math.max(...alternateX2) - x1 : 0));
+      this.previewRect.setAttribute("height", String(alternateY2.length ? Math.max(...alternateY2) - y1 : 0));
+      this.previewRect.style.display = "block";
+    }
+  }
   const initStore = (container, nodes) => {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("class", `${NODE_CLASS_PREFIX}-svg`);
@@ -822,6 +926,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       alignLine: new AlignLine(svg),
       seletedBorder: new SeletedBorder(svg),
       resize: new Resize(svg, nodes),
+      selector: new Selector(svg),
       moveDelta: [0, 0],
       setSelected(target) {
         this.selected = target;

@@ -1,6 +1,7 @@
 import { AlignLine } from './align-line';
 import { SeletedBorder } from './selected-border';
 import { Resize } from './resize';
+import { Selector } from './selector';
 export interface Store {
     container: HTMLElement;
     nodes: HTMLElement[];
@@ -10,6 +11,7 @@ export interface Store {
     alignLine: AlignLine;
     seletedBorder: SeletedBorder;
     resize: Resize;
+    selector: Selector;
     setSelected: (target: HTMLElement | null) => void;
 }
 export declare const initStore: (container: HTMLElement, nodes: HTMLElement[]) => Store;

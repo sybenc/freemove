@@ -1,7 +1,7 @@
 import { Store } from "./../store";
 import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX, NODE_MIN_HEIGHT, NODE_MIN_WIDTH } from "../const";
 import Rect from "../rect";
-import { epsilonEqual, getElement, toPx } from "../utils";
+import { getElement, toPx } from "../utils";
 import { ResizeData } from "./type";
 import { RESIZE_COLOR, RESIZE_ENDPOINT_LENGTH, RESIZE_FONT_SIZE, RESIZE_OFFSET, RESIZE_WIDTH } from "./const";
 

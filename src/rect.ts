@@ -49,7 +49,8 @@ export default class Rect {
   }
 
   // 判断两个矩形是否相交，Tolerance为容差
-  isIntersect(rect: Rect) {
+  isIntersect(rect: { x: number; y: number; h: number; w: number; }): boolean;
+  isIntersect(rect: Rect): boolean {
     const x1A = this.x + Tolerance;
     const y1A = this.y + Tolerance;
     const x2A = this.x + this.w - Tolerance;

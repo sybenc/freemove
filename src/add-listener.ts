@@ -3,7 +3,7 @@ import Rect from "./rect";
 import { Store } from "./store";
 import { toPx } from "./utils";
 
-function handleMoveNode(store: Store, event: MouseEvent) {
+function handleMoveNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
   const containerRect = store.container.getBoundingClientRect();
   store.alignLine.reRender(store);
@@ -123,16 +123,7 @@ function handleResizeNode(store: Store, event: PointerEvent) {
     newWidth = Math.max(newWidth, NODE_MIN_WIDTH);
     newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
 
-    store.resize.reRender(
-      store,
-      newWidth,
-      newHeight,
-      direction!,
-      startLeft,
-      startTop,
-      startWidth,
-      startHeight
-    );
+    store.resize.reRender(store, newWidth, newHeight, direction!, startLeft, startTop, startWidth, startHeight);
     store.seletedBorder.reRender(store);
   }
 
@@ -144,6 +135,27 @@ function handleResizeNode(store: Store, event: PointerEvent) {
 
   document.addEventListener("pointermove", resize);
   document.addEventListener("pointerup", stopResize);
+}
+
+function handleSelector(store: Store, event: PointerEvent) {
+  const containerRect = store.container.getBoundingClientRect();
+  const startX = event.clientX - containerRect.left;
+  const startY = event.clientY - containerRect.top;
+
+  function select(ep: PointerEvent) {
+    const endX = ep.clientX - containerRect.left;
+    const endY = ep.clientY - containerRect.top;
+    store.selector.reRender(store, startX, startY, endX, endY);
+  }
+
+  function stopSelect() {
+    store.selector.hiddenSelector();
+    document.removeEventListener("pointermove", select);
+    document.removeEventListener("pointerup", stopSelect);
+  }
+
+  document.addEventListener("pointermove", select);
+  document.addEventListener("pointerup", stopSelect);
 }
 
 export function addPointerListener(store: Store) {
@@ -188,7 +200,8 @@ export function addPointerListener(store: Store) {
 
       // todo: 此外，绘画选择框、清除被选择节点选择边框
       if (!seleted) {
-        store.seletedBorder.hidden()
+        store.seletedBorder.hidden();
+        handleSelector(store, event);
       }
     }
   });

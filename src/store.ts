@@ -4,6 +4,7 @@ import { NODE_CLASS_PREFIX } from "./const";
 import { SeletedBorder } from "./selected-border";
 import { toPx } from "./utils";
 import { Resize } from "./resize";
+import { Selector } from "./selector";
 
 export interface Store {
   container: HTMLElement;
@@ -14,6 +15,7 @@ export interface Store {
   alignLine: AlignLine;
   seletedBorder: SeletedBorder;
   resize: Resize;
+  selector: Selector;
   setSelected: (target: HTMLElement | null) => void;
 }
 
@@ -44,6 +46,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
     alignLine: new AlignLine(svg),
     seletedBorder: new SeletedBorder(svg),
     resize: new Resize(svg, nodes),
+    selector: new Selector(svg),
     moveDelta: [0, 0],
     setSelected(target: HTMLElement | null) {
       this.selected = target;

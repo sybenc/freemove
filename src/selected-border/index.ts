@@ -55,10 +55,10 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   return [points, lines];
 }
 
-function renderSelectedBorder(store: Store) {
-  const seletedRect = Rect.from(store.selected!);
+function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
+  const seletedRect = Rect.from(selected);
   selectedBorderLineTypes.forEach((type) => {
-    const line = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
+    const line = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
     switch (type) {
       case "left":
         line.setAttribute("x1", String(seletedRect.x));
@@ -87,8 +87,8 @@ function renderSelectedBorder(store: Store) {
     }
   });
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = store.seletedBorder.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
-    rect.setAttribute("data-owner-id", store.selected!.dataset.id!);
+    const rect = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
+    rect.setAttribute("data-owner-id", selected.dataset.id!);
     // 往左上角的偏移量，为边长的一半
     const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
     switch (type) {
@@ -151,6 +151,6 @@ export class SeletedBorder {
   reRender(store: Store) {
     if (!store.selected) return;
     this.g.style.display = "block";
-    renderSelectedBorder(store);
+    renderSelectedBorder(this.g, store.selected);
   }
 }
