@@ -8,6 +8,7 @@ export default class Rect {
     y: number;
     w: number;
     h: number;
+    id: string;
     node: HTMLElement;
     constructor({ x, y, h, w, node }: {
         x: number;

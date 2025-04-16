@@ -1,4 +1,4 @@
-import { NODE_CLASS_PREFIX, NODE_MIM_HEIGHT, NODE_MIN_WIDTH } from "./const";
+import { NODE_CLASS_PREFIX, NODE_MIN_HEIGHT, NODE_MIN_WIDTH } from "./const";
 import Rect from "./rect";
 import { Store } from "./store";
 import { toPx } from "./utils";
@@ -68,13 +68,13 @@ function handleResizeNode(store: Store, event: PointerEvent) {
   const direction = target.dataset.direction;
   if (!direction) return;
 
-  const rect = store.selected.getBoundingClientRect();
+  const rect = Rect.from(store.selected);
   let startX = event.clientX;
   let startY = event.clientY;
-  let startWidth = rect.width;
-  let startHeight = rect.height;
-  let startLeft = rect.left - containerRect.left;
-  let startTop = rect.top - containerRect.top;
+  let startWidth = rect.w;
+  let startHeight = rect.h;
+  let startLeft = rect.x;
+  let startTop = rect.y;
 
   function resize(ev: PointerEvent) {
     let deltaX = ev.clientX - startX;
@@ -86,33 +86,35 @@ function handleResizeNode(store: Store, event: PointerEvent) {
     let newTop = startTop;
 
     if (direction!.includes("right")) {
-      newWidth = Math.max(10, startWidth + deltaX);
+      newWidth = startWidth + deltaX;
     }
     if (direction!.includes("left")) {
-      newWidth = Math.max(10, startWidth - deltaX);
+      newWidth = startWidth - deltaX;
       newLeft = startLeft + deltaX;
     }
     if (direction!.includes("bottom")) {
-      newHeight = Math.max(10, startHeight + deltaY);
+      newHeight = startHeight + deltaY;
     }
     if (direction!.includes("top")) {
-      newHeight = Math.max(10, startHeight - deltaY);
+      newHeight = startHeight - deltaY;
       newTop = startTop + deltaY;
     }
 
-    if (newHeight > NODE_MIM_HEIGHT) {
-      store.selected!.style.height = toPx(newHeight);
-      store.selected!.style.top = toPx(newTop);
-    }
-    if (newWidth > NODE_MIN_WIDTH) {
-      store.selected!.style.width = toPx(newWidth);
-      store.selected!.style.left = toPx(newLeft);
-    }
-    
+    store.resize.reRender(
+      store,
+      newWidth,
+      newHeight,
+      direction!,
+      startLeft,
+      startTop,
+      startWidth,
+      startHeight
+    );
     store.seletedBorder.reRender(store);
   }
 
   function stopResize() {
+    store.resize.hidden();
     document.removeEventListener("pointermove", resize);
     document.removeEventListener("pointerup", stopResize);
   }
@@ -141,7 +143,6 @@ export function addPointerListener(store: Store) {
       return;
     }
 
-    console.log(1111);
     // 如果点击到svg画布
     if (target.classList.contains(`${NODE_CLASS_PREFIX}-svg`)) {
       // 判断点击位置是否在某个节点内部
@@ -162,8 +163,9 @@ export function addPointerListener(store: Store) {
         handleMoveNode(store, event);
       }
 
-      // todo: 此外，绘画选择框
+      // todo: 此外，绘画选择框、清除被选择节点选择边框
       if (!seleted) {
+        store.seletedBorder.hidden()
       }
     }
   });

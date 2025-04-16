@@ -141,6 +141,7 @@ export class SeletedBorder {
     this.points = points;
     this.lines = lines;
     this.g.append(...lines, ...points);
+    this.g.style.display = "none";
   }
 
   hidden() {

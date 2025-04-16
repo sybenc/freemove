@@ -12,6 +12,7 @@ export default class Rect {
   y: number;
   w: number;
   h: number;
+  id: string;
   node: HTMLElement;
 
   constructor({ x, y, h, w, node }: { x: number; y: number; h: number; w: number; node: HTMLElement }) {
@@ -20,6 +21,7 @@ export default class Rect {
     this.h = h;
     this.w = w;
     this.node = node;
+    this.id = node.dataset.id!
   }
 
   // 判断一个点是否在矩形里面

@@ -6,7 +6,7 @@ import dts from "vite-plugin-dts";
 export default defineConfig({
   build: {
     outDir: "dist",
-    minify: true,
+    minify: false,
     lib: {
       entry: resolve(__dirname, './src/index.ts'),
       name: "createFreeMove",

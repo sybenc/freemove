@@ -3,6 +3,7 @@ import { AlignLine } from "./align-line";
 import { NODE_CLASS_PREFIX } from "./const";
 import { SeletedBorder } from "./selected-border";
 import { toPx } from "./utils";
+import { Resize } from "./resize";
 
 export interface Store {
   container: HTMLElement;
@@ -12,6 +13,7 @@ export interface Store {
   svg: SVGSVGElement;
   alignLine: AlignLine;
   seletedBorder: SeletedBorder;
+  resize: Resize;
   setSelected: (target: HTMLElement | null) => void;
 }
 
@@ -41,6 +43,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
     selected: null,
     alignLine: new AlignLine(svg),
     seletedBorder: new SeletedBorder(svg),
+    resize: new Resize(svg, nodes),
     moveDelta: [0, 0],
     setSelected(target: HTMLElement | null) {
       this.selected = target;
