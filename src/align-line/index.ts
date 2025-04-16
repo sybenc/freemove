@@ -204,12 +204,10 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     .forEach((item) => {
       handleAbsorb(item);
     });
-  handleDraw();
-
   // 在两个吸附点很近且两个矩形的长宽差距很小的时候 或者 水平垂直方向都有对齐线
   // 会造成对齐线显示异常
   // 修复方法是找到最小的吸附距离，只显示吸附距离最小的对齐线
-  // 这段代码放在这里才会生效
+  // 这段代码放在这里才会生效，处理完才能绘制对齐线
   let min = Infinity;
   alignLineTypes.forEach((type) => {
     alternateNodes[type].forEach((item) => {
@@ -217,8 +215,9 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     });
   });
   alignLineTypes.forEach((type) => {
-    alternateNodes[type] = alternateNodes[type].filter((item) => epsilonEqual(item.absorbDistance, min, 0.1));
+    alternateNodes[type] = alternateNodes[type].filter((item) => epsilonEqual(item.absorbDistance, min, 0.01));
   });
+  handleDraw();
 }
 
 export class AlignLine {

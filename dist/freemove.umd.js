@@ -126,7 +126,7 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
   }
   function handleResizeNode(store, event) {
     if (!store.selected) return;
-    store.container.getBoundingClientRect();
+    const containerRect = store.container.getBoundingClientRect();
     const target = event.target;
     const direction = target.dataset.direction;
     if (!direction) return;
@@ -137,23 +137,45 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     let startHeight = rect.h;
     let startLeft = rect.x;
     let startTop = rect.y;
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
     function resize(ev) {
       let deltaX = ev.clientX - startX;
       let deltaY = ev.clientY - startY;
       let newWidth = startWidth;
       let newHeight = startHeight;
+      let newLeft = startLeft;
+      let newTop = startTop;
       if (direction.includes("right")) {
         newWidth = startWidth + deltaX;
       }
       if (direction.includes("left")) {
         newWidth = startWidth - deltaX;
+        newLeft = startLeft + deltaX;
       }
       if (direction.includes("bottom")) {
         newHeight = startHeight + deltaY;
       }
       if (direction.includes("top")) {
         newHeight = startHeight - deltaY;
+        newTop = startTop + deltaY;
       }
+      if (newLeft < 0) {
+        newWidth += newLeft;
+        newLeft = 0;
+      }
+      if (newTop < 0) {
+        newHeight += newTop;
+        newTop = 0;
+      }
+      if (newLeft + newWidth > containerWidth) {
+        newWidth = containerWidth - newLeft;
+      }
+      if (newTop + newHeight > containerHeight) {
+        newHeight = containerHeight - newTop;
+      }
+      newWidth = Math.max(newWidth, NODE_MIN_WIDTH);
+      newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
       store.resize.reRender(
         store,
         newWidth,
@@ -390,7 +412,6 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
     Object.values(alternateNodes).flat().forEach((item) => {
       handleAbsorb(item);
     });
-    handleDraw();
     let min = Infinity;
     alignLineTypes.forEach((type) => {
       alternateNodes[type].forEach((item) => {
@@ -398,8 +419,9 @@ var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "sy
       });
     });
     alignLineTypes.forEach((type) => {
-      alternateNodes[type] = alternateNodes[type].filter((item) => epsilonEqual(item.absorbDistance, min, 0.1));
+      alternateNodes[type] = alternateNodes[type].filter((item) => epsilonEqual(item.absorbDistance, min, 0.01));
     });
+    handleDraw();
   }
   class AlignLine {
     constructor(svg) {

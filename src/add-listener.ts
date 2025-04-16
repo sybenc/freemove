@@ -76,6 +76,9 @@ function handleResizeNode(store: Store, event: PointerEvent) {
   let startLeft = rect.x;
   let startTop = rect.y;
 
+  const containerWidth = containerRect.width;
+  const containerHeight = containerRect.height;
+
   function resize(ev: PointerEvent) {
     let deltaX = ev.clientX - startX;
     let deltaY = ev.clientY - startY;
@@ -99,6 +102,26 @@ function handleResizeNode(store: Store, event: PointerEvent) {
       newHeight = startHeight - deltaY;
       newTop = startTop + deltaY;
     }
+
+    // 限制不超出容器边界
+    if (newLeft < 0) {
+      newWidth += newLeft;
+      newLeft = 0;
+    }
+    if (newTop < 0) {
+      newHeight += newTop;
+      newTop = 0;
+    }
+    if (newLeft + newWidth > containerWidth) {
+      newWidth = containerWidth - newLeft;
+    }
+    if (newTop + newHeight > containerHeight) {
+      newHeight = containerHeight - newTop;
+    }
+
+    // 限制最小尺寸
+    newWidth = Math.max(newWidth, NODE_MIN_WIDTH);
+    newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
 
     store.resize.reRender(
       store,
