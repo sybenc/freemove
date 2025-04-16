@@ -7,6 +7,6 @@ export function epsilonEqual(a: number, b: number, epsilon: number = 0.1): boole
   return Math.abs(a - b) <= epsilon;
 }
 
-export function getElement(g: Element, className: string): HTMLElement{
-  return g.getElementsByClassName(className)[0] as HTMLElement;
+export function getElement<T>(g: Element, className: string): T{
+  return g.getElementsByClassName(className)[0] as T;
 }
