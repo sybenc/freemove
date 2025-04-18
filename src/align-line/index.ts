@@ -6,9 +6,10 @@ import { epsilonEqual, toPx } from "../utils";
 import { ALIGNLINE_COLOR, ALIGNLINE_WIDTH } from "./const";
 import { AlignLineData, AlignLineType } from "./type";
 
-export const alignLineTypes: AlignLineType[] = ["vl", "vc", "vr", "ht", "hc", "hb"];
+const alignLineTypes: AlignLineType[] = ["vl", "vc", "vr", "ht", "hc", "hb"];
 
-function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineElement>) {
+function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical", SVGLineElement>) {
+  const containerRect = store.container.getBoundingClientRect();
   const alternateNodes: Record<AlignLineType, AlignLineData[]> = {
     ht: [],
     hc: [],
@@ -17,6 +18,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     vc: [],
     vr: [],
   };
+  let showContainerAlignLine = false;
 
   function handleSearchAlternateNodes() {
     const selectedRect = Rect.from(store.selected!);
@@ -119,7 +121,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     });
   }
 
-  function handleAbsorb(data: AlignLineData) {
+  function handleAlignLineAbsorb(data: AlignLineData) {
     const { absorbPosition, type } = data;
     const selected = store.selected!;
     switch (type) {
@@ -148,6 +150,20 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     store.seletedBorder.reRender(store);
   }
 
+  function handleContainerAlignLineAbsorb() {
+    if (!store.selected) return;
+    const selectedRect = Rect.from(store.selected!);
+    const absorbPosition = containerRect.width / 2;
+    if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NODE_ABSORB_DELTA) {
+      store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
+      showContainerAlignLine = true;
+    }
+
+    // 更改了被选择元素的位置，所以需要重新寻找备选节点，并重新渲染selected-border
+    handleSearchAlternateNodes();
+    store.seletedBorder.reRender(store);
+  }
+
   function handleDraw() {
     if (!store.selected) return;
     const selectedRect = Rect.from(store.selected!);
@@ -155,7 +171,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
     const alternateNodesFlat = Object.values(alternateNodes).flat();
     alternateNodesFlat.forEach((item) => {
       const { source, target, type } = item;
-      const line = store.alignLine.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-alignLine-${type}`)[0];
+      const line = lines[type];
 
       if (/^h/.test(type)) {
         line?.setAttribute("x1", String(source));
@@ -193,8 +209,18 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
             break;
         }
       }
+
       line?.setAttribute("style", "display: 'block");
     });
+
+    if (showContainerAlignLine) {
+      const line = lines["vertical"];
+      line.setAttribute("x1", String(containerRect.width / 2));
+      line.setAttribute("y1", String(0));
+      line.setAttribute("x2", String(containerRect.width / 2));
+      line.setAttribute("y2", String(containerRect.height));
+      line?.setAttribute("style", "display: 'block");
+    }
   }
 
   handleSearchAlternateNodes();
@@ -202,9 +228,10 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
   Object.values(alternateNodes)
     .flat()
     .forEach((item) => {
-      handleAbsorb(item);
+      handleAlignLineAbsorb(item);
     });
-    
+  handleContainerAlignLineAbsorb();
+
   // ! 在两个吸附点很近且两个矩形的长宽差距很小的时候 或者 水平垂直方向都有对齐线
   // ! 会造成对齐线显示异常
   // ! 修复方法是找到最小的吸附距离，只显示吸附距离最小的对齐线
@@ -223,23 +250,22 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType, SVGLineEleme
 
 export class AlignLine {
   g: SVGGElement;
-  lines: Record<AlignLineType, SVGLineElement>;
+  lines: Record<AlignLineType | "vertical", SVGLineElement>;
 
   constructor(svg: SVGSVGElement) {
     this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine`);
-    svg.append(this.g);
-
     this.lines = {} as any;
-    alignLineTypes.forEach((type) => {
+    [...alignLineTypes, "vertical"].forEach((type) => {
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine-${type}`);
       line.setAttribute("stroke", ALIGNLINE_COLOR);
       line.setAttribute("stroke-width", String(ALIGNLINE_WIDTH));
       line.style.display = "none";
       this.g.append(line);
-      this.lines[type] = line;
+      this.lines[type as AlignLineType | "vertical"] = line;
     });
+    svg.append(this.g);
   }
 
   hidden() {

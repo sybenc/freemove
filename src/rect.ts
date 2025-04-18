@@ -21,35 +21,24 @@ export default class Rect {
     this.h = h;
     this.w = w;
     this.node = node;
-    this.id = node.dataset.id!
+    this.id = node.dataset.id!;
   }
 
   // 判断一个点是否在矩形里面
-  isInSide(position: Position) {
+  isInSide(position: Position): boolean {
     if (
       position.x >= this.x &&
       position.x <= this.x + this.w &&
-      position.y >= this.y && 
+      position.y >= this.y &&
       position.y <= this.y + this.h
     ) {
       return true;
     }
     return false;
   }
-
-  isEquel(rect: Rect) {
-    if (
-      this.h === rect.h && 
-      this.w === rect.w && 
-      this.x === rect.x &&
-      this.y === rect.y && 
-      this.node === rect.node
-    ) return true;
-    return false;
-  }
-
+  
   // 判断两个矩形是否相交，Tolerance为容差
-  isIntersect(rect: { x: number; y: number; h: number; w: number; }): boolean;
+  isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
   isIntersect(rect: Rect): boolean {
     const x1A = this.x + Tolerance;
     const y1A = this.y + Tolerance;
@@ -86,5 +75,9 @@ export default class Rect {
       h: node.offsetHeight,
       node,
     });
+  }
+
+  static error(svg: SVGSVGElement, nodeRects: Rect[]){
+
   }
 }

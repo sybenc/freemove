@@ -1,6 +1,5 @@
-// vite.config.js
 import { defineConfig } from "vite";
-import { resolve } from 'path'
+import { resolve } from 'path';
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
@@ -9,9 +8,9 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: resolve(__dirname, './src/index.ts'),
-      name: "createFreeMove",
-      formats: ['es', 'umd'], // ES模块 & 浏览器全局
-      fileName: (format)=>`freemove.${format}.js`,
+      name: "FreeMove",
+      formats: ['es', 'umd'],
+      fileName: (format) => `freemove.${format}.js`,
     },
     rollupOptions: {
       external: [],
@@ -22,5 +21,10 @@ export default defineConfig({
       },
     },
   },
-  plugins: [dts()],
+  plugins: [
+    dts({
+      outputDir: "dist",
+      rollupTypes: true,
+    })
+  ],
 });

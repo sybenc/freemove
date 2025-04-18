@@ -7,26 +7,20 @@ import Rect from "../rect";
 // ht   horizontal-top      水平方向，顶部对齐线
 // hc   horizontal-center   水平方向，中心对齐线
 // hb   horizontal-bottom   水平方向，底部对齐线
-export type AlignLineType =
-  | "vl"
-  | "vc"
-  | "vr"
-  | "ht"
-  | "hc"
-  | "hb";
+export type AlignLineType = "vl" | "vc" | "vr" | "ht" | "hc" | "hb";
 
 // 绘制对齐线所需数据
 export interface AlignLineData {
-  type: AlignLineType
-  // 开始位置
-  source: number
-  // 结束位置
-  target: number
-  // 吸附距离
-  absorbDistance: number
-  // 吸附位置
-  absorbPosition: number
-  // 相关联矩形
-  nodeRects: Rect[]
+  // 对齐线类型（如 'vl' 表示垂直左侧对齐线）
+  type: AlignLineType;
+  // 线段的起始坐标（水平线为 x 轴，垂直线为 y 轴）
+  source: number;
+  // 线段的结束坐标（水平线为 x 轴，垂直线为 y 轴）
+  target: number;
+  // 吸附距离（选中节点与目标节点的对齐点距离）
+  absorbDistance: number;
+  // 吸附位置（目标节点的对齐点坐标）
+  absorbPosition: number;
+  // 关联的矩形列表（触发对齐线的节点）
+  nodeRects: ReadonlyArray<Rect>;
 }
-

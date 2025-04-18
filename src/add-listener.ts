@@ -13,10 +13,6 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 
   let animationFrameId: number | null = null;
 
-  // 存储上一次偏移的位置，判断用户移动方向
-  let prevX: number | null = null;
-  let prevY: number | null = null;
-
   function handlePointerMove(ev: PointerEvent) {
     if (animationFrameId) return;
 
@@ -31,17 +27,12 @@ function handleMoveNode(store: Store, event: PointerEvent) {
       newX = Math.max(0, Math.min(newX, maxLeft));
       newY = Math.max(0, Math.min(newY, maxTop));
 
-      // 计算偏移量
-      store.moveDelta = [prevX !== null ? newX - prevX : 0, prevY !== null ? newY - prevY : 0];
-
       store.selected.style.left = toPx(newX);
       store.selected.style.top = toPx(newY);
       store.alignLine.reRender(store);
       store.seletedBorder.reRender(store);
-
-      // 存储该次坐标
-      prevX = newX;
-      prevY = newY;
+      store.gap.reRender(store)
+      
       animationFrameId = null;
     });
   }
@@ -150,6 +141,7 @@ function handleSelector(store: Store, event: PointerEvent) {
 
   function stopSelect() {
     store.selector.hiddenSelector();
+    store.selector.showPreview();
     document.removeEventListener("pointermove", select);
     document.removeEventListener("pointerup", stopSelect);
   }
@@ -194,11 +186,12 @@ export function addPointerListener(store: Store) {
 
       // 如果点击到节点，处理节点拖拽动作
       if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
+        store.selector.hiddenPreview()
         store.setSelected(seleted.node);
         handleMoveNode(store, event);
       }
 
-      // todo: 此外，绘画选择框、清除被选择节点选择边框
+      // 此外，绘画选择框、清除被选择节点选择边框
       if (!seleted) {
         store.seletedBorder.hidden();
         handleSelector(store, event);

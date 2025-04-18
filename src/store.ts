@@ -1,3 +1,4 @@
+import { Gap } from './gap/index';
 import { nanoid } from "nanoid";
 import { AlignLine } from "./align-line";
 import { NODE_CLASS_PREFIX } from "./const";
@@ -10,12 +11,12 @@ export interface Store {
   container: HTMLElement;
   nodes: HTMLElement[];
   selected: HTMLElement | null;
-  moveDelta: [number, number];
   svg: SVGSVGElement;
   alignLine: AlignLine;
   seletedBorder: SeletedBorder;
   resize: Resize;
   selector: Selector;
+  gap: Gap
   setSelected: (target: HTMLElement | null) => void;
 }
 
@@ -47,7 +48,7 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
     seletedBorder: new SeletedBorder(svg),
     resize: new Resize(svg, nodes),
     selector: new Selector(svg),
-    moveDelta: [0, 0],
+    gap: new Gap(svg),
     setSelected(target: HTMLElement | null) {
       this.selected = target;
       if (!target) {

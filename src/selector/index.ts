@@ -31,7 +31,7 @@ export class Selector {
     this.previewRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     this.previewRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-preview`);
     this.previewRect.setAttribute("stroke", "#000");
-    this.previewRect.setAttribute("stroke-width", "1.5px");
+    this.previewRect.setAttribute("stroke-width", "1px");
     this.previewRect.setAttribute("fill", "transparent");
     this.previewRect.style.display = "none";
 
@@ -43,12 +43,21 @@ export class Selector {
     this.selectorRect.style.display = "none";
   }
 
+  showSelector(){
+    this.selectorRect.style.display = "block";
+  }
+
   hiddenPreview() {
     this.previewRect.style.display = "none";
   }
 
+  showPreview() {
+    this.previewRect.style.display = "block";
+  }
+
   reRender(store: Store, startX: number, startY: number, endX: number, endY: number) {
-    this.selectorRect.style.display = "block";
+    this.showSelector()
+    this.hiddenPreview()
     this.selectedGroup = [];
     const quadrant = getQuadrant(startX, startY, endX, endY);
     const width = Math.abs(startX - endX);
@@ -102,7 +111,7 @@ export class Selector {
 
     this.selectedGroup.forEach((node) => {
       const { x, y, w, h } = Rect.from(node);
-      console.log(Rect.from(node));
+      // console.log(Rect.from(node));
       alternateX1.push(x);
       alternateY1.push(y);
       alternateX2.push(x + w);
@@ -115,6 +124,5 @@ export class Selector {
     this.previewRect.setAttribute("y", String(alternateY1.length ? y1 : 0));
     this.previewRect.setAttribute("width", String(alternateX2.length ? Math.max(...alternateX2) - x1 : 0));
     this.previewRect.setAttribute("height", String(alternateY2.length ? Math.max(...alternateY2) - y1 : 0));
-    this.previewRect.style.display = "block";
   }
 }

@@ -28,10 +28,6 @@ class Rect {
     }
     return false;
   }
-  isEquel(rect) {
-    if (this.h === rect.h && this.w === rect.w && this.x === rect.x && this.y === rect.y && this.node === rect.node) return true;
-    return false;
-  }
   isIntersect(rect) {
     const x1A = this.x + Tolerance;
     const y1A = this.y + Tolerance;
@@ -66,6 +62,8 @@ class Rect {
       node
     });
   }
+  static error(svg, nodeRects) {
+  }
 }
 function toPx(value) {
   if (typeof value === "number") return `${value}px`;
@@ -85,8 +83,6 @@ function handleMoveNode(store, event) {
   let startX = event.clientX - rect.left;
   let startY = event.clientY - rect.top;
   let animationFrameId = null;
-  let prevX = null;
-  let prevY = null;
   function handlePointerMove(ev) {
     if (animationFrameId) return;
     animationFrameId = requestAnimationFrame(() => {
@@ -97,13 +93,11 @@ function handleMoveNode(store, event) {
       const maxTop = store.container.clientHeight - store.selected.offsetHeight;
       newX = Math.max(0, Math.min(newX, maxLeft));
       newY = Math.max(0, Math.min(newY, maxTop));
-      store.moveDelta = [prevX !== null ? newX - prevX : 0, prevY !== null ? newY - prevY : 0];
       store.selected.style.left = toPx(newX);
       store.selected.style.top = toPx(newY);
       store.alignLine.reRender(store);
       store.seletedBorder.reRender(store);
-      prevX = newX;
-      prevY = newY;
+      store.gap.reRender(store);
       animationFrameId = null;
     });
   }
@@ -193,6 +187,7 @@ function handleSelector(store, event) {
   }
   function stopSelect() {
     store.selector.hiddenSelector();
+    store.selector.showPreview();
     document.removeEventListener("pointermove", select);
     document.removeEventListener("pointerup", stopSelect);
   }
@@ -225,6 +220,7 @@ function addPointerListener(store) {
         }
       }
       if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
+        store.selector.hiddenPreview();
         store.setSelected(seleted.node);
         handleMoveNode(store, event);
       }
@@ -234,6 +230,227 @@ function addPointerListener(store) {
       }
     }
   });
+}
+function searchDistanceBlockXData(store) {
+  const xGapRegions = /* @__PURE__ */ new Map();
+  function getGapRegions(currActiveRects) {
+    var _a;
+    const xEdgeCoords = [];
+    currActiveRects.toSorted((a, b) => a.x - b.x).forEach((nodeRect) => {
+      xEdgeCoords.push({ value: nodeRect.x, type: "min", nodeRect });
+      xEdgeCoords.push({ value: nodeRect.x + nodeRect.w, type: "max", nodeRect });
+    });
+    xEdgeCoords.sort((a, b) => a.value - b.value);
+    for (let i = 0; i < xEdgeCoords.length - 1; i++) {
+      const maxs = [];
+      const mins = [];
+      if (xEdgeCoords[i].type === "max" && xEdgeCoords[i + 1].type === "min") {
+        for (let j = 0; j <= i; j++) {
+          if (xEdgeCoords[i].value === xEdgeCoords[i - j].value) maxs.push(xEdgeCoords[i - j]);
+          else break;
+        }
+        for (let j = i + 1; j <= xEdgeCoords.length; j++) {
+          if (xEdgeCoords[i + 1].value === xEdgeCoords[j].value) mins.push(xEdgeCoords[j]);
+          else break;
+        }
+        const gap = mins[0].value - maxs[0].value;
+        const x = maxs[0].nodeRect.x;
+        if (gap > 0) {
+          const y = Math.min(...maxs.map((max) => max.nodeRect.y), ...mins.map((min) => min.nodeRect.y));
+          const h = Math.max(
+            ...maxs.map((max) => max.nodeRect.y + max.nodeRect.h),
+            ...mins.map((min) => min.nodeRect.y + min.nodeRect.h)
+          );
+          const gapRegion = {
+            x,
+            y,
+            w: gap,
+            h: h - y,
+            rect1: maxs.map((max) => max.nodeRect),
+            rect2: mins.map((min) => min.nodeRect)
+          };
+          if (xGapRegions.has(gap)) (_a = xGapRegions.get(gap)) == null ? void 0 : _a.push(gapRegion);
+          else xGapRegions.set(gap, [gapRegion]);
+        }
+      }
+    }
+  }
+  function mergeGapRegions() {
+    xGapRegions.forEach((gapValue, gapKey) => {
+      const xMap = /* @__PURE__ */ new Map();
+      gapValue.forEach((gapRegion) => {
+        if (xMap.has(gapRegion.x)) {
+          xMap.get(gapRegion.x).push(gapRegion);
+        } else {
+          xMap.set(gapRegion.x, [gapRegion]);
+        }
+      });
+      xMap.forEach((xValue, xKey) => {
+        const alternateY = [];
+        const alternateH = [];
+        const rect1 = /* @__PURE__ */ new Set();
+        const rect2 = /* @__PURE__ */ new Set();
+        xValue == null ? void 0 : xValue.forEach((gapRegion) => {
+          alternateY.push(gapRegion.y);
+          alternateH.push(gapRegion.y + gapRegion.h);
+          gapRegion.rect1.forEach((rect) => rect1.add(rect));
+          gapRegion.rect2.forEach((rect) => rect2.add(rect));
+        });
+        const finalY = Math.min(...alternateY);
+        const finalH = Math.max(...alternateH);
+        xMap.set(xKey, [
+          {
+            x: xKey,
+            y: finalY,
+            h: finalH - finalY,
+            w: gapKey,
+            rect1: Array.from(rect1),
+            rect2: Array.from(rect2)
+          }
+        ]);
+      });
+      xGapRegions.set(gapKey, Array.from(xMap.values()).flat());
+    });
+  }
+  const nodeRects = [];
+  const seletedRect = Rect.from(store.selected);
+  store.nodes.forEach((node) => {
+    const nodeRect = Rect.from(node);
+    nodeRects.push(nodeRect);
+  });
+  nodeRects.sort((a, b) => a.x - b.x);
+  const activeRects = [];
+  const inactiveRects = [];
+  nodeRects.forEach((nodeRect) => {
+    const isActive = nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h;
+    if (isActive) activeRects.push(nodeRect);
+    else inactiveRects.push(nodeRect);
+  });
+  getGapRegions(activeRects);
+  inactiveRects.forEach((nodeRect) => {
+    activeRects.push(nodeRect);
+    getGapRegions(activeRects);
+  });
+  mergeGapRegions();
+  return xGapRegions;
+}
+function searchDistanceBlockYData(store) {
+  const yGapRegions = /* @__PURE__ */ new Map();
+  function getGapRegions(currActiveRects) {
+    var _a;
+    const yEdgeCoords = [];
+    currActiveRects.toSorted((a, b) => a.y - b.y).forEach((nodeRect) => {
+      yEdgeCoords.push({ value: nodeRect.y, type: "min", nodeRect });
+      yEdgeCoords.push({ value: nodeRect.y + nodeRect.h, type: "max", nodeRect });
+    });
+    yEdgeCoords.sort((a, b) => a.value - b.value);
+    for (let i = 0; i < yEdgeCoords.length - 1; i++) {
+      const maxs = [];
+      const mins = [];
+      if (yEdgeCoords[i].type === "max" && yEdgeCoords[i + 1].type === "min") {
+        for (let j = 0; j <= i; j++) {
+          if (yEdgeCoords[i].value === yEdgeCoords[i - j].value) maxs.push(yEdgeCoords[i - j]);
+          else break;
+        }
+        for (let j = i + 1; j <= yEdgeCoords.length; j++) {
+          if (yEdgeCoords[i + 1].value === yEdgeCoords[j].value) mins.push(yEdgeCoords[j]);
+          else break;
+        }
+        const gap = mins[0].value - maxs[0].value;
+        const y = maxs[0].nodeRect.y;
+        if (gap > 0) {
+          const x = Math.min(...maxs.map((max) => max.nodeRect.x), ...mins.map((min) => min.nodeRect.x));
+          const w = Math.max(
+            ...maxs.map((max) => max.nodeRect.x + max.nodeRect.w),
+            ...mins.map((min) => min.nodeRect.x + min.nodeRect.w)
+          );
+          const gapRegion = {
+            x,
+            y,
+            w: w - x,
+            h: gap,
+            rect1: maxs.map((max) => max.nodeRect),
+            rect2: mins.map((min) => min.nodeRect)
+          };
+          if (yGapRegions.has(gap)) (_a = yGapRegions.get(gap)) == null ? void 0 : _a.push(gapRegion);
+          else yGapRegions.set(gap, [gapRegion]);
+        }
+      }
+    }
+  }
+  function mergeGapRegions() {
+    yGapRegions.forEach((gapValue, gapKey) => {
+      const yMap = /* @__PURE__ */ new Map();
+      gapValue.forEach((gapRegion) => {
+        if (yMap.has(gapRegion.y)) {
+          yMap.get(gapRegion.y).push(gapRegion);
+        } else {
+          yMap.set(gapRegion.y, [gapRegion]);
+        }
+      });
+      yMap.forEach((yValue, yKey) => {
+        const alternateX = [];
+        const alternateW = [];
+        const rect1 = /* @__PURE__ */ new Set();
+        const rect2 = /* @__PURE__ */ new Set();
+        yValue == null ? void 0 : yValue.forEach((gapRegion) => {
+          alternateX.push(gapRegion.x);
+          alternateW.push(gapRegion.x + gapRegion.w);
+          gapRegion.rect1.forEach((rect) => rect1.add(rect));
+          gapRegion.rect2.forEach((rect) => rect2.add(rect));
+        });
+        const finalX = Math.min(...alternateX);
+        const finalW = Math.max(...alternateW);
+        yMap.set(yKey, [
+          {
+            x: finalX,
+            y: yKey,
+            h: gapKey,
+            w: finalW - finalX,
+            rect1: Array.from(rect1),
+            rect2: Array.from(rect2)
+          }
+        ]);
+      });
+      yGapRegions.set(gapKey, Array.from(yMap.values()).flat());
+    });
+  }
+  const nodeRects = [];
+  const seletedRect = Rect.from(store.selected);
+  store.nodes.forEach((node) => {
+    const nodeRect = Rect.from(node);
+    nodeRects.push(nodeRect);
+  });
+  const activeRects = [];
+  const inactiveRects = [];
+  nodeRects.forEach((nodeRect) => {
+    const isActive = nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h;
+    if (isActive) activeRects.push(nodeRect);
+    else inactiveRects.push(nodeRect);
+  });
+  getGapRegions(activeRects);
+  inactiveRects.forEach((nodeRect) => {
+    activeRects.push(nodeRect);
+    getGapRegions(activeRects);
+  });
+  mergeGapRegions();
+  return yGapRegions;
+}
+class Gap {
+  constructor(svg) {
+    __publicField(this, "g");
+    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-distance-block`);
+    svg.append(this.g);
+  }
+  clear() {
+    this.g.innerHTML = "";
+  }
+  reRender(store) {
+    const blockXData = searchDistanceBlockXData(store);
+    const blockYData = searchDistanceBlockYData(store);
+    console.log(blockXData, blockYData);
+  }
 }
 const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
 let nanoid = (size = 21) => {
@@ -248,6 +465,7 @@ const ALIGNLINE_WIDTH = 1;
 const ALIGNLINE_COLOR = "#EA3";
 const alignLineTypes = ["vl", "vc", "vr", "ht", "hc", "hb"];
 function renderAlignLine(store, lines) {
+  const containerRect = store.container.getBoundingClientRect();
   const alternateNodes = {
     ht: [],
     hc: [],
@@ -256,6 +474,7 @@ function renderAlignLine(store, lines) {
     vc: [],
     vr: []
   };
+  let showContainerAlignLine = false;
   function handleSearchAlternateNodes() {
     const selectedRect = Rect.from(store.selected);
     const nodeRects = store.nodes.filter((n) => n !== store.selected).map((n) => Rect.from(n));
@@ -340,7 +559,7 @@ function renderAlignLine(store, lines) {
       alternateNodes[type] = Array.from(map.values()).flat();
     });
   }
-  function handleAbsorb(data) {
+  function handleAlignLineAbsorb(data) {
     const { absorbPosition, type } = data;
     const selected = store.selected;
     switch (type) {
@@ -366,13 +585,24 @@ function renderAlignLine(store, lines) {
     handleSearchAlternateNodes();
     store.seletedBorder.reRender(store);
   }
+  function handleContainerAlignLineAbsorb() {
+    if (!store.selected) return;
+    const selectedRect = Rect.from(store.selected);
+    const absorbPosition = containerRect.width / 2;
+    if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NODE_ABSORB_DELTA) {
+      store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
+      showContainerAlignLine = true;
+    }
+    handleSearchAlternateNodes();
+    store.seletedBorder.reRender(store);
+  }
   function handleDraw() {
     if (!store.selected) return;
     const selectedRect = Rect.from(store.selected);
     const alternateNodesFlat = Object.values(alternateNodes).flat();
     alternateNodesFlat.forEach((item) => {
       const { source, target, type } = item;
-      const line = store.alignLine.g.getElementsByClassName(`${NODE_CLASS_PREFIX}-alignLine-${type}`)[0];
+      const line = lines[type];
       if (/^h/.test(type)) {
         line == null ? void 0 : line.setAttribute("x1", String(source));
         line == null ? void 0 : line.setAttribute("x2", String(target));
@@ -411,11 +641,20 @@ function renderAlignLine(store, lines) {
       }
       line == null ? void 0 : line.setAttribute("style", "display: 'block");
     });
+    if (showContainerAlignLine) {
+      const line = lines["vertical"];
+      line.setAttribute("x1", String(containerRect.width / 2));
+      line.setAttribute("y1", String(0));
+      line.setAttribute("x2", String(containerRect.width / 2));
+      line.setAttribute("y2", String(containerRect.height));
+      line == null ? void 0 : line.setAttribute("style", "display: 'block");
+    }
   }
   handleSearchAlternateNodes();
   Object.values(alternateNodes).flat().forEach((item) => {
-    handleAbsorb(item);
+    handleAlignLineAbsorb(item);
   });
+  handleContainerAlignLineAbsorb();
   let min = Infinity;
   alignLineTypes.forEach((type) => {
     alternateNodes[type].forEach((item) => {
@@ -433,9 +672,8 @@ class AlignLine {
     __publicField(this, "lines");
     this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine`);
-    svg.append(this.g);
     this.lines = {};
-    alignLineTypes.forEach((type) => {
+    [...alignLineTypes, "vertical"].forEach((type) => {
       const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine-${type}`);
       line.setAttribute("stroke", ALIGNLINE_COLOR);
@@ -444,6 +682,7 @@ class AlignLine {
       this.g.append(line);
       this.lines[type] = line;
     });
+    svg.append(this.g);
   }
   hidden() {
     Object.values(this.lines).forEach((line) => {
@@ -827,7 +1066,7 @@ class Selector {
     this.previewRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     this.previewRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-preview`);
     this.previewRect.setAttribute("stroke", "#000");
-    this.previewRect.setAttribute("stroke-width", "1.5px");
+    this.previewRect.setAttribute("stroke-width", "1px");
     this.previewRect.setAttribute("fill", "transparent");
     this.previewRect.style.display = "none";
     this.g.append(this.selectorRect, this.previewRect);
@@ -836,11 +1075,18 @@ class Selector {
   hiddenSelector() {
     this.selectorRect.style.display = "none";
   }
+  showSelector() {
+    this.selectorRect.style.display = "block";
+  }
   hiddenPreview() {
     this.previewRect.style.display = "none";
   }
+  showPreview() {
+    this.previewRect.style.display = "block";
+  }
   reRender(store, startX, startY, endX, endY) {
-    this.selectorRect.style.display = "block";
+    this.showSelector();
+    this.hiddenPreview();
     this.selectedGroup = [];
     const quadrant = getQuadrant(startX, startY, endX, endY);
     const width = Math.abs(startX - endX);
@@ -883,7 +1129,6 @@ class Selector {
     const alternateY2 = [];
     this.selectedGroup.forEach((node) => {
       const { x: x2, y: y2, w, h } = Rect.from(node);
-      console.log(Rect.from(node));
       alternateX1.push(x2);
       alternateY1.push(y2);
       alternateX2.push(x2 + w);
@@ -895,7 +1140,6 @@ class Selector {
     this.previewRect.setAttribute("y", String(alternateY1.length ? y1 : 0));
     this.previewRect.setAttribute("width", String(alternateX2.length ? Math.max(...alternateX2) - x1 : 0));
     this.previewRect.setAttribute("height", String(alternateY2.length ? Math.max(...alternateY2) - y1 : 0));
-    this.previewRect.style.display = "block";
   }
 }
 const initStore = (container, nodes) => {
@@ -923,7 +1167,7 @@ const initStore = (container, nodes) => {
     seletedBorder: new SeletedBorder(svg),
     resize: new Resize(svg, nodes),
     selector: new Selector(svg),
-    moveDelta: [0, 0],
+    gap: new Gap(svg),
     setSelected(target) {
       this.selected = target;
       if (!target) {
@@ -934,11 +1178,36 @@ const initStore = (container, nodes) => {
     }
   };
 };
-function createFreeMove(container, nodes) {
-  const store = initStore(container, nodes);
-  addPointerListener(store);
-  return store.svg;
+class FreeMove {
+  constructor(container, nodes) {
+    __publicField(this, "store");
+    this.store = initStore(container, nodes);
+    addPointerListener(this.store);
+  }
+  mount() {
+    this.store.container.append(this.store.svg);
+  }
+  unmount() {
+    this.store.svg.remove();
+  }
+  align(option) {
+    const { selected, container } = this.store;
+    if (!selected) return;
+    const containerRect = container.getBoundingClientRect();
+    const selectedRect = Rect.from(selected);
+    switch (option) {
+      case "start":
+        selected.style.left = toPx(0);
+        break;
+      case "center":
+        selected.style.left = toPx(containerRect.width / 2 - selectedRect.w / 2);
+        break;
+      case "end":
+        selected.style.left = toPx(containerRect.width - selectedRect.w);
+        break;
+    }
+  }
 }
 export {
-  createFreeMove as default
+  FreeMove as default
 };
