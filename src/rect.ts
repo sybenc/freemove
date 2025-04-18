@@ -1,4 +1,4 @@
-import { AlignLineType } from "./align-line/type";
+import { AlignLineType } from "./align/type";
 
 const Tolerance = 3;
 

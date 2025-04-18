@@ -6,7 +6,7 @@ import { toPx } from "./utils";
 function handleMoveNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
   const containerRect = store.container.getBoundingClientRect();
-  store.alignLine.reRender(store);
+  store.align.reRender(store);
   const rect = store.selected.getBoundingClientRect();
   let startX = event.clientX - rect.left;
   let startY = event.clientY - rect.top;
@@ -29,10 +29,10 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 
       store.selected.style.left = toPx(newX);
       store.selected.style.top = toPx(newY);
-      store.alignLine.reRender(store);
-      store.seletedBorder.reRender(store);
+      store.align.reRender(store);
+      store.border.reRender(store);
       store.gap.reRender(store)
-      
+
       animationFrameId = null;
     });
   }
@@ -40,7 +40,7 @@ function handleMoveNode(store: Store, event: PointerEvent) {
   function handlePointerUp() {
     document.removeEventListener("pointermove", handlePointerMove);
     document.removeEventListener("pointerup", handlePointerUp);
-    store.alignLine.hidden();
+    store.align.hidden();
 
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
@@ -115,7 +115,7 @@ function handleResizeNode(store: Store, event: PointerEvent) {
     newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
 
     store.resize.reRender(store, newWidth, newHeight, direction!, startLeft, startTop, startWidth, startHeight);
-    store.seletedBorder.reRender(store);
+    store.border.reRender(store);
   }
 
   function stopResize() {
@@ -157,7 +157,7 @@ export function addPointerListener(store: Store) {
     const target = event.target as HTMLElement;
 
     // 如果点击啊到被选择边框的resize点
-    if (target.classList[0].includes(`${NODE_CLASS_PREFIX}-selected-border-point-`)) {
+    if (target.classList[0].includes(`${NODE_CLASS_PREFIX}-border-point-`)) {
       const ownerId = target.dataset.ownerId;
       for (let i = 0; i < store.nodes.length; i++) {
         if (ownerId === store.nodes[i].dataset.ownerId) {
@@ -193,7 +193,7 @@ export function addPointerListener(store: Store) {
 
       // 此外，绘画选择框、清除被选择节点选择边框
       if (!seleted) {
-        store.seletedBorder.hidden();
+        store.border.hidden();
         handleSelector(store, event);
       }
     }

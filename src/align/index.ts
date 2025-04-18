@@ -2,7 +2,7 @@
 import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
-import { epsilonEqual, toPx } from "../utils";
+import { createElementNS, epsilonEqual, toPx } from "../utils";
 import { ALIGNLINE_COLOR, ALIGNLINE_WIDTH } from "./const";
 import { AlignLineData, AlignLineType } from "./type";
 
@@ -147,7 +147,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
 
     // 更改了被选择元素的位置，所以需要重新寻找备选节点，并重新渲染selected-border
     handleSearchAlternateNodes();
-    store.seletedBorder.reRender(store);
+    store.border.reRender(store);
   }
 
   function handleContainerAlignLineAbsorb() {
@@ -161,7 +161,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
 
     // 更改了被选择元素的位置，所以需要重新寻找备选节点，并重新渲染selected-border
     handleSearchAlternateNodes();
-    store.seletedBorder.reRender(store);
+    store.border.reRender(store);
   }
 
   function handleDraw() {
@@ -248,17 +248,17 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
   handleDraw();
 }
 
-export class AlignLine {
+export class Align {
   g: SVGGElement;
   lines: Record<AlignLineType | "vertical", SVGLineElement>;
 
   constructor(svg: SVGSVGElement) {
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine`);
+    this.g = createElementNS<SVGGElement>('g');
+    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-align`);
     this.lines = {} as any;
     [...alignLineTypes, "vertical"].forEach((type) => {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine-${type}`);
+      const line = createElementNS<SVGLineElement>('line');
+      line.setAttribute("class", `${NODE_CLASS_PREFIX}-align-${type}`);
       line.setAttribute("stroke", ALIGNLINE_COLOR);
       line.setAttribute("stroke-width", String(ALIGNLINE_WIDTH));
       line.style.display = "none";

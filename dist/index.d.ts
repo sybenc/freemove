@@ -1,4 +1,4 @@
-declare class AlignLine {
+declare class Align {
     g: SVGGElement;
     lines: Record<AlignLineType | "vertical", SVGLineElement>;
     constructor(svg: SVGSVGElement);
@@ -7,6 +7,33 @@ declare class AlignLine {
 }
 
 declare type AlignLineType = "vl" | "vc" | "vr" | "ht" | "hc" | "hb";
+
+declare class Border {
+    g: SVGGElement;
+    points: SVGRectElement[];
+    lines: SVGLineElement[];
+    constructor(svg: SVGSVGElement);
+    hidden(): void;
+    reRender(store: Store): void;
+}
+
+declare class Distance {
+    g: SVGGElement;
+    distanceGroups: Record<DistanceType, SVGGElement>;
+    x: {
+        type: 'left' | 'right';
+        node: HTMLElement | null;
+    };
+    y: {
+        type: 'top' | 'bottom';
+        node: HTMLElement | null;
+    };
+    constructor(svg: SVGSVGElement);
+    hidden(): void;
+    reRender(store: Store): void;
+}
+
+declare type DistanceType = 'left' | 'right' | 'bottom' | 'top';
 
 declare class FreeMove {
     store: Store;
@@ -45,26 +72,18 @@ declare class Selector {
     reRender(store: Store, startX: number, startY: number, endX: number, endY: number): void;
 }
 
-declare class SeletedBorder {
-    g: SVGGElement;
-    points: SVGRectElement[];
-    lines: SVGLineElement[];
-    constructor(svg: SVGSVGElement);
-    hidden(): void;
-    reRender(store: Store): void;
-}
-
 declare interface Store {
     container: HTMLElement;
     nodes: HTMLElement[];
-    selected: HTMLElement | null;
     svg: SVGSVGElement;
-    alignLine: AlignLine;
-    seletedBorder: SeletedBorder;
+    selected: HTMLElement | null;
+    setSelected: (target: HTMLElement | null) => void;
+    align: Align;
+    border: Border;
     resize: Resize;
     selector: Selector;
     gap: Gap;
-    setSelected: (target: HTMLElement | null) => void;
+    distance: Distance;
 }
 
 export { }

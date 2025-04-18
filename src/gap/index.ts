@@ -1,6 +1,7 @@
 import { NODE_CLASS_PREFIX } from '../const';
 import Rect from '../rect';
 import { Store } from '../store';
+import { createElementNS } from '../utils';
 import { GapRegion, EdgeCoord } from './type';
 
 function searchDistanceBlockXData(store: Store): Map<number, GapRegion[]> {
@@ -111,15 +112,33 @@ function searchDistanceBlockXData(store: Store): Map<number, GapRegion[]> {
   const activeRects: Rect[] = [];
   // 在活动矩形上面的矩形
   const inactiveRects: Rect[] = [];
-
+  let distance = Infinity;
   // 初始化活动矩形
   nodeRects.forEach(nodeRect => {
     const isActive =
       (nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h) ||
       (nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h) ||
       (nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h);
-    if (isActive) activeRects.push(nodeRect);
-    else inactiveRects.push(nodeRect);
+    if (isActive) {
+      // 寻找最近的矩形，间距吸附要根据最近的矩形判断
+      if (seletedRect.x + seletedRect.w < nodeRect.x) {
+        const currDistance = Math.abs(seletedRect.x + seletedRect.w - nodeRect.x);
+        if (distance > currDistance) {
+          distance = currDistance
+          store.distance.x.type = 'right';
+          store.distance.x.node = nodeRect.node;
+        } 
+      }
+      if (seletedRect.x > nodeRect.x + nodeRect.w) {
+        const currDistance = Math.abs(seletedRect.x - nodeRect.x - nodeRect.w);
+        if (distance > currDistance) {
+          distance = currDistance
+          store.distance.x.type = 'left';
+          store.distance.x.node = nodeRect.node;
+        } 
+      }
+      activeRects.push(nodeRect);
+    } else inactiveRects.push(nodeRect);
   });
 
   getGapRegions(activeRects);
@@ -235,19 +254,39 @@ function searchDistanceBlockYData(store: Store): Map<number, GapRegion[]> {
     nodeRects.push(nodeRect);
   });
 
+  nodeRects.sort((a, b) => a.y - b.y);
+
   // 和当前被选择矩形在同一行的矩形集合
   const activeRects: Rect[] = [];
   // 在活动矩形上面的矩形
   const inactiveRects: Rect[] = [];
-
+  let distance = Infinity
   // 初始化活动矩形
   nodeRects.forEach(nodeRect => {
     const isActive =
-      (nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h) ||
-      (nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h) ||
-      (nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h);
-    if (isActive) activeRects.push(nodeRect);
-    else inactiveRects.push(nodeRect);
+      (nodeRect.x >= seletedRect.x && nodeRect.x <= seletedRect.x + seletedRect.w) ||
+      (nodeRect.x + nodeRect.w / 2 >= seletedRect.x && nodeRect.x + nodeRect.w / 2 <= seletedRect.x + seletedRect.w) ||
+      (nodeRect.x + nodeRect.w >= seletedRect.x && nodeRect.x + nodeRect.w <= seletedRect.x + seletedRect.w);
+    if (isActive) {
+       // 寻找最近的矩形，间距吸附要根据最近的矩形判断
+       if (seletedRect.y + seletedRect.h < nodeRect.y) {
+        const currDistance = Math.abs(seletedRect.y + seletedRect.h - nodeRect.y);
+        if (distance > currDistance) {
+          distance = currDistance
+          store.distance.y.type = 'bottom';
+          store.distance.y.node = nodeRect.node;
+        } 
+      }
+      if (seletedRect.y > nodeRect.y + nodeRect.h) {
+        const currDistance = Math.abs(seletedRect.y - nodeRect.y - nodeRect.h);
+        if (distance > currDistance) {
+          distance = currDistance
+          store.distance.y.type = 'top';
+          store.distance.y.node = nodeRect.node;
+        } 
+      }
+      activeRects.push(nodeRect);
+    } else inactiveRects.push(nodeRect);
   });
 
   getGapRegions(activeRects);
@@ -266,8 +305,8 @@ export class Gap {
   g: SVGGElement;
 
   constructor(svg: SVGSVGElement) {
-    this.g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    this.g.setAttribute('class', `${NODE_CLASS_PREFIX}-distance-block`);
+    this.g = createElementNS('g');
+    this.g.setAttribute('class', `${NODE_CLASS_PREFIX}-gap`);
     svg.append(this.g);
   }
 
@@ -278,6 +317,5 @@ export class Gap {
   reRender(store: Store) {
     const blockXData = searchDistanceBlockXData(store);
     const blockYData = searchDistanceBlockYData(store);
-    console.log(blockXData, blockYData);
   }
 }

@@ -1,46 +1,24 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-const NODE_ABSORB_DELTA = 3;
-const NODE_CLASS_PREFIX = "__freemove";
-const NODE_MIN_WIDTH = 10;
-const NODE_MIN_HEIGHT = 10;
-const Tolerance = 3;
-class Rect {
-  constructor({ x, y, h, w, node }) {
-    __publicField(this, "x");
-    __publicField(this, "y");
-    __publicField(this, "w");
-    __publicField(this, "h");
-    __publicField(this, "id");
-    __publicField(this, "node");
-    this.x = x;
-    this.y = y;
-    this.h = h;
-    this.w = w;
-    this.node = node;
-    this.id = node.dataset.id;
+var q = Object.defineProperty;
+var Z = (i, e, t) => e in i ? q(i, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : i[e] = t;
+var E = (i, e, t) => Z(i, typeof e != "symbol" ? e + "" : e, t);
+const p = "__freemove";
+class L {
+  constructor({ x: e, y: t, h: c, w: n, node: h }) {
+    E(this, "x");
+    E(this, "y");
+    E(this, "w");
+    E(this, "h");
+    E(this, "id");
+    E(this, "node");
+    this.x = e, this.y = t, this.h = c, this.w = n, this.node = h, this.id = h.dataset.id;
   }
   // 判断一个点是否在矩形里面
-  isInSide(position) {
-    if (position.x >= this.x && position.x <= this.x + this.w && position.y >= this.y && position.y <= this.y + this.h) {
-      return true;
-    }
-    return false;
+  isInSide(e) {
+    return e.x >= this.x && e.x <= this.x + this.w && e.y >= this.y && e.y <= this.y + this.h;
   }
-  isIntersect(rect) {
-    const x1A = this.x + Tolerance;
-    const y1A = this.y + Tolerance;
-    const x2A = this.x + this.w - Tolerance;
-    const y2A = this.y + this.h - Tolerance;
-    const x1B = rect.x;
-    const y1B = rect.y;
-    const x2B = rect.x + rect.w;
-    const y2B = rect.y + rect.h;
-    if (x2A < x1B || x1A > x2B || y2A < y1B || y1A > y2B) {
-      return false;
-    }
-    return true;
+  isIntersect(e) {
+    const t = this.x + 3, c = this.y + 3, n = this.x + this.w - 3, h = this.y + this.h - 3, u = e.x, A = e.y, y = e.x + e.w, a = e.y + e.h;
+    return !(n < u || t > y || h < A || c > a);
   }
   getAlignLinePostion() {
     return {
@@ -53,420 +31,282 @@ class Rect {
     };
   }
   // 从dom元素的style构建Rect对象
-  static from(node) {
-    return new Rect({
-      x: node.offsetLeft,
-      y: node.offsetTop,
-      w: node.offsetWidth,
-      h: node.offsetHeight,
-      node
+  static from(e) {
+    return new L({
+      x: e.offsetLeft,
+      y: e.offsetTop,
+      w: e.offsetWidth,
+      h: e.offsetHeight,
+      node: e
     });
   }
-  static error(svg, nodeRects) {
+  static error(e, t) {
   }
 }
-function toPx(value) {
-  if (typeof value === "number") return `${value}px`;
-  return String(value);
+function S(i) {
+  return typeof i == "number" ? `${i}px` : String(i);
 }
-function epsilonEqual(a, b, epsilon = 0.1) {
-  return Math.abs(a - b) <= epsilon;
+function U(i, e, t = 0.1) {
+  return Math.abs(i - e) <= t;
 }
-function getElement(g, className) {
-  return g.getElementsByClassName(className)[0];
+function M(i, e) {
+  return i.getElementsByClassName(e)[0];
 }
-function handleMoveNode(store, event) {
-  if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
-  store.alignLine.reRender(store);
-  const rect = store.selected.getBoundingClientRect();
-  let startX = event.clientX - rect.left;
-  let startY = event.clientY - rect.top;
-  let animationFrameId = null;
-  function handlePointerMove(ev) {
-    if (animationFrameId) return;
-    animationFrameId = requestAnimationFrame(() => {
-      if (!store.selected) return;
-      let newX = ev.clientX - containerRect.left - startX;
-      let newY = ev.clientY - containerRect.top - startY;
-      const maxLeft = store.container.clientWidth - store.selected.offsetWidth;
-      const maxTop = store.container.clientHeight - store.selected.offsetHeight;
-      newX = Math.max(0, Math.min(newX, maxLeft));
-      newY = Math.max(0, Math.min(newY, maxTop));
-      store.selected.style.left = toPx(newX);
-      store.selected.style.top = toPx(newY);
-      store.alignLine.reRender(store);
-      store.seletedBorder.reRender(store);
-      store.gap.reRender(store);
-      animationFrameId = null;
-    });
-  }
-  function handlePointerUp() {
-    document.removeEventListener("pointermove", handlePointerMove);
-    document.removeEventListener("pointerup", handlePointerUp);
-    store.alignLine.hidden();
-    if (animationFrameId !== null) {
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = null;
-    }
-  }
-  document.addEventListener("pointermove", handlePointerMove);
-  document.addEventListener("pointerup", handlePointerUp);
+function w(i) {
+  return document.createElementNS("http://www.w3.org/2000/svg", i);
 }
-function handleResizeNode(store, event) {
-  if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
-  const target = event.target;
-  const direction = target.dataset.direction;
-  if (!direction) return;
-  const rect = Rect.from(store.selected);
-  let startX = event.clientX;
-  let startY = event.clientY;
-  let startWidth = rect.w;
-  let startHeight = rect.h;
-  let startLeft = rect.x;
-  let startTop = rect.y;
-  const containerWidth = containerRect.width;
-  const containerHeight = containerRect.height;
-  function resize(ev) {
-    let deltaX = ev.clientX - startX;
-    let deltaY = ev.clientY - startY;
-    let newWidth = startWidth;
-    let newHeight = startHeight;
-    let newLeft = startLeft;
-    let newTop = startTop;
-    if (direction.includes("right")) {
-      newWidth = startWidth + deltaX;
-    }
-    if (direction.includes("left")) {
-      newWidth = startWidth - deltaX;
-      newLeft = startLeft + deltaX;
-    }
-    if (direction.includes("bottom")) {
-      newHeight = startHeight + deltaY;
-    }
-    if (direction.includes("top")) {
-      newHeight = startHeight - deltaY;
-      newTop = startTop + deltaY;
-    }
-    if (newLeft < 0) {
-      newWidth += newLeft;
-      newLeft = 0;
-    }
-    if (newTop < 0) {
-      newHeight += newTop;
-      newTop = 0;
-    }
-    if (newLeft + newWidth > containerWidth) {
-      newWidth = containerWidth - newLeft;
-    }
-    if (newTop + newHeight > containerHeight) {
-      newHeight = containerHeight - newTop;
-    }
-    newWidth = Math.max(newWidth, NODE_MIN_WIDTH);
-    newHeight = Math.max(newHeight, NODE_MIN_HEIGHT);
-    store.resize.reRender(store, newWidth, newHeight, direction, startLeft, startTop, startWidth, startHeight);
-    store.seletedBorder.reRender(store);
+function Q(i, e) {
+  if (!i.selected) return;
+  const t = i.container.getBoundingClientRect();
+  i.align.reRender(i);
+  const c = i.selected.getBoundingClientRect();
+  let n = e.clientX - c.left, h = e.clientY - c.top, u = null;
+  function A(a) {
+    u || (u = requestAnimationFrame(() => {
+      if (!i.selected) return;
+      let r = a.clientX - t.left - n, o = a.clientY - t.top - h;
+      const s = i.container.clientWidth - i.selected.offsetWidth, d = i.container.clientHeight - i.selected.offsetHeight;
+      r = Math.max(0, Math.min(r, s)), o = Math.max(0, Math.min(o, d)), i.selected.style.left = S(r), i.selected.style.top = S(o), i.align.reRender(i), i.border.reRender(i), i.gap.reRender(i), u = null;
+    }));
   }
-  function stopResize() {
-    store.resize.hidden();
-    document.removeEventListener("pointermove", resize);
-    document.removeEventListener("pointerup", stopResize);
+  function y() {
+    document.removeEventListener("pointermove", A), document.removeEventListener("pointerup", y), i.align.hidden(), u !== null && (cancelAnimationFrame(u), u = null);
   }
-  document.addEventListener("pointermove", resize);
-  document.addEventListener("pointerup", stopResize);
+  document.addEventListener("pointermove", A), document.addEventListener("pointerup", y);
 }
-function handleSelector(store, event) {
-  const containerRect = store.container.getBoundingClientRect();
-  const startX = event.clientX - containerRect.left;
-  const startY = event.clientY - containerRect.top;
-  function select(ep) {
-    const endX = ep.clientX - containerRect.left;
-    const endY = ep.clientY - containerRect.top;
-    store.selector.reRender(store, startX, startY, endX, endY);
+function J(i, e) {
+  if (!i.selected) return;
+  const t = i.container.getBoundingClientRect(), n = e.target.dataset.direction;
+  if (!n) return;
+  const h = L.from(i.selected);
+  let u = e.clientX, A = e.clientY, y = h.w, a = h.h, r = h.x, o = h.y;
+  const s = t.width, d = t.height;
+  function x(l) {
+    let g = l.clientX - u, m = l.clientY - A, v = y, f = a, $ = r, T = o;
+    n.includes("right") && (v = y + g), n.includes("left") && (v = y - g, $ = r + g), n.includes("bottom") && (f = a + m), n.includes("top") && (f = a - m, T = o + m), $ < 0 && (v += $, $ = 0), T < 0 && (f += T, T = 0), $ + v > s && (v = s - $), T + f > d && (f = d - T), v = Math.max(v, 10), f = Math.max(f, 10), i.resize.reRender(i, v, f, n, r, o, y, a), i.border.reRender(i);
   }
-  function stopSelect() {
-    store.selector.hiddenSelector();
-    store.selector.showPreview();
-    document.removeEventListener("pointermove", select);
-    document.removeEventListener("pointerup", stopSelect);
+  function b() {
+    i.resize.hidden(), document.removeEventListener("pointermove", x), document.removeEventListener("pointerup", b);
   }
-  document.addEventListener("pointermove", select);
-  document.addEventListener("pointerup", stopSelect);
+  document.addEventListener("pointermove", x), document.addEventListener("pointerup", b);
 }
-function addPointerListener(store) {
-  store.svg.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    const target = event.target;
-    if (target.classList[0].includes(`${NODE_CLASS_PREFIX}-selected-border-point-`)) {
-      const ownerId = target.dataset.ownerId;
-      for (let i = 0; i < store.nodes.length; i++) {
-        if (ownerId === store.nodes[i].dataset.ownerId) {
-          store.setSelected(store.nodes[i]);
-        }
-      }
-      if (store.selected) {
-        handleResizeNode(store, event);
-      }
+function K(i, e) {
+  const t = i.container.getBoundingClientRect(), c = e.clientX - t.left, n = e.clientY - t.top;
+  function h(A) {
+    const y = A.clientX - t.left, a = A.clientY - t.top;
+    i.selector.reRender(i, c, n, y, a);
+  }
+  function u() {
+    i.selector.hiddenSelector(), i.selector.showPreview(), document.removeEventListener("pointermove", h), document.removeEventListener("pointerup", u);
+  }
+  document.addEventListener("pointermove", h), document.addEventListener("pointerup", u);
+}
+function V(i) {
+  i.svg.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const t = e.target;
+    if (t.classList[0].includes(`${p}-border-point-`)) {
+      const c = t.dataset.ownerId;
+      for (let n = 0; n < i.nodes.length; n++)
+        c === i.nodes[n].dataset.ownerId && i.setSelected(i.nodes[n]);
+      i.selected && J(i, e);
       return;
     }
-    if (target.classList.contains(`${NODE_CLASS_PREFIX}-svg`)) {
-      let seleted = null;
-      for (const node of store.nodes) {
-        const nodeRect = Rect.from(node);
-        if (nodeRect.isInSide({ x: event.offsetX, y: event.offsetY })) {
-          seleted = nodeRect;
+    if (t.classList.contains(`${p}-svg`)) {
+      let c = null;
+      for (const n of i.nodes) {
+        const h = L.from(n);
+        if (h.isInSide({ x: e.offsetX, y: e.offsetY })) {
+          c = h;
           break;
         }
       }
-      if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
-        store.selector.hiddenPreview();
-        store.setSelected(seleted.node);
-        handleMoveNode(store, event);
-      }
-      if (!seleted) {
-        store.seletedBorder.hidden();
-        handleSelector(store, event);
-      }
+      c && c.node.classList.contains(`${p}-movable-node`) && (i.selector.hiddenPreview(), i.setSelected(c.node), Q(i, e)), c || (i.border.hidden(), K(i, e));
     }
   });
 }
-function searchDistanceBlockXData(store) {
-  const xGapRegions = /* @__PURE__ */ new Map();
-  function getGapRegions(currActiveRects) {
-    var _a;
-    const xEdgeCoords = [];
-    currActiveRects.toSorted((a, b) => a.x - b.x).forEach((nodeRect) => {
-      xEdgeCoords.push({ value: nodeRect.x, type: "min", nodeRect });
-      xEdgeCoords.push({ value: nodeRect.x + nodeRect.w, type: "max", nodeRect });
-    });
-    xEdgeCoords.sort((a, b) => a.value - b.value);
-    for (let i = 0; i < xEdgeCoords.length - 1; i++) {
-      const maxs = [];
-      const mins = [];
-      if (xEdgeCoords[i].type === "max" && xEdgeCoords[i + 1].type === "min") {
-        for (let j = 0; j <= i; j++) {
-          if (xEdgeCoords[i].value === xEdgeCoords[i - j].value) maxs.push(xEdgeCoords[i - j]);
-          else break;
-        }
-        for (let j = i + 1; j <= xEdgeCoords.length; j++) {
-          if (xEdgeCoords[i + 1].value === xEdgeCoords[j].value) mins.push(xEdgeCoords[j]);
-          else break;
-        }
-        const gap = mins[0].value - maxs[0].value;
-        const x = maxs[0].nodeRect.x;
-        if (gap > 0) {
-          const y = Math.min(...maxs.map((max) => max.nodeRect.y), ...mins.map((min) => min.nodeRect.y));
-          const h = Math.max(
-            ...maxs.map((max) => max.nodeRect.y + max.nodeRect.h),
-            ...mins.map((min) => min.nodeRect.y + min.nodeRect.h)
-          );
-          const gapRegion = {
-            x,
-            y,
-            w: gap,
-            h: h - y,
-            rect1: maxs.map((max) => max.nodeRect),
-            rect2: mins.map((min) => min.nodeRect)
+function tt(i) {
+  const e = /* @__PURE__ */ new Map();
+  function t(a) {
+    var o;
+    const r = [];
+    a.toSorted((s, d) => s.x - d.x).forEach((s) => {
+      r.push({ value: s.x, type: "min", nodeRect: s }), r.push({ value: s.x + s.w, type: "max", nodeRect: s });
+    }), r.sort((s, d) => s.value - d.value);
+    for (let s = 0; s < r.length - 1; s++) {
+      const d = [], x = [];
+      if (r[s].type === "max" && r[s + 1].type === "min") {
+        for (let g = 0; g <= s && r[s].value === r[s - g].value; g++)
+          d.push(r[s - g]);
+        for (let g = s + 1; g <= r.length && r[s + 1].value === r[g].value; g++)
+          x.push(r[g]);
+        const b = x[0].value - d[0].value, l = d[0].nodeRect.x;
+        if (b > 0) {
+          const g = Math.min(...d.map((f) => f.nodeRect.y), ...x.map((f) => f.nodeRect.y)), m = Math.max(
+            ...d.map((f) => f.nodeRect.y + f.nodeRect.h),
+            ...x.map((f) => f.nodeRect.y + f.nodeRect.h)
+          ), v = {
+            x: l,
+            y: g,
+            w: b,
+            h: m - g,
+            rect1: d.map((f) => f.nodeRect),
+            rect2: x.map((f) => f.nodeRect)
           };
-          if (xGapRegions.has(gap)) (_a = xGapRegions.get(gap)) == null ? void 0 : _a.push(gapRegion);
-          else xGapRegions.set(gap, [gapRegion]);
+          e.has(b) ? (o = e.get(b)) == null || o.push(v) : e.set(b, [v]);
         }
       }
     }
   }
-  function mergeGapRegions() {
-    xGapRegions.forEach((gapValue, gapKey) => {
-      const xMap = /* @__PURE__ */ new Map();
-      gapValue.forEach((gapRegion) => {
-        if (xMap.has(gapRegion.x)) {
-          xMap.get(gapRegion.x).push(gapRegion);
-        } else {
-          xMap.set(gapRegion.x, [gapRegion]);
-        }
-      });
-      xMap.forEach((xValue, xKey) => {
-        const alternateY = [];
-        const alternateH = [];
-        const rect1 = /* @__PURE__ */ new Set();
-        const rect2 = /* @__PURE__ */ new Set();
-        xValue == null ? void 0 : xValue.forEach((gapRegion) => {
-          alternateY.push(gapRegion.y);
-          alternateH.push(gapRegion.y + gapRegion.h);
-          gapRegion.rect1.forEach((rect) => rect1.add(rect));
-          gapRegion.rect2.forEach((rect) => rect2.add(rect));
+  function c() {
+    e.forEach((a, r) => {
+      const o = /* @__PURE__ */ new Map();
+      a.forEach((s) => {
+        o.has(s.x) ? o.get(s.x).push(s) : o.set(s.x, [s]);
+      }), o.forEach((s, d) => {
+        const x = [], b = [], l = /* @__PURE__ */ new Set(), g = /* @__PURE__ */ new Set();
+        s == null || s.forEach((f) => {
+          x.push(f.y), b.push(f.y + f.h), f.rect1.forEach(($) => l.add($)), f.rect2.forEach(($) => g.add($));
         });
-        const finalY = Math.min(...alternateY);
-        const finalH = Math.max(...alternateH);
-        xMap.set(xKey, [
+        const m = Math.min(...x), v = Math.max(...b);
+        o.set(d, [
           {
-            x: xKey,
-            y: finalY,
-            h: finalH - finalY,
-            w: gapKey,
-            rect1: Array.from(rect1),
-            rect2: Array.from(rect2)
+            x: d,
+            y: m,
+            h: v - m,
+            w: r,
+            rect1: Array.from(l),
+            rect2: Array.from(g)
           }
         ]);
-      });
-      xGapRegions.set(gapKey, Array.from(xMap.values()).flat());
+      }), e.set(r, Array.from(o.values()).flat());
     });
   }
-  const nodeRects = [];
-  const seletedRect = Rect.from(store.selected);
-  store.nodes.forEach((node) => {
-    const nodeRect = Rect.from(node);
-    nodeRects.push(nodeRect);
-  });
-  nodeRects.sort((a, b) => a.x - b.x);
-  const activeRects = [];
-  const inactiveRects = [];
-  nodeRects.forEach((nodeRect) => {
-    const isActive = nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h;
-    if (isActive) activeRects.push(nodeRect);
-    else inactiveRects.push(nodeRect);
-  });
-  getGapRegions(activeRects);
-  inactiveRects.forEach((nodeRect) => {
-    activeRects.push(nodeRect);
-    getGapRegions(activeRects);
-  });
-  mergeGapRegions();
-  return xGapRegions;
+  const n = [], h = L.from(i.selected);
+  i.nodes.forEach((a) => {
+    const r = L.from(a);
+    n.push(r);
+  }), n.sort((a, r) => a.x - r.x);
+  const u = [], A = [];
+  let y = 1 / 0;
+  return n.forEach((a) => {
+    if (a.y >= h.y && a.y <= h.y + h.h || a.y + a.h / 2 >= h.y && a.y + a.h / 2 <= h.y + h.h || a.y + a.h >= h.y && a.y + a.h <= h.y + h.h) {
+      if (h.x + h.w < a.x) {
+        const o = Math.abs(h.x + h.w - a.x);
+        y > o && (y = o, i.distance.x.type = "right", i.distance.x.node = a.node);
+      }
+      if (h.x > a.x + a.w) {
+        const o = Math.abs(h.x - a.x - a.w);
+        y > o && (y = o, i.distance.x.type = "left", i.distance.x.node = a.node);
+      }
+      u.push(a);
+    } else A.push(a);
+  }), t(u), A.forEach((a) => {
+    u.push(a), t(u);
+  }), c(), e;
 }
-function searchDistanceBlockYData(store) {
-  const yGapRegions = /* @__PURE__ */ new Map();
-  function getGapRegions(currActiveRects) {
-    var _a;
-    const yEdgeCoords = [];
-    currActiveRects.toSorted((a, b) => a.y - b.y).forEach((nodeRect) => {
-      yEdgeCoords.push({ value: nodeRect.y, type: "min", nodeRect });
-      yEdgeCoords.push({ value: nodeRect.y + nodeRect.h, type: "max", nodeRect });
-    });
-    yEdgeCoords.sort((a, b) => a.value - b.value);
-    for (let i = 0; i < yEdgeCoords.length - 1; i++) {
-      const maxs = [];
-      const mins = [];
-      if (yEdgeCoords[i].type === "max" && yEdgeCoords[i + 1].type === "min") {
-        for (let j = 0; j <= i; j++) {
-          if (yEdgeCoords[i].value === yEdgeCoords[i - j].value) maxs.push(yEdgeCoords[i - j]);
-          else break;
-        }
-        for (let j = i + 1; j <= yEdgeCoords.length; j++) {
-          if (yEdgeCoords[i + 1].value === yEdgeCoords[j].value) mins.push(yEdgeCoords[j]);
-          else break;
-        }
-        const gap = mins[0].value - maxs[0].value;
-        const y = maxs[0].nodeRect.y;
-        if (gap > 0) {
-          const x = Math.min(...maxs.map((max) => max.nodeRect.x), ...mins.map((min) => min.nodeRect.x));
-          const w = Math.max(
-            ...maxs.map((max) => max.nodeRect.x + max.nodeRect.w),
-            ...mins.map((min) => min.nodeRect.x + min.nodeRect.w)
-          );
-          const gapRegion = {
-            x,
-            y,
-            w: w - x,
-            h: gap,
-            rect1: maxs.map((max) => max.nodeRect),
-            rect2: mins.map((min) => min.nodeRect)
+function et(i) {
+  const e = /* @__PURE__ */ new Map();
+  function t(a) {
+    var o;
+    const r = [];
+    a.toSorted((s, d) => s.y - d.y).forEach((s) => {
+      r.push({ value: s.y, type: "min", nodeRect: s }), r.push({ value: s.y + s.h, type: "max", nodeRect: s });
+    }), r.sort((s, d) => s.value - d.value);
+    for (let s = 0; s < r.length - 1; s++) {
+      const d = [], x = [];
+      if (r[s].type === "max" && r[s + 1].type === "min") {
+        for (let g = 0; g <= s && r[s].value === r[s - g].value; g++)
+          d.push(r[s - g]);
+        for (let g = s + 1; g <= r.length && r[s + 1].value === r[g].value; g++)
+          x.push(r[g]);
+        const b = x[0].value - d[0].value, l = d[0].nodeRect.y;
+        if (b > 0) {
+          const g = Math.min(...d.map((f) => f.nodeRect.x), ...x.map((f) => f.nodeRect.x)), m = Math.max(
+            ...d.map((f) => f.nodeRect.x + f.nodeRect.w),
+            ...x.map((f) => f.nodeRect.x + f.nodeRect.w)
+          ), v = {
+            x: g,
+            y: l,
+            w: m - g,
+            h: b,
+            rect1: d.map((f) => f.nodeRect),
+            rect2: x.map((f) => f.nodeRect)
           };
-          if (yGapRegions.has(gap)) (_a = yGapRegions.get(gap)) == null ? void 0 : _a.push(gapRegion);
-          else yGapRegions.set(gap, [gapRegion]);
+          e.has(b) ? (o = e.get(b)) == null || o.push(v) : e.set(b, [v]);
         }
       }
     }
   }
-  function mergeGapRegions() {
-    yGapRegions.forEach((gapValue, gapKey) => {
-      const yMap = /* @__PURE__ */ new Map();
-      gapValue.forEach((gapRegion) => {
-        if (yMap.has(gapRegion.y)) {
-          yMap.get(gapRegion.y).push(gapRegion);
-        } else {
-          yMap.set(gapRegion.y, [gapRegion]);
-        }
-      });
-      yMap.forEach((yValue, yKey) => {
-        const alternateX = [];
-        const alternateW = [];
-        const rect1 = /* @__PURE__ */ new Set();
-        const rect2 = /* @__PURE__ */ new Set();
-        yValue == null ? void 0 : yValue.forEach((gapRegion) => {
-          alternateX.push(gapRegion.x);
-          alternateW.push(gapRegion.x + gapRegion.w);
-          gapRegion.rect1.forEach((rect) => rect1.add(rect));
-          gapRegion.rect2.forEach((rect) => rect2.add(rect));
+  function c() {
+    e.forEach((a, r) => {
+      const o = /* @__PURE__ */ new Map();
+      a.forEach((s) => {
+        o.has(s.y) ? o.get(s.y).push(s) : o.set(s.y, [s]);
+      }), o.forEach((s, d) => {
+        const x = [], b = [], l = /* @__PURE__ */ new Set(), g = /* @__PURE__ */ new Set();
+        s == null || s.forEach((f) => {
+          x.push(f.x), b.push(f.x + f.w), f.rect1.forEach(($) => l.add($)), f.rect2.forEach(($) => g.add($));
         });
-        const finalX = Math.min(...alternateX);
-        const finalW = Math.max(...alternateW);
-        yMap.set(yKey, [
+        const m = Math.min(...x), v = Math.max(...b);
+        o.set(d, [
           {
-            x: finalX,
-            y: yKey,
-            h: gapKey,
-            w: finalW - finalX,
-            rect1: Array.from(rect1),
-            rect2: Array.from(rect2)
+            x: m,
+            y: d,
+            h: r,
+            w: v - m,
+            rect1: Array.from(l),
+            rect2: Array.from(g)
           }
         ]);
-      });
-      yGapRegions.set(gapKey, Array.from(yMap.values()).flat());
+      }), e.set(r, Array.from(o.values()).flat());
     });
   }
-  const nodeRects = [];
-  const seletedRect = Rect.from(store.selected);
-  store.nodes.forEach((node) => {
-    const nodeRect = Rect.from(node);
-    nodeRects.push(nodeRect);
-  });
-  const activeRects = [];
-  const inactiveRects = [];
-  nodeRects.forEach((nodeRect) => {
-    const isActive = nodeRect.y >= seletedRect.y && nodeRect.y <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h / 2 >= seletedRect.y && nodeRect.y + nodeRect.h / 2 <= seletedRect.y + seletedRect.h || nodeRect.y + nodeRect.h >= seletedRect.y && nodeRect.y + nodeRect.h <= seletedRect.y + seletedRect.h;
-    if (isActive) activeRects.push(nodeRect);
-    else inactiveRects.push(nodeRect);
-  });
-  getGapRegions(activeRects);
-  inactiveRects.forEach((nodeRect) => {
-    activeRects.push(nodeRect);
-    getGapRegions(activeRects);
-  });
-  mergeGapRegions();
-  return yGapRegions;
+  const n = [], h = L.from(i.selected);
+  i.nodes.forEach((a) => {
+    const r = L.from(a);
+    n.push(r);
+  }), n.sort((a, r) => a.y - r.y);
+  const u = [], A = [];
+  let y = 1 / 0;
+  return n.forEach((a) => {
+    if (a.x >= h.x && a.x <= h.x + h.w || a.x + a.w / 2 >= h.x && a.x + a.w / 2 <= h.x + h.w || a.x + a.w >= h.x && a.x + a.w <= h.x + h.w) {
+      if (h.y + h.h < a.y) {
+        const o = Math.abs(h.y + h.h - a.y);
+        y > o && (y = o, i.distance.y.type = "bottom", i.distance.y.node = a.node);
+      }
+      if (h.y > a.y + a.h) {
+        const o = Math.abs(h.y - a.y - a.h);
+        y > o && (y = o, i.distance.y.type = "top", i.distance.y.node = a.node);
+      }
+      u.push(a);
+    } else A.push(a);
+  }), t(u), A.forEach((a) => {
+    u.push(a), t(u);
+  }), c(), e;
 }
-class Gap {
-  constructor(svg) {
-    __publicField(this, "g");
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-distance-block`);
-    svg.append(this.g);
+class st {
+  constructor(e) {
+    E(this, "g");
+    this.g = w("g"), this.g.setAttribute("class", `${p}-gap`), e.append(this.g);
   }
   clear() {
     this.g.innerHTML = "";
   }
-  reRender(store) {
-    const blockXData = searchDistanceBlockXData(store);
-    const blockYData = searchDistanceBlockYData(store);
-    console.log(blockXData, blockYData);
+  reRender(e) {
+    tt(e), et(e);
   }
 }
-const urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
-let nanoid = (size = 21) => {
-  let id = "";
-  let bytes = crypto.getRandomValues(new Uint8Array(size |= 0));
-  while (size--) {
-    id += urlAlphabet[bytes[size] & 63];
-  }
-  return id;
+const it = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let rt = (i = 21) => {
+  let e = "", t = crypto.getRandomValues(new Uint8Array(i |= 0));
+  for (; i--; )
+    e += it[t[i] & 63];
+  return e;
 };
-const ALIGNLINE_WIDTH = 1;
-const ALIGNLINE_COLOR = "#EA3";
-const alignLineTypes = ["vl", "vc", "vr", "ht", "hc", "hb"];
-function renderAlignLine(store, lines) {
-  const containerRect = store.container.getBoundingClientRect();
-  const alternateNodes = {
+const nt = 1, ct = "#EA3", B = ["vl", "vc", "vr", "ht", "hc", "hb"];
+function at(i, e) {
+  const t = i.container.getBoundingClientRect(), c = {
     ht: [],
     hc: [],
     hb: [],
@@ -474,232 +314,147 @@ function renderAlignLine(store, lines) {
     vc: [],
     vr: []
   };
-  let showContainerAlignLine = false;
-  function handleSearchAlternateNodes() {
-    const selectedRect = Rect.from(store.selected);
-    const nodeRects = store.nodes.filter((n) => n !== store.selected).map((n) => Rect.from(n));
-    alignLineTypes.forEach((type) => alternateNodes[type] = []);
-    nodeRects.forEach((nodeRect) => {
-      if (selectedRect.isIntersect(nodeRect)) return;
-      const selectedAlignLinePosition = selectedRect.getAlignLinePostion();
-      alignLineTypes.forEach((type) => {
-        let source = 1e4, target = 1e4, absorbDistance;
-        if (/^h/.test(type)) {
-          if (selectedRect.x > nodeRect.x + nodeRect.w) {
-            source = selectedRect.x + selectedRect.w;
-            target = nodeRect.x;
-          } else if (selectedRect.x + selectedRect.w < nodeRect.x) {
-            source = selectedRect.x;
-            target = nodeRect.x + nodeRect.w;
-          } else {
-            source = Math.min(selectedRect.x, nodeRect.x);
-            target = Math.max(selectedRect.x + selectedRect.w, nodeRect.x + nodeRect.w);
-          }
-          [nodeRect.y, nodeRect.y + nodeRect.h / 2, nodeRect.y + nodeRect.h].forEach((pos) => {
-            absorbDistance = Math.abs(selectedAlignLinePosition[type] - pos);
-            if (absorbDistance <= NODE_ABSORB_DELTA) {
-              alternateNodes[type].push({
-                type,
-                source,
-                target,
-                absorbDistance,
-                absorbPosition: pos,
-                nodeRects: [nodeRect]
-              });
-            }
+  let n = !1;
+  function h() {
+    const r = L.from(i.selected), o = i.nodes.filter((s) => s !== i.selected).map((s) => L.from(s));
+    B.forEach((s) => c[s] = []), o.forEach((s) => {
+      if (r.isIntersect(s)) return;
+      const d = r.getAlignLinePostion();
+      B.forEach((x) => {
+        let b = 1e4, l = 1e4, g;
+        /^h/.test(x) && (r.x > s.x + s.w ? (b = r.x + r.w, l = s.x) : r.x + r.w < s.x ? (b = r.x, l = s.x + s.w) : (b = Math.min(r.x, s.x), l = Math.max(r.x + r.w, s.x + s.w)), [s.y, s.y + s.h / 2, s.y + s.h].forEach((m) => {
+          g = Math.abs(d[x] - m), g <= 3 && c[x].push({
+            type: x,
+            source: b,
+            target: l,
+            absorbDistance: g,
+            absorbPosition: m,
+            nodeRects: [s]
           });
-        }
-        if (/^v/.test(type)) {
-          if (selectedRect.y > nodeRect.y + nodeRect.h) {
-            source = selectedRect.y + selectedRect.h;
-            target = nodeRect.y;
-          } else if (selectedRect.y + selectedRect.h < nodeRect.y) {
-            source = selectedRect.y;
-            target = nodeRect.y + nodeRect.h;
-          } else {
-            source = Math.min(selectedRect.y, nodeRect.y);
-            target = Math.max(selectedRect.y + selectedRect.h, nodeRect.y + nodeRect.h);
-          }
-          [nodeRect.x, nodeRect.x + nodeRect.w / 2, nodeRect.x + nodeRect.w].forEach((pos) => {
-            absorbDistance = Math.abs(selectedAlignLinePosition[type] - pos);
-            if (absorbDistance <= NODE_ABSORB_DELTA) {
-              alternateNodes[type].push({
-                type,
-                source,
-                target,
-                absorbDistance,
-                absorbPosition: pos,
-                nodeRects: [nodeRect]
-              });
-            }
+        })), /^v/.test(x) && (r.y > s.y + s.h ? (b = r.y + r.h, l = s.y) : r.y + r.h < s.y ? (b = r.y, l = s.y + s.h) : (b = Math.min(r.y, s.y), l = Math.max(r.y + r.h, s.y + s.h)), [s.x, s.x + s.w / 2, s.x + s.w].forEach((m) => {
+          g = Math.abs(d[x] - m), g <= 3 && c[x].push({
+            type: x,
+            source: b,
+            target: l,
+            absorbDistance: g,
+            absorbPosition: m,
+            nodeRects: [s]
           });
-        }
+        }));
       });
-    });
-    alignLineTypes.forEach((type) => {
-      const map = /* @__PURE__ */ new Map();
-      alternateNodes[type].forEach((item) => {
-        const arr = map.get(item.absorbDistance) || [];
-        arr.push(item);
-        map.set(item.absorbDistance, arr);
+    }), B.forEach((s) => {
+      const d = /* @__PURE__ */ new Map();
+      c[s].forEach((l) => {
+        const g = d.get(l.absorbDistance) || [];
+        g.push(l), d.set(l.absorbDistance, g);
       });
-      let min2 = Infinity, max = 0;
-      map.forEach((group) => {
-        group.forEach((i) => {
-          min2 = Math.min(min2, i.source, i.target);
-          max = Math.max(max, i.source, i.target);
+      let x = 1 / 0, b = 0;
+      d.forEach((l) => {
+        l.forEach((g) => {
+          x = Math.min(x, g.source, g.target), b = Math.max(b, g.source, g.target);
         });
-      });
-      map.forEach((group) => {
-        group.forEach((i) => {
-          i.source = min2;
-          i.target = max;
+      }), d.forEach((l) => {
+        l.forEach((g) => {
+          g.source = x, g.target = b;
         });
-      });
-      alternateNodes[type] = Array.from(map.values()).flat();
+      }), c[s] = Array.from(d.values()).flat();
     });
   }
-  function handleAlignLineAbsorb(data) {
-    const { absorbPosition, type } = data;
-    const selected = store.selected;
-    switch (type) {
+  function u(r) {
+    const { absorbPosition: o, type: s } = r, d = i.selected;
+    switch (s) {
       case "ht":
-        selected.style.top = toPx(absorbPosition);
+        d.style.top = S(o);
         break;
       case "hc":
-        selected.style.top = toPx(absorbPosition - parseFloat(selected.style.height) / 2);
+        d.style.top = S(o - parseFloat(d.style.height) / 2);
         break;
       case "hb":
-        selected.style.top = toPx(absorbPosition - parseFloat(selected.style.height));
+        d.style.top = S(o - parseFloat(d.style.height));
         break;
       case "vl":
-        selected.style.left = toPx(absorbPosition);
+        d.style.left = S(o);
         break;
       case "vc":
-        selected.style.left = toPx(absorbPosition - parseFloat(selected.style.width) / 2);
+        d.style.left = S(o - parseFloat(d.style.width) / 2);
         break;
       case "vr":
-        selected.style.left = toPx(absorbPosition - parseFloat(selected.style.width));
+        d.style.left = S(o - parseFloat(d.style.width));
         break;
     }
-    handleSearchAlternateNodes();
-    store.seletedBorder.reRender(store);
+    h(), i.border.reRender(i);
   }
-  function handleContainerAlignLineAbsorb() {
-    if (!store.selected) return;
-    const selectedRect = Rect.from(store.selected);
-    const absorbPosition = containerRect.width / 2;
-    if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NODE_ABSORB_DELTA) {
-      store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
-      showContainerAlignLine = true;
-    }
-    handleSearchAlternateNodes();
-    store.seletedBorder.reRender(store);
+  function A() {
+    if (!i.selected) return;
+    const r = L.from(i.selected), o = t.width / 2;
+    Math.abs(r.x + r.w / 2 - o) <= 3 && (i.selected.style.left = S(o - r.w / 2), n = !0), h(), i.border.reRender(i);
   }
-  function handleDraw() {
-    if (!store.selected) return;
-    const selectedRect = Rect.from(store.selected);
-    const alternateNodesFlat = Object.values(alternateNodes).flat();
-    alternateNodesFlat.forEach((item) => {
-      const { source, target, type } = item;
-      const line = lines[type];
-      if (/^h/.test(type)) {
-        line == null ? void 0 : line.setAttribute("x1", String(source));
-        line == null ? void 0 : line.setAttribute("x2", String(target));
-        switch (type) {
+  function y() {
+    if (!i.selected) return;
+    const r = L.from(i.selected);
+    if (Object.values(c).flat().forEach((s) => {
+      const { source: d, target: x, type: b } = s, l = e[b];
+      if (/^h/.test(b))
+        switch (l == null || l.setAttribute("x1", String(d)), l == null || l.setAttribute("x2", String(x)), b) {
           case "ht":
-            line.setAttribute("y1", String(selectedRect.y));
-            line.setAttribute("y2", String(selectedRect.y));
+            l.setAttribute("y1", String(r.y)), l.setAttribute("y2", String(r.y));
             break;
           case "hc":
-            line.setAttribute("y1", String(selectedRect.y + selectedRect.h / 2));
-            line.setAttribute("y2", String(selectedRect.y + selectedRect.h / 2));
+            l.setAttribute("y1", String(r.y + r.h / 2)), l.setAttribute("y2", String(r.y + r.h / 2));
             break;
           case "hb":
-            line.setAttribute("y1", String(selectedRect.y + selectedRect.h));
-            line.setAttribute("y2", String(selectedRect.y + selectedRect.h));
+            l.setAttribute("y1", String(r.y + r.h)), l.setAttribute("y2", String(r.y + r.h));
             break;
         }
-      }
-      if (/^v/.test(type)) {
-        line == null ? void 0 : line.setAttribute("y1", String(source));
-        line == null ? void 0 : line.setAttribute("y2", String(target));
-        switch (type) {
+      if (/^v/.test(b))
+        switch (l == null || l.setAttribute("y1", String(d)), l == null || l.setAttribute("y2", String(x)), b) {
           case "vl":
-            line.setAttribute("x1", String(selectedRect.x));
-            line.setAttribute("x2", String(selectedRect.x));
+            l.setAttribute("x1", String(r.x)), l.setAttribute("x2", String(r.x));
             break;
           case "vc":
-            line.setAttribute("x1", String(selectedRect.x + selectedRect.w / 2));
-            line.setAttribute("x2", String(selectedRect.x + selectedRect.w / 2));
+            l.setAttribute("x1", String(r.x + r.w / 2)), l.setAttribute("x2", String(r.x + r.w / 2));
             break;
           case "vr":
-            line.setAttribute("x1", String(selectedRect.x + selectedRect.w));
-            line.setAttribute("x2", String(selectedRect.x + selectedRect.w));
+            l.setAttribute("x1", String(r.x + r.w)), l.setAttribute("x2", String(r.x + r.w));
             break;
         }
-      }
-      line == null ? void 0 : line.setAttribute("style", "display: 'block");
-    });
-    if (showContainerAlignLine) {
-      const line = lines["vertical"];
-      line.setAttribute("x1", String(containerRect.width / 2));
-      line.setAttribute("y1", String(0));
-      line.setAttribute("x2", String(containerRect.width / 2));
-      line.setAttribute("y2", String(containerRect.height));
-      line == null ? void 0 : line.setAttribute("style", "display: 'block");
+      l == null || l.setAttribute("style", "display: 'block");
+    }), n) {
+      const s = e.vertical;
+      s.setAttribute("x1", String(t.width / 2)), s.setAttribute("y1", String(0)), s.setAttribute("x2", String(t.width / 2)), s.setAttribute("y2", String(t.height)), s == null || s.setAttribute("style", "display: 'block");
     }
   }
-  handleSearchAlternateNodes();
-  Object.values(alternateNodes).flat().forEach((item) => {
-    handleAlignLineAbsorb(item);
-  });
-  handleContainerAlignLineAbsorb();
-  let min = Infinity;
-  alignLineTypes.forEach((type) => {
-    alternateNodes[type].forEach((item) => {
-      if (item.absorbDistance < min) min = item.absorbDistance;
+  h(), Object.values(c).flat().forEach((r) => {
+    u(r);
+  }), A();
+  let a = 1 / 0;
+  B.forEach((r) => {
+    c[r].forEach((o) => {
+      o.absorbDistance < a && (a = o.absorbDistance);
     });
-  });
-  alignLineTypes.forEach((type) => {
-    alternateNodes[type] = alternateNodes[type].filter((item) => epsilonEqual(item.absorbDistance, min, 0.01));
-  });
-  handleDraw();
+  }), B.forEach((r) => {
+    c[r] = c[r].filter((o) => U(o.absorbDistance, a, 0.01));
+  }), y();
 }
-class AlignLine {
-  constructor(svg) {
-    __publicField(this, "g");
-    __publicField(this, "lines");
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine`);
-    this.lines = {};
-    [...alignLineTypes, "vertical"].forEach((type) => {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("class", `${NODE_CLASS_PREFIX}-alignLine-${type}`);
-      line.setAttribute("stroke", ALIGNLINE_COLOR);
-      line.setAttribute("stroke-width", String(ALIGNLINE_WIDTH));
-      line.style.display = "none";
-      this.g.append(line);
-      this.lines[type] = line;
-    });
-    svg.append(this.g);
+class ht {
+  constructor(e) {
+    E(this, "g");
+    E(this, "lines");
+    this.g = w("g"), this.g.setAttribute("class", `${p}-align`), this.lines = {}, [...B, "vertical"].forEach((t) => {
+      const c = w("line");
+      c.setAttribute("class", `${p}-align-${t}`), c.setAttribute("stroke", ct), c.setAttribute("stroke-width", String(nt)), c.style.display = "none", this.g.append(c), this.lines[t] = c;
+    }), e.append(this.g);
   }
   hidden() {
-    Object.values(this.lines).forEach((line) => {
-      line.style.display = "none";
+    Object.values(this.lines).forEach((e) => {
+      e.style.display = "none";
     });
   }
-  reRender(store) {
-    if (!store.selected) return;
-    this.hidden();
-    renderAlignLine(store, this.lines);
+  reRender(e) {
+    e.selected && (this.hidden(), at(e, this.lines));
   }
 }
-const SELECTED_BORDER_WIDTH = 1;
-const SELECTED_BORDER_COLOR = "#000";
-const SELECTED_BORDER_POINTS_SIDELENGTH = 6;
-const selectedBorderLineTypes = ["left", "top", "right", "bottom"];
-const selectedBorderPointTypes = [
+const I = 1, P = "#000", G = 6, X = ["left", "top", "right", "bottom"], j = [
   "left-top",
   "top",
   "right-top",
@@ -708,8 +463,7 @@ const selectedBorderPointTypes = [
   "bottom",
   "left-bottom",
   "left"
-];
-const selectedBorderLineCursor = [
+], ot = [
   "nwse-resize",
   "ns-resize",
   "nesw-resize",
@@ -719,358 +473,196 @@ const selectedBorderLineCursor = [
   "nesw-resize",
   "ew-resize"
 ];
-function createSeletedBorderDom() {
-  const points = [];
-  const lines = [];
-  selectedBorderLineTypes.forEach((type) => {
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-line-${type}`);
-    line.setAttribute("stroke", SELECTED_BORDER_COLOR);
-    line.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
-    lines.push(line);
-  });
-  selectedBorderPointTypes.forEach((type, index) => {
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-point-${type}`);
-    rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", SELECTED_BORDER_COLOR);
-    rect.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
-    rect.setAttribute("width", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("height", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
-    rect.setAttribute("data-direction", type);
-    points.push(rect);
-  });
-  return [points, lines];
+function lt() {
+  const i = [], e = [];
+  return X.forEach((t) => {
+    const c = w("line");
+    c.setAttribute("class", `${p}-border-line-${t}`), c.setAttribute("stroke", P), c.setAttribute("stroke-width", S(I)), e.push(c);
+  }), j.forEach((t, c) => {
+    const n = w("rect");
+    n.setAttribute("class", `${p}-border-point-${t}`), n.setAttribute("fill", "white"), n.setAttribute("stroke", P), n.setAttribute("stroke-width", S(I)), n.setAttribute("width", S(G)), n.setAttribute("height", S(G)), n.setAttribute("style", `cursor: ${ot[c]}`), n.setAttribute("data-direction", t), i.push(n);
+  }), [i, e];
 }
-function renderSelectedBorder(g, selected) {
-  const seletedRect = Rect.from(selected);
-  selectedBorderLineTypes.forEach((type) => {
-    const line = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
-    switch (type) {
+function ut(i, e) {
+  const t = L.from(e);
+  X.forEach((c) => {
+    const n = M(i, `${p}-border-line-${c}`);
+    switch (c) {
       case "left":
-        line.setAttribute("x1", String(seletedRect.x));
-        line.setAttribute("y1", String(seletedRect.y - SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("x2", String(seletedRect.x));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + SELECTED_BORDER_WIDTH / 2));
+        n.setAttribute("x1", String(t.x)), n.setAttribute("y1", String(t.y - I / 2)), n.setAttribute("x2", String(t.x)), n.setAttribute("y2", String(t.y + t.h + I / 2));
         break;
       case "right":
-        line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y1", String(seletedRect.y - SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + SELECTED_BORDER_WIDTH / 2));
+        n.setAttribute("x1", String(t.x + t.w)), n.setAttribute("y1", String(t.y - I / 2)), n.setAttribute("x2", String(t.x + t.w)), n.setAttribute("y2", String(t.y + t.h + I / 2));
         break;
       case "top":
-        line.setAttribute("x1", String(seletedRect.x - SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("y1", String(seletedRect.y));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("y2", String(seletedRect.y));
+        n.setAttribute("x1", String(t.x - I / 2)), n.setAttribute("y1", String(t.y)), n.setAttribute("x2", String(t.x + t.w + I / 2)), n.setAttribute("y2", String(t.y));
         break;
       case "bottom":
-        line.setAttribute("x1", String(seletedRect.x - SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("y1", String(seletedRect.y + seletedRect.h));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + SELECTED_BORDER_WIDTH / 2));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h));
+        n.setAttribute("x1", String(t.x - I / 2)), n.setAttribute("y1", String(t.y + t.h)), n.setAttribute("x2", String(t.x + t.w + I / 2)), n.setAttribute("y2", String(t.y + t.h));
         break;
     }
-  });
-  selectedBorderPointTypes.forEach((type, index) => {
-    const rect = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
-    rect.setAttribute("data-owner-id", selected.dataset.id);
-    const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
-    switch (type) {
+  }), j.forEach((c, n) => {
+    const h = M(i, `${p}-border-point-${c}`);
+    h.setAttribute("data-owner-id", e.dataset.id);
+    const u = G / 2;
+    switch (c) {
       case "left-top":
-        rect.setAttribute("x", String(seletedRect.x - offset));
-        rect.setAttribute("y", String(seletedRect.y - offset));
+        h.setAttribute("x", String(t.x - u)), h.setAttribute("y", String(t.y - u));
         break;
       case "top":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - offset));
-        rect.setAttribute("y", String(seletedRect.y - offset));
+        h.setAttribute("x", String(t.x + t.w / 2 - u)), h.setAttribute("y", String(t.y - u));
         break;
       case "right-top":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
-        rect.setAttribute("y", String(seletedRect.y - offset));
+        h.setAttribute("x", String(t.x + t.w - u)), h.setAttribute("y", String(t.y - u));
         break;
       case "right":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - offset));
+        h.setAttribute("x", String(t.x + t.w - u)), h.setAttribute("y", String(t.y + t.h / 2 - u));
         break;
       case "right-bottom":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w - offset));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
+        h.setAttribute("x", String(t.x + t.w - u)), h.setAttribute("y", String(t.y + t.h - u));
         break;
       case "bottom":
-        rect.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - offset));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
+        h.setAttribute("x", String(t.x + t.w / 2 - u)), h.setAttribute("y", String(t.y + t.h - u));
         break;
       case "left-bottom":
-        rect.setAttribute("x", String(seletedRect.x - offset));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h - offset));
+        h.setAttribute("x", String(t.x - u)), h.setAttribute("y", String(t.y + t.h - u));
         break;
       case "left":
-        rect.setAttribute("x", String(seletedRect.x - offset));
-        rect.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - offset));
+        h.setAttribute("x", String(t.x - u)), h.setAttribute("y", String(t.y + t.h / 2 - u));
         break;
     }
   });
 }
-class SeletedBorder {
-  constructor(svg) {
-    __publicField(this, "g");
-    __publicField(this, "points");
-    __publicField(this, "lines");
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-seleted-border`);
-    svg.append(this.g);
-    const [points, lines] = createSeletedBorderDom();
-    this.points = points;
-    this.lines = lines;
-    this.g.append(...lines, ...points);
-    this.g.style.display = "none";
+class dt {
+  constructor(e) {
+    E(this, "g");
+    E(this, "points");
+    E(this, "lines");
+    this.g = w("g"), this.g.setAttribute("class", `${p}-border`), e.append(this.g);
+    const [t, c] = lt();
+    this.points = t, this.lines = c, this.g.append(...c, ...t), this.g.style.display = "none";
   }
   hidden() {
     this.g.style.display = "none";
   }
-  reRender(store) {
-    if (!store.selected) return;
-    this.g.style.display = "block";
-    renderSelectedBorder(this.g, store.selected);
+  reRender(e) {
+    e.selected && (this.g.style.display = "block", ut(this.g, e.selected));
   }
 }
-const RESIZE_WIDTH = 1;
-const RESIZE_COLOR = "#2A63F4";
-const RESIZE_OFFSET = 8;
-const RESIZE_ENDPOINT_LENGTH = 10;
-const RESIZE_FONT_SIZE = 10;
-function searchSameWidthHeight(store) {
-  const nodeRects = store.nodes.map((item) => Rect.from(item));
-  const widthMap = /* @__PURE__ */ new Map();
-  const heightMap = /* @__PURE__ */ new Map();
-  nodeRects.forEach((nodeRect) => {
-    var _a, _b;
-    const resizeWidthData = {
+const R = 1, O = "#2A63F4", D = 8, N = 10, W = 10;
+function F(i) {
+  const e = i.nodes.map((n) => L.from(n)), t = /* @__PURE__ */ new Map(), c = /* @__PURE__ */ new Map();
+  return e.forEach((n) => {
+    var A, y;
+    const h = {
       type: "width",
-      nodeRect
-    };
-    const resizeHeightData = {
+      nodeRect: n
+    }, u = {
       type: "height",
-      nodeRect
+      nodeRect: n
     };
-    if (widthMap.has(nodeRect.w)) {
-      (_a = widthMap.get(nodeRect.w)) == null ? void 0 : _a.push(resizeWidthData);
-    } else {
-      widthMap.set(nodeRect.w, [resizeWidthData]);
-    }
-    if (heightMap.has(nodeRect.h)) {
-      (_b = heightMap.get(nodeRect.h)) == null ? void 0 : _b.push(resizeHeightData);
-    } else {
-      heightMap.set(nodeRect.h, [resizeHeightData]);
-    }
-  });
-  return {
-    widthMap,
-    heightMap
+    t.has(n.w) ? (A = t.get(n.w)) == null || A.push(h) : t.set(n.w, [h]), c.has(n.h) ? (y = c.get(n.h)) == null || y.push(u) : c.set(n.h, [u]);
+  }), {
+    widthMap: t,
+    heightMap: c
   };
 }
-function renderResizeLine(store) {
-  store.nodes.forEach((node) => {
-    const nodeRect = Rect.from(node);
-    const g = store.resize.g.querySelector(`[data-ower-id="${nodeRect.id}"]`);
-    const widthLine = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line`);
-    const widthLineStart = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line-start`);
-    const widthLineEnd = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line-end`);
-    const widthLineText = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-text`);
-    const heightLine = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line`);
-    const heightLineText = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-text`);
-    const heightLineStart = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line-start`);
-    const heightLineEnd = getElement(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line-end`);
-    widthLine.setAttribute("x1", String(nodeRect.x));
-    widthLine.setAttribute("y1", String(nodeRect.y - RESIZE_OFFSET));
-    widthLine.setAttribute("x2", String(nodeRect.x + nodeRect.w));
-    widthLine.setAttribute("y2", String(nodeRect.y - RESIZE_OFFSET));
-    widthLineStart.setAttribute("x", String(nodeRect.x - RESIZE_WIDTH / 2));
-    widthLineStart.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    widthLineStart.setAttribute("width", String(RESIZE_WIDTH));
-    widthLineStart.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
-    widthLineStart.setAttribute("fill", String(RESIZE_COLOR));
-    widthLineEnd.setAttribute("x", String(nodeRect.x + nodeRect.w - RESIZE_WIDTH / 2));
-    widthLineEnd.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    widthLineEnd.setAttribute("width", String(RESIZE_WIDTH));
-    widthLineEnd.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
-    widthLineEnd.setAttribute("fill", String(RESIZE_COLOR));
-    widthLineText.textContent = `${nodeRect.w}`;
-    widthLineText.setAttribute("x", String(nodeRect.x + nodeRect.w / 2));
-    widthLineText.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - 8));
-    widthLineText.setAttribute("fill", String(RESIZE_COLOR));
-    widthLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
-    widthLineText.setAttribute("text-anchor", "middle");
-    widthLineText.setAttribute("alignment-baseline", "middle");
-    heightLine.setAttribute("x1", String(nodeRect.x - RESIZE_OFFSET));
-    heightLine.setAttribute("y1", String(nodeRect.y));
-    heightLine.setAttribute("x2", String(nodeRect.x - RESIZE_OFFSET));
-    heightLine.setAttribute("y2", String(nodeRect.y + nodeRect.h));
-    heightLineStart.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    heightLineStart.setAttribute("y", String(nodeRect.y - RESIZE_WIDTH / 2));
-    heightLineStart.setAttribute("width", String(RESIZE_ENDPOINT_LENGTH));
-    heightLineStart.setAttribute("height", String(RESIZE_WIDTH));
-    heightLineStart.setAttribute("fill", String(RESIZE_COLOR));
-    heightLineEnd.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    heightLineEnd.setAttribute("y", String(nodeRect.y + nodeRect.h - RESIZE_WIDTH / 2));
-    heightLineEnd.setAttribute("width", String(RESIZE_ENDPOINT_LENGTH));
-    heightLineEnd.setAttribute("height", String(RESIZE_WIDTH));
-    heightLineEnd.setAttribute("fill", String(RESIZE_COLOR));
-    heightLineText.textContent = `${nodeRect.h}`;
-    heightLineText.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - 8));
-    heightLineText.setAttribute("y", String(nodeRect.y + nodeRect.h / 2));
-    heightLineText.setAttribute("fill", String(RESIZE_COLOR));
-    heightLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
-    heightLineText.setAttribute("text-anchor", "middle");
-    heightLineText.setAttribute("alignment-baseline", "middle");
-    heightLineText.setAttribute(
+function gt(i) {
+  i.nodes.forEach((e) => {
+    const t = L.from(e), c = i.resize.g.querySelector(`[data-ower-id="${t.id}"]`), n = M(c, `${p}-resize-line-group-width-line`), h = M(c, `${p}-resize-line-group-width-line-start`), u = M(c, `${p}-resize-line-group-width-line-end`), A = M(c, `${p}-resize-line-group-width-text`), y = M(c, `${p}-resize-line-group-height-line`), a = M(c, `${p}-resize-line-group-height-text`), r = M(c, `${p}-resize-line-group-height-line-start`), o = M(c, `${p}-resize-line-group-height-line-end`);
+    n.setAttribute("x1", String(t.x)), n.setAttribute("y1", String(t.y - D)), n.setAttribute("x2", String(t.x + t.w)), n.setAttribute("y2", String(t.y - D)), h.setAttribute("x", String(t.x - R / 2)), h.setAttribute("y", String(t.y - D - N / 2)), h.setAttribute("width", String(R)), h.setAttribute("height", String(N)), h.setAttribute("fill", String(O)), u.setAttribute("x", String(t.x + t.w - R / 2)), u.setAttribute("y", String(t.y - D - N / 2)), u.setAttribute("width", String(R)), u.setAttribute("height", String(N)), u.setAttribute("fill", String(O)), A.textContent = `${t.w}`, A.setAttribute("x", String(t.x + t.w / 2)), A.setAttribute("y", String(t.y - D - 8)), A.setAttribute("fill", String(O)), A.setAttribute("font-size", String(W)), A.setAttribute("text-anchor", "middle"), A.setAttribute("alignment-baseline", "middle"), y.setAttribute("x1", String(t.x - D)), y.setAttribute("y1", String(t.y)), y.setAttribute("x2", String(t.x - D)), y.setAttribute("y2", String(t.y + t.h)), r.setAttribute("x", String(t.x - D - N / 2)), r.setAttribute("y", String(t.y - R / 2)), r.setAttribute("width", String(N)), r.setAttribute("height", String(R)), r.setAttribute("fill", String(O)), o.setAttribute("x", String(t.x - D - N / 2)), o.setAttribute("y", String(t.y + t.h - R / 2)), o.setAttribute("width", String(N)), o.setAttribute("height", String(R)), o.setAttribute("fill", String(O)), a.textContent = `${t.h}`, a.setAttribute("x", String(t.x - D - 8)), a.setAttribute("y", String(t.y + t.h / 2)), a.setAttribute("fill", String(O)), a.setAttribute("font-size", String(W)), a.setAttribute("text-anchor", "middle"), a.setAttribute("alignment-baseline", "middle"), a.setAttribute(
       "transform",
-      `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`
-    );
-    [widthLine, heightLine].forEach((line) => {
-      line.setAttribute("stroke", RESIZE_COLOR);
-      line.setAttribute("stroke-width", String(RESIZE_WIDTH));
+      `rotate(-90 ${t.x - D - 8} ${t.y + t.h / 2})`
+    ), [n, y].forEach((s) => {
+      s.setAttribute("stroke", O), s.setAttribute("stroke-width", String(R));
     });
   });
 }
-class Resize {
-  constructor(svg, nodes) {
-    __publicField(this, "g");
-    __publicField(this, "lines");
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize`);
-    const result = [];
-    nodes.forEach((node) => {
-      const nodeRect = Rect.from(node);
-      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line`);
-      g.setAttribute("data-ower-id", nodeRect.id);
-      g.innerHTML = `
-        <g class="${NODE_CLASS_PREFIX}-resize-line-group-width">
-          <line class="${NODE_CLASS_PREFIX}-resize-line-group-width-line"></line>
-          <text class="${NODE_CLASS_PREFIX}-resize-line-group-width-text"></text>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-width-line-start"></rect>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-width-line-end"></rect>
-        </g>
-        <g class="${NODE_CLASS_PREFIX}-resize-line-group-height">
-          <line class="${NODE_CLASS_PREFIX}-resize-line-group-height-line"></line>
-          <text class="${NODE_CLASS_PREFIX}-resize-line-group-height-text"></text>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-start"></rect>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-end"></rect>
-        </g>
-      `;
-      result.push(g);
-    });
-    this.lines = result;
-    this.g.append(...this.lines);
-    svg.append(this.g);
-    this.hidden();
+class ft {
+  constructor(e, t) {
+    E(this, "g");
+    E(this, "lines");
+    this.g = w("g"), this.g.setAttribute("class", `${p}-resize`);
+    const c = [];
+    t.forEach((n) => {
+      const h = L.from(n), u = w("g");
+      u.setAttribute("class", `${p}-resize-line`), u.setAttribute("data-ower-id", h.id);
+      const A = w("g");
+      A.setAttribute("class", `${p}-resize-line-group-width`);
+      const y = w("line");
+      y.setAttribute("class", `${p}-resize-line-group-width-line`);
+      const a = w("text");
+      a.setAttribute("class", `${p}-resize-line-group-width-text`);
+      const r = w("rect");
+      r.setAttribute("class", `${p}-resize-line-group-width-line-start`);
+      const o = w("rect");
+      o.setAttribute("class", `${p}-resize-line-group-width-line-end`), A.append(y, a, r, o);
+      const s = w("g");
+      s.setAttribute("class", `${p}-resize-line-group-height`);
+      const d = w("line");
+      d.setAttribute("class", `${p}-resize-line-group-height-line`);
+      const x = w("text");
+      x.setAttribute("class", `${p}-resize-line-group-height-text`);
+      const b = w("rect");
+      b.setAttribute("class", `${p}-resize-line-group-height-line-start`);
+      const l = w("rect");
+      l.setAttribute("class", `${p}-resize-line-group-height-line-end`), s.append(d, x, b, l), u.append(A, s), c.push(u);
+    }), this.lines = c, this.g.append(...this.lines), e.append(this.g), this.hidden();
   }
   hidden() {
-    this.lines.forEach((lineGroup) => {
-      Array.from(lineGroup.children).forEach((item) => {
-        item.style.display = "none";
+    this.lines.forEach((e) => {
+      Array.from(e.children).forEach((t) => {
+        t.style.display = "none";
       });
     });
   }
-  reRender(store, newWidth, newHeight, direction, startLeft, startTop, startWidth, startHeight) {
-    var _a, _b;
-    if (!store.selected) return;
+  reRender(e, t, c, n, h, u, A, y) {
+    var H, C;
+    if (!e.selected) return;
     this.hidden();
-    const { widthMap, heightMap } = searchSameWidthHeight(store);
-    const alternateAbsorbWidth = [];
-    const alternateAbsorbHeight = [];
-    widthMap.forEach((value, key) => {
-      var _a2;
-      if (value.length === 1) {
-        if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id)) return;
-      }
-      if (Math.abs(newWidth - key) <= NODE_ABSORB_DELTA) {
-        alternateAbsorbWidth.push(key);
-      }
+    const { widthMap: a, heightMap: r } = F(e), o = [], s = [];
+    a.forEach((k, z) => {
+      var _;
+      k.length === 1 && k[0].nodeRect.id === ((_ = e.selected) == null ? void 0 : _.dataset.id) || Math.abs(t - z) <= 3 && o.push(z);
+    }), r.forEach((k, z) => {
+      var _;
+      k.length === 1 && k[0].nodeRect.id === ((_ = e.selected) == null ? void 0 : _.dataset.id) || Math.abs(c - z) <= 3 && s.push(z);
     });
-    heightMap.forEach((value, key) => {
-      var _a2;
-      if (value.length === 1) {
-        if (value[0].nodeRect.id === ((_a2 = store.selected) == null ? void 0 : _a2.dataset.id)) return;
-      }
-      if (Math.abs(newHeight - key) <= NODE_ABSORB_DELTA) {
-        alternateAbsorbHeight.push(key);
-      }
+    const d = o.length === 0 ? t : Math.max(...o), x = s.length === 0 ? c : Math.max(...s), b = Math.max(d, 10), l = Math.max(x, 10);
+    if (n.includes("left")) {
+      const k = h + A;
+      e.selected.style.left = S(k - b);
+    } else
+      e.selected.style.left = S(h);
+    if (e.selected.style.width = S(b), n.includes("top")) {
+      const k = u + y;
+      e.selected.style.top = S(k - l);
+    } else
+      e.selected.style.top = S(u);
+    e.selected.style.height = S(l);
+    const g = parseFloat(e.selected.style.width), m = parseFloat(e.selected.style.height), { widthMap: v, heightMap: f } = F(e);
+    (H = v.get(g)) == null || H.forEach((k) => {
+      const z = this.g.querySelector(`[data-ower-id="${k.nodeRect.id}"]`), _ = M(z, `${p}-resize-line-group-width`);
+      _.style.display = "block";
+    }), (C = f.get(m)) == null || C.forEach((k) => {
+      const z = this.g.querySelector(`[data-ower-id="${k.nodeRect.id}"]`), _ = M(z, `${p}-resize-line-group-height`);
+      _.style.display = "block";
     });
-    const absorbWidth = alternateAbsorbWidth.length === 0 ? newWidth : Math.max(...alternateAbsorbWidth);
-    const absorbHeight = alternateAbsorbHeight.length === 0 ? newHeight : Math.max(...alternateAbsorbHeight);
-    const finalWidth = Math.max(absorbWidth, NODE_MIN_WIDTH);
-    const finalHeight = Math.max(absorbHeight, NODE_MIN_HEIGHT);
-    if (direction.includes("left")) {
-      const rightEdge = startLeft + startWidth;
-      store.selected.style.left = toPx(rightEdge - finalWidth);
-    } else {
-      store.selected.style.left = toPx(startLeft);
-    }
-    store.selected.style.width = toPx(finalWidth);
-    if (direction.includes("top")) {
-      const bottomEdge = startTop + startHeight;
-      store.selected.style.top = toPx(bottomEdge - finalHeight);
-    } else {
-      store.selected.style.top = toPx(startTop);
-    }
-    store.selected.style.height = toPx(finalHeight);
-    const currentWidth = parseFloat(store.selected.style.width);
-    const currentHeight = parseFloat(store.selected.style.height);
-    const { widthMap: newWidthMap, heightMap: newHeightMap } = searchSameWidthHeight(store);
-    (_a = newWidthMap.get(currentWidth)) == null ? void 0 : _a.forEach((item) => {
-      const lineGroup2 = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
-      const widthLine2 = getElement(lineGroup2, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
-      widthLine2.style.display = "block";
-    });
-    (_b = newHeightMap.get(currentHeight)) == null ? void 0 : _b.forEach((item) => {
-      const lineGroup2 = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`);
-      const heightLine2 = getElement(lineGroup2, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
-      heightLine2.style.display = "block";
-    });
-    const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`);
-    const widthLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
-    const heightLine = getElement(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
-    heightLine.style.display = "block";
-    widthLine.style.display = "block";
-    renderResizeLine(store);
-    store.seletedBorder.reRender(store);
+    const $ = this.g.querySelector(`[data-ower-id="${e.selected.dataset.id}"]`), T = M($, `${p}-resize-line-group-width`), Y = M($, `${p}-resize-line-group-height`);
+    Y.style.display = "block", T.style.display = "block", gt(e), e.border.reRender(e);
   }
 }
-function getQuadrant(startX, startY, endX, endY) {
-  if (endX - startX > 0 && endY - startY > 0) return "4";
-  if (endX - startX < 0 && endY - startY > 0) return "3";
-  if (endX - startX < 0 && endY - startY < 0) return "2";
-  if (endX - startX > 0 && endY - startY < 0) return "1";
-  return "0";
+function bt(i, e, t, c) {
+  return t - i > 0 && c - e > 0 ? "4" : t - i < 0 && c - e > 0 ? "3" : t - i < 0 && c - e < 0 ? "2" : t - i > 0 && c - e < 0 ? "1" : "0";
 }
-class Selector {
-  constructor(svg) {
-    __publicField(this, "g");
+class pt {
+  constructor(e) {
+    E(this, "g");
     // 选择框矩形
-    __publicField(this, "selectorRect");
-    __publicField(this, "previewRect");
-    __publicField(this, "selectedGroup", []);
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-selector`);
-    this.selectorRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    this.selectorRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-rect`);
-    this.selectorRect.setAttribute("stroke", "#919191");
-    this.selectorRect.setAttribute("stroke-width", "1px");
-    this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)");
-    this.selectorRect.style.display = "none";
-    this.previewRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    this.previewRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-preview`);
-    this.previewRect.setAttribute("stroke", "#000");
-    this.previewRect.setAttribute("stroke-width", "1px");
-    this.previewRect.setAttribute("fill", "transparent");
-    this.previewRect.style.display = "none";
-    this.g.append(this.selectorRect, this.previewRect);
-    svg.append(this.g);
+    E(this, "selectorRect");
+    E(this, "previewRect");
+    E(this, "selectedGroup", []);
+    this.g = w("g"), this.g.setAttribute("class", `${p}-selector`), this.selectorRect = w("rect"), this.selectorRect.setAttribute("class", `${p}-selector-rect`), this.selectorRect.setAttribute("stroke", "#919191"), this.selectorRect.setAttribute("stroke-width", "1px"), this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)"), this.selectorRect.style.display = "none", this.previewRect = w("rect"), this.previewRect.setAttribute("class", `${p}-selector-preview`), this.previewRect.setAttribute("stroke", "#000"), this.previewRect.setAttribute("stroke-width", "1px"), this.previewRect.setAttribute("fill", "transparent"), this.previewRect.style.display = "none", this.g.append(this.selectorRect, this.previewRect), e.append(this.g);
   }
   hiddenSelector() {
     this.selectorRect.style.display = "none";
@@ -1084,105 +676,113 @@ class Selector {
   showPreview() {
     this.previewRect.style.display = "block";
   }
-  reRender(store, startX, startY, endX, endY) {
-    this.showSelector();
-    this.hiddenPreview();
-    this.selectedGroup = [];
-    const quadrant = getQuadrant(startX, startY, endX, endY);
-    const width = Math.abs(startX - endX);
-    const height = Math.abs(startY - endY);
-    this.selectorRect.setAttribute("width", String(width));
-    this.selectorRect.setAttribute("height", String(height));
-    let x = startX;
-    let y = startY;
-    switch (quadrant) {
+  reRender(e, t, c, n, h) {
+    this.showSelector(), this.hiddenPreview(), this.selectedGroup = [];
+    const u = bt(t, c, n, h), A = Math.abs(t - n), y = Math.abs(c - h);
+    this.selectorRect.setAttribute("width", String(A)), this.selectorRect.setAttribute("height", String(y));
+    let a = t, r = c;
+    switch (u) {
       case "3": {
-        x = x - width;
+        a = a - A;
         break;
       }
       case "2": {
-        x = x - width;
-        y = y - height;
+        a = a - A, r = r - y;
         break;
       }
       case "1": {
-        y = y - height;
+        r = r - y;
         break;
       }
     }
-    this.selectorRect.setAttribute("x", String(x));
-    this.selectorRect.setAttribute("y", String(y));
-    store.nodes.forEach((node) => {
-      const nodeRect = Rect.from(node);
-      if (nodeRect.isIntersect({
-        x,
-        y,
-        w: width,
-        h: height
-      })) {
-        this.selectedGroup.push(node);
-      }
+    this.selectorRect.setAttribute("x", String(a)), this.selectorRect.setAttribute("y", String(r)), e.nodes.forEach((g) => {
+      L.from(g).isIntersect({
+        x: a,
+        y: r,
+        w: A,
+        h: y
+      }) && this.selectedGroup.push(g);
     });
-    const alternateX1 = [];
-    const alternateY1 = [];
-    const alternateX2 = [];
-    const alternateY2 = [];
-    this.selectedGroup.forEach((node) => {
-      const { x: x2, y: y2, w, h } = Rect.from(node);
-      alternateX1.push(x2);
-      alternateY1.push(y2);
-      alternateX2.push(x2 + w);
-      alternateY2.push(y2 + h);
+    const o = [], s = [], d = [], x = [];
+    this.selectedGroup.forEach((g) => {
+      const { x: m, y: v, w: f, h: $ } = L.from(g);
+      o.push(m), s.push(v), d.push(m + f), x.push(v + $);
     });
-    const x1 = Math.min(...alternateX1);
-    const y1 = Math.min(...alternateY1);
-    this.previewRect.setAttribute("x", String(alternateX1.length ? x1 : 0));
-    this.previewRect.setAttribute("y", String(alternateY1.length ? y1 : 0));
-    this.previewRect.setAttribute("width", String(alternateX2.length ? Math.max(...alternateX2) - x1 : 0));
-    this.previewRect.setAttribute("height", String(alternateY2.length ? Math.max(...alternateY2) - y1 : 0));
+    const b = Math.min(...o), l = Math.min(...s);
+    this.previewRect.setAttribute("x", String(o.length ? b : 0)), this.previewRect.setAttribute("y", String(s.length ? l : 0)), this.previewRect.setAttribute("width", String(d.length ? Math.max(...d) - b : 0)), this.previewRect.setAttribute("height", String(x.length ? Math.max(...x) - l : 0));
   }
 }
-const initStore = (container, nodes) => {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", `${NODE_CLASS_PREFIX}-svg`);
-  const containerRect = container.getBoundingClientRect();
-  svg.setAttribute("width", toPx(containerRect.width));
-  svg.setAttribute("height", toPx(containerRect.height));
-  svg.style = "position: absolute; inset: 0;";
-  container.className += ` ${NODE_CLASS_PREFIX}-container`;
-  nodes.forEach((node) => {
-    node.className += ` ${NODE_CLASS_PREFIX}-movable-node`;
-    node.setAttribute("data-id", nanoid());
-    if (/%$/.test(node.style.x)) node.style.x = toPx(containerRect.width * parseInt(node.style.x) / 100);
-    if (/%$/.test(node.style.y)) node.style.y = toPx(containerRect.height * parseInt(node.style.y) / 100);
-    if (/%$/.test(node.style.width)) node.style.width = toPx(containerRect.width * parseInt(node.style.width) / 100);
-    if (/%$/.test(node.style.height)) node.style.height = toPx(containerRect.height * parseInt(node.style.height) / 100);
-  });
-  return {
-    container,
-    nodes,
-    svg,
+const yt = ["left", "right", "top", "bottom"];
+class xt {
+  constructor(e) {
+    E(this, "g");
+    E(this, "distanceGroups");
+    E(this, "x");
+    E(this, "y");
+    this.g = w("g"), this.g.setAttribute("class", `${p}-distance`), this.distanceGroups = {};
+    const t = (c) => {
+      const n = w("g");
+      n.setAttribute("class", `${p}-distance-${c}`);
+      const h = w("line");
+      h.setAttribute("class", `${p}-distance-${c}-line`);
+      const u = w("text");
+      u.setAttribute("class", `${p}-distance-${c}-text`);
+      const A = w("rect");
+      A.setAttribute("class", `${p}-distance-${c}-text-bg`);
+      const y = w("rect");
+      y.setAttribute("class", `${p}-distance-${c}-line-start`);
+      const a = w("rect");
+      return a.setAttribute("class", `${p}-distance-${c}-line-end`), n.appendChild(h), n.appendChild(u), n.appendChild(A), n.appendChild(y), n.appendChild(a), n;
+    };
+    this.x = {
+      type: "left",
+      node: null
+    }, this.y = {
+      type: "top",
+      node: null
+    }, yt.forEach((c) => {
+      const n = t(c);
+      this.distanceGroups[c] = n;
+    }), this.g.append(...Object.values(this.distanceGroups)), e.append(this.g);
+  }
+  hidden() {
+    Object.values(this.distanceGroups).forEach((e) => {
+      e.style.display = "none";
+    });
+  }
+  reRender(e) {
+  }
+}
+const At = (i, e) => {
+  const t = w("svg");
+  t.setAttribute("class", `${p}-svg`);
+  const c = i.getBoundingClientRect();
+  return t.setAttribute("width", S(c.width)), t.setAttribute("height", S(c.height)), t.style = "position: absolute; inset: 0;", i.className += ` ${p}-container`, e.forEach((n) => {
+    n.className += ` ${p}-movable-node`, n.setAttribute("data-id", rt()), /%$/.test(n.style.x) && (n.style.x = S(c.width * parseInt(n.style.x) / 100)), /%$/.test(n.style.y) && (n.style.y = S(c.height * parseInt(n.style.y) / 100)), /%$/.test(n.style.width) && (n.style.width = S(c.width * parseInt(n.style.width) / 100)), /%$/.test(n.style.height) && (n.style.height = S(c.height * parseInt(n.style.height) / 100));
+  }), {
+    container: i,
+    nodes: e,
+    svg: t,
     selected: null,
-    alignLine: new AlignLine(svg),
-    seletedBorder: new SeletedBorder(svg),
-    resize: new Resize(svg, nodes),
-    selector: new Selector(svg),
-    gap: new Gap(svg),
-    setSelected(target) {
-      this.selected = target;
-      if (!target) {
-        this.seletedBorder.hidden();
+    setSelected(n) {
+      if (this.selected = n, !n) {
+        this.border.hidden();
         return;
       }
-      this.seletedBorder.reRender(this);
-    }
+      this.border.reRender(this);
+    },
+    align: new ht(t),
+    border: new dt(t),
+    resize: new ft(t, e),
+    selector: new pt(t),
+    gap: new st(t),
+    distance: new xt(t)
   };
 };
-class FreeMove {
-  constructor(container, nodes) {
-    __publicField(this, "store");
-    this.store = initStore(container, nodes);
-    addPointerListener(this.store);
+class St {
+  constructor(e, t) {
+    E(this, "store");
+    this.store = At(e, t), V(this.store);
   }
   mount() {
     this.store.container.append(this.store.svg);
@@ -1190,24 +790,23 @@ class FreeMove {
   unmount() {
     this.store.svg.remove();
   }
-  align(option) {
-    const { selected, container } = this.store;
-    if (!selected) return;
-    const containerRect = container.getBoundingClientRect();
-    const selectedRect = Rect.from(selected);
-    switch (option) {
+  align(e) {
+    const { selected: t, container: c } = this.store;
+    if (!t) return;
+    const n = c.getBoundingClientRect(), h = L.from(t);
+    switch (e) {
       case "start":
-        selected.style.left = toPx(0);
+        t.style.left = S(0);
         break;
       case "center":
-        selected.style.left = toPx(containerRect.width / 2 - selectedRect.w / 2);
+        t.style.left = S(n.width / 2 - h.w / 2);
         break;
       case "end":
-        selected.style.left = toPx(containerRect.width - selectedRect.w);
+        t.style.left = S(n.width - h.w);
         break;
     }
   }
 }
 export {
-  FreeMove as default
+  St as default
 };

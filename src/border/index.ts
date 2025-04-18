@@ -1,7 +1,7 @@
 import { NODE_CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
-import { toPx } from "../utils";
+import { createElementNS, getElement, toPx } from "../utils";
 import { SELECTED_BORDER_COLOR, SELECTED_BORDER_POINTS_SIDELENGTH, SELECTED_BORDER_WIDTH } from "./const";
 import { SelectedBorderLineType, SelectedBorderPointType } from "./type";
 
@@ -31,8 +31,8 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   const points: SVGRectElement[] = [];
   const lines: SVGLineElement[] = [];
   selectedBorderLineTypes.forEach((type) => {
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-line-${type}`);
+    const line = createElementNS<SVGLineElement>('line');
+    line.setAttribute("class", `${NODE_CLASS_PREFIX}-border-line-${type}`);
     line.setAttribute("stroke", SELECTED_BORDER_COLOR);
     line.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
 
@@ -40,8 +40,8 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   });
 
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("class", `${NODE_CLASS_PREFIX}-selected-border-point-${type}`);
+    const rect = createElementNS<SVGRectElement>('rect');
+    rect.setAttribute("class", `${NODE_CLASS_PREFIX}-border-point-${type}`);
     rect.setAttribute("fill", "white");
     rect.setAttribute("stroke", SELECTED_BORDER_COLOR);
     rect.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
@@ -58,7 +58,7 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
 function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
   const seletedRect = Rect.from(selected);
   selectedBorderLineTypes.forEach((type) => {
-    const line = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-line-${type}`)[0];
+    const line = getElement<SVGLineElement>(g, `${NODE_CLASS_PREFIX}-border-line-${type}`)
     switch (type) {
       case "left":
         line.setAttribute("x1", String(seletedRect.x));
@@ -87,7 +87,7 @@ function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
     }
   });
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = g.getElementsByClassName(`${NODE_CLASS_PREFIX}-selected-border-point-${type}`)[0];
+    const rect = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-border-point-${type}`)
     rect.setAttribute("data-owner-id", selected.dataset.id!);
     // 往左上角的偏移量，为边长的一半
     const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
@@ -128,14 +128,14 @@ function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
   });
 }
 
-export class SeletedBorder {
+export class Border {
   g: SVGGElement;
   points: SVGRectElement[];
   lines: SVGLineElement[];
 
   constructor(svg: SVGSVGElement) {
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-seleted-border`);
+    this.g = createElementNS<SVGGElement>('g');
+    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-border`);
     svg.append(this.g);
     const [points, lines] = createSeletedBorderDom();
     this.points = points;

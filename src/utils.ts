@@ -1,5 +1,5 @@
 export function toPx(value: any): string {
-  if (typeof value === "number") return `${value}px`;
+  if (typeof value === 'number') return `${value}px`;
   return String(value);
 }
 
@@ -7,6 +7,10 @@ export function epsilonEqual(a: number, b: number, epsilon: number = 0.1): boole
   return Math.abs(a - b) <= epsilon;
 }
 
-export function getElement<T>(g: Element, className: string): T{
+export function getElement<T>(g: Element, className: string): T {
   return g.getElementsByClassName(className)[0] as T;
+}
+
+export function createElementNS<T>(tag: string): T {
+  return document.createElementNS('http://www.w3.org/2000/svg', tag) as T;
 }

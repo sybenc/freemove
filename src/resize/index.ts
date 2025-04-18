@@ -1,7 +1,7 @@
 import { Store } from "./../store";
 import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX, NODE_MIN_HEIGHT, NODE_MIN_WIDTH } from "../const";
 import Rect from "../rect";
-import { getElement, toPx } from "../utils";
+import { createElementNS, getElement, toPx } from "../utils"; // Ensure createElementNS is imported
 import { ResizeData } from "./type";
 import { RESIZE_COLOR, RESIZE_ENDPOINT_LENGTH, RESIZE_FONT_SIZE, RESIZE_OFFSET, RESIZE_WIDTH } from "./const";
 
@@ -117,29 +117,53 @@ export class Resize {
   g: SVGGElement;
   lines: SVGGElement[];
   constructor(svg: SVGSVGElement, nodes: HTMLElement[]) {
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this.g = createElementNS<SVGGElement>("g");
     this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize`);
     const result: SVGGElement[] = [];
     nodes.forEach((node) => {
       const nodeRect = Rect.from(node);
 
-      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      const g = createElementNS<SVGGElement>("g");
       g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line`);
       g.setAttribute("data-ower-id", nodeRect.id);
-      g.innerHTML = `
-        <g class="${NODE_CLASS_PREFIX}-resize-line-group-width">
-          <line class="${NODE_CLASS_PREFIX}-resize-line-group-width-line"></line>
-          <text class="${NODE_CLASS_PREFIX}-resize-line-group-width-text"></text>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-width-line-start"></rect>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-width-line-end"></rect>
-        </g>
-        <g class="${NODE_CLASS_PREFIX}-resize-line-group-height">
-          <line class="${NODE_CLASS_PREFIX}-resize-line-group-height-line"></line>
-          <text class="${NODE_CLASS_PREFIX}-resize-line-group-height-text"></text>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-start"></rect>
-          <rect class="${NODE_CLASS_PREFIX}-resize-line-group-height-line-end"></rect>
-        </g>
-      `;
+
+      // Create width group
+      const widthGroup = createElementNS<SVGGElement>("g");
+      widthGroup.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+
+      const widthLine = createElementNS<SVGLineElement>("line");
+      widthLine.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line`);
+
+      const widthLineText = createElementNS<SVGTextElement>("text");
+      widthLineText.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-text`);
+
+      const widthLineStart = createElementNS<SVGRectElement>("rect");
+      widthLineStart.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line-start`);
+
+      const widthLineEnd = createElementNS<SVGRectElement>("rect");
+      widthLineEnd.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line-end`);
+
+      widthGroup.append(widthLine, widthLineText, widthLineStart, widthLineEnd);
+
+      // Create height group
+      const heightGroup = createElementNS<SVGGElement>("g");
+      heightGroup.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+
+      const heightLine = createElementNS<SVGLineElement>("line");
+      heightLine.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line`);
+
+      const heightLineText = createElementNS<SVGTextElement>("text");
+      heightLineText.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-text`);
+
+      const heightLineStart = createElementNS<SVGRectElement>("rect");
+      heightLineStart.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line-start`);
+
+      const heightLineEnd = createElementNS<SVGRectElement>("rect");
+      heightLineEnd.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line-end`);
+
+      heightGroup.append(heightLine, heightLineText, heightLineStart, heightLineEnd);
+
+      g.append(widthGroup, heightGroup);
       result.push(g);
     });
     this.lines = result;
@@ -244,6 +268,6 @@ export class Resize {
     widthLine.style.display = "block";
 
     renderResizeLine(store);
-    store.seletedBorder.reRender(store);
+    store.border.reRender(store);
   }
 }

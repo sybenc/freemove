@@ -2,6 +2,7 @@ import { Store } from "./../store";
 import { NODE_CLASS_PREFIX } from "../const";
 import { Quadrant } from "./type";
 import Rect from "../rect";
+import { createElementNS } from "../utils";
 
 function getQuadrant(startX: number, startY: number, endX: number, endY: number): Quadrant {
   if (endX - startX > 0 && endY - startY > 0) return "4";
@@ -19,16 +20,16 @@ export class Selector {
   selectedGroup: HTMLElement[] = [];
 
   constructor(svg: SVGSVGElement) {
-    this.g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    this.g = createElementNS<SVGGElement>('g');
     this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-selector`);
-    this.selectorRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    this.selectorRect = createElementNS<SVGRectElement>('rect');
     this.selectorRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-rect`);
     this.selectorRect.setAttribute("stroke", "#919191");
     this.selectorRect.setAttribute("stroke-width", "1px");
     this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)");
     this.selectorRect.style.display = "none";
 
-    this.previewRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    this.previewRect = createElementNS<SVGRectElement>('rect');
     this.previewRect.setAttribute("class", `${NODE_CLASS_PREFIX}-selector-preview`);
     this.previewRect.setAttribute("stroke", "#000");
     this.previewRect.setAttribute("stroke-width", "1px");
