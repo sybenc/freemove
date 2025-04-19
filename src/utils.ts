@@ -15,7 +15,8 @@ export function createElementNS<T>(tag: string): T {
   return document.createElementNS("http://www.w3.org/2000/svg", tag) as T;
 }
 
-export function showNumber(value: number) {
+export function showNumber(value: number, round: boolean = false) {
+  if (round) return Math.round(parseFloat(value.toFixed(1)));
   if (Number.isInteger(value)) return value.toFixed(0);
   else return value.toFixed(1);
 }

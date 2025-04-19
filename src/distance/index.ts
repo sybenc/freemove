@@ -1,7 +1,7 @@
 import { NODE_CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
-import { createElementNS, getElement, showNumber } from "../utils";
+import { createElementNS, getElement, showNumber, toPx } from "../utils";
 import { DISTANCE_COLOR, DISTANCE_FONT_SIZE, DISTANCE_MAX_LENGTH, DISTANCE_WIDTH } from "./const";
 import { DistanceType } from "./type";
 
@@ -71,6 +71,14 @@ function searchDistanceLine(store: Store) {
       }
     }
   });
+}
+
+function getAbsorbDistance(currLength: number) {
+  const absorbPosition = [0, 4, 8, 12, 16];
+  for (const position of absorbPosition) {
+    if (position - 2 <= currLength && position + 2 >= currLength) return position;
+  }
+  return currLength;
 }
 
 export class Distance {
@@ -165,9 +173,16 @@ export class Distance {
     this.hidden();
     searchDistanceLine(store);
     if (this.x.node && this.x.node.id !== store.selected.dataset.id) {
-      const nodeRect = Rect.from(this.x.node);
-      const seletedRect = Rect.from(store.selected);
       if (this.x.type === "left") {
+        const absorbDistance = getAbsorbDistance(this.x.length);
+        if (absorbDistance !== this.x.length) {
+          store.selected.style.left = toPx(parseFloat(store.selected.style.left) - this.x.length + absorbDistance);
+          this.x.length = absorbDistance;
+          store.align.reRender(store);
+          store.border.reRender(store);
+        }
+        const nodeRect = Rect.from(this.x.node);
+        const seletedRect = Rect.from(store.selected);
         // 主线（水平距离线）
         const line = getElement<SVGLineElement>(this.lines.left, `${NODE_CLASS_PREFIX}-distance-left-line`);
         line.setAttribute("x1", String(nodeRect.x + nodeRect.w));
@@ -179,7 +194,7 @@ export class Distance {
 
         // 距离文本
         const text = getElement<SVGTextElement>(this.lines.left, `${NODE_CLASS_PREFIX}-distance-left-text`);
-        text.textContent = `${showNumber(this.x.length)}`;
+        text.textContent = `${showNumber(this.x.length, true)}`;
         text.setAttribute("x", String((nodeRect.x + nodeRect.w + seletedRect.x) / 2));
         text.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - 9));
         text.setAttribute("fill", "#FFFFFF");
@@ -246,6 +261,15 @@ export class Distance {
         }
         if (store.align.isHAlign) this.lines.left.setAttribute("style", "display: block;");
       } else if (this.x.type === "right") {
+        const absorbDistance = getAbsorbDistance(this.x.length);
+        if (absorbDistance !== this.x.length) {
+          store.selected.style.left = toPx(parseFloat(store.selected.style.left) + this.x.length - absorbDistance);
+          this.x.length = absorbDistance;
+          store.align.reRender(store);
+          store.border.reRender(store);
+        }
+        const nodeRect = Rect.from(this.x.node);
+        const seletedRect = Rect.from(store.selected);
         // 主线（水平距离线）
         const line = getElement<SVGLineElement>(this.lines.right, `${NODE_CLASS_PREFIX}-distance-right-line`);
         line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
@@ -257,7 +281,7 @@ export class Distance {
 
         // 距离文本
         const text = getElement<SVGTextElement>(this.lines.right, `${NODE_CLASS_PREFIX}-distance-right-text`);
-        text.textContent = `${showNumber(this.x.length)}`;
+        text.textContent = `${showNumber(this.x.length, true)}`;
         text.setAttribute("x", String((seletedRect.x + seletedRect.w + nodeRect.x) / 2));
         text.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - 9));
         text.setAttribute("fill", "#FFFFFF");
@@ -328,9 +352,15 @@ export class Distance {
     }
 
     if (this.y.node && this.y.node.id !== store.selected.dataset.id) {
-      const nodeRect = Rect.from(this.y.node);
-      const seletedRect = Rect.from(store.selected);
       if (this.y.type === "top") {
+        const absorbDistance = getAbsorbDistance(this.y.length);
+        if (absorbDistance !== this.y.length) {
+          store.selected.style.top = toPx(parseFloat(store.selected.style.top) - this.y.length + absorbDistance);
+          this.y.length = absorbDistance;
+          store.border.reRender(store);
+        }
+        const nodeRect = Rect.from(this.y.node);
+        const seletedRect = Rect.from(store.selected);
         // 主线（水平距离线）
         const line = getElement<SVGLineElement>(this.lines.top, `${NODE_CLASS_PREFIX}-distance-top-line`);
         line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));
@@ -342,7 +372,7 @@ export class Distance {
 
         // 距离文本
         const text = getElement<SVGTextElement>(this.lines.top, `${NODE_CLASS_PREFIX}-distance-top-text`);
-        text.textContent = `${showNumber(this.y.length)}`;
+        text.textContent = `${showNumber(this.y.length, true)}`;
         text.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 + (text.getComputedTextLength() + 10) / 2 + 3));
         text.setAttribute("y", String((seletedRect.y + nodeRect.y + nodeRect.h) / 2 + 1));
         text.setAttribute("fill", "#FFFFFF");
@@ -407,6 +437,14 @@ export class Distance {
         }
         if (store.align.isVAlign) this.lines.top.setAttribute("style", "display: block;");
       } else if (this.y.type === "bottom") {
+        const absorbDistance = getAbsorbDistance(this.y.length);
+        if (absorbDistance !== this.y.length) {
+          store.selected.style.top = toPx(parseFloat(store.selected.style.top) + this.y.length - absorbDistance);
+          this.y.length = absorbDistance;
+          store.border.reRender(store);
+        }
+        const nodeRect = Rect.from(this.y.node);
+        const seletedRect = Rect.from(store.selected);
         // 主线（垂直距离线）
         const line = getElement<SVGLineElement>(this.lines.bottom, `${NODE_CLASS_PREFIX}-distance-bottom-line`);
         line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));
@@ -418,7 +456,7 @@ export class Distance {
 
         // 距离文本
         const text = getElement<SVGTextElement>(this.lines.bottom, `${NODE_CLASS_PREFIX}-distance-bottom-text`);
-        text.textContent = `${showNumber(this.y.length)}`;
+        text.textContent = `${showNumber(this.y.length, true)}`;
         const textX = seletedRect.x + seletedRect.w / 2 + (text.getComputedTextLength() + 10) / 2 + 3;
         text.setAttribute("x", String(textX));
         text.setAttribute("y", String((seletedRect.y + seletedRect.h + nodeRect.y) / 2 + 1)); // 线的中间位置

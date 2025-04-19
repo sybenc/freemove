@@ -283,5 +283,6 @@ export class Gap {
   reRender(store: Store) {
     const blockXData = searchDistanceBlockXData(store);
     const blockYData = searchDistanceBlockYData(store);
+    // console.log(blockXData, blockYData)
   }
 }
