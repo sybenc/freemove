@@ -1,6 +1,8 @@
 declare class Align {
     g: SVGGElement;
     lines: Record<AlignLineType | "vertical", SVGLineElement>;
+    isHAlign: boolean;
+    isVAlign: boolean;
     constructor(svg: SVGSVGElement);
     hidden(): void;
     reRender(store: Store): void;
@@ -19,13 +21,15 @@ declare class Border {
 
 declare class Distance {
     g: SVGGElement;
-    distanceGroups: Record<DistanceType, SVGGElement>;
+    lines: Record<DistanceType, SVGGElement>;
     x: {
-        type: 'left' | 'right';
+        type: "left" | "right";
+        length: number;
         node: HTMLElement | null;
     };
     y: {
-        type: 'top' | 'bottom';
+        type: "top" | "bottom";
+        length: number;
         node: HTMLElement | null;
     };
     constructor(svg: SVGSVGElement);
@@ -79,11 +83,11 @@ declare interface Store {
     selected: HTMLElement | null;
     setSelected: (target: HTMLElement | null) => void;
     align: Align;
+    distance: Distance;
     border: Border;
     resize: Resize;
     selector: Selector;
     gap: Gap;
-    distance: Distance;
 }
 
 export { }

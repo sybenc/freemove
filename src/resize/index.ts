@@ -1,7 +1,7 @@
 import { Store } from "./../store";
 import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX, NODE_MIN_HEIGHT, NODE_MIN_WIDTH } from "../const";
 import Rect from "../rect";
-import { createElementNS, getElement, toPx } from "../utils"; // Ensure createElementNS is imported
+import { createElementNS, getElement, showNumber, toPx } from "../utils"; // Ensure createElementNS is imported
 import { ResizeData } from "./type";
 import { RESIZE_COLOR, RESIZE_ENDPOINT_LENGTH, RESIZE_FONT_SIZE, RESIZE_OFFSET, RESIZE_WIDTH } from "./const";
 
@@ -69,7 +69,7 @@ function renderResizeLine(store: Store) {
     widthLineEnd.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
     widthLineEnd.setAttribute("fill", String(RESIZE_COLOR));
 
-    widthLineText.textContent = `${nodeRect.w}`;
+    widthLineText.textContent = `${showNumber(nodeRect.w)}`;
     widthLineText.setAttribute("x", String(nodeRect.x + nodeRect.w / 2));
     widthLineText.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - 8));
     widthLineText.setAttribute("fill", String(RESIZE_COLOR));
@@ -94,7 +94,7 @@ function renderResizeLine(store: Store) {
     heightLineEnd.setAttribute("height", String(RESIZE_WIDTH));
     heightLineEnd.setAttribute("fill", String(RESIZE_COLOR));
 
-    heightLineText.textContent = `${nodeRect.h}`;
+    heightLineText.textContent = `${showNumber(nodeRect.h)}`;
     heightLineText.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - 8));
     heightLineText.setAttribute("y", String(nodeRect.y + nodeRect.h / 2));
     heightLineText.setAttribute("fill", String(RESIZE_COLOR));

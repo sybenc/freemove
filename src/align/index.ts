@@ -8,7 +8,7 @@ import { AlignLineData, AlignLineType } from "./type";
 
 const alignLineTypes: AlignLineType[] = ["vl", "vc", "vr", "ht", "hc", "hb"];
 
-function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical", SVGLineElement>) {
+function renderAlignLine(store: Store, align: Align) {
   const containerRect = store.container.getBoundingClientRect();
   const alternateNodes: Record<AlignLineType, AlignLineData[]> = {
     ht: [],
@@ -169,9 +169,13 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
     const selectedRect = Rect.from(store.selected!);
 
     const alternateNodesFlat = Object.values(alternateNodes).flat();
+    if ([...alternateNodes.hb, ...alternateNodes.hc, ...alternateNodes.ht].length === 0) align.isHAlign = false
+    else align.isHAlign = true
+    if ([...alternateNodes.vc, ...alternateNodes.vl, ...alternateNodes.vr].length === 0) align.isVAlign = false
+    else align.isVAlign = true
     alternateNodesFlat.forEach((item) => {
       const { source, target, type } = item;
-      const line = lines[type];
+      const line = align.lines[type];
 
       if (/^h/.test(type)) {
         line?.setAttribute("x1", String(source));
@@ -214,7 +218,7 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
     });
 
     if (showContainerAlignLine) {
-      const line = lines["vertical"];
+      const line = align.lines["vertical"];
       line.setAttribute("x1", String(containerRect.width / 2));
       line.setAttribute("y1", String(0));
       line.setAttribute("x2", String(containerRect.width / 2));
@@ -251,6 +255,8 @@ function renderAlignLine(store: Store, lines: Record<AlignLineType | "vertical",
 export class Align {
   g: SVGGElement;
   lines: Record<AlignLineType | "vertical", SVGLineElement>;
+  isHAlign: boolean = false
+  isVAlign: boolean = false
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>('g');
@@ -277,6 +283,6 @@ export class Align {
   reRender(store: Store) {
     if (!store.selected) return;
     this.hidden();
-    renderAlignLine(store, this.lines);
+    renderAlignLine(store, this);
   }
 }

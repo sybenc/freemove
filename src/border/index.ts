@@ -2,7 +2,7 @@ import { NODE_CLASS_PREFIX } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, getElement, toPx } from "../utils";
-import { SELECTED_BORDER_COLOR, SELECTED_BORDER_POINTS_SIDELENGTH, SELECTED_BORDER_WIDTH } from "./const";
+import { BORDER_COLOR, BORDER_POINTS_SIDELENGTH, BORDER_WIDTH } from "./const";
 import { SelectedBorderLineType, SelectedBorderPointType } from "./type";
 
 const selectedBorderLineTypes: SelectedBorderLineType[] = ["left", "top", "right", "bottom"];
@@ -33,8 +33,8 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   selectedBorderLineTypes.forEach((type) => {
     const line = createElementNS<SVGLineElement>('line');
     line.setAttribute("class", `${NODE_CLASS_PREFIX}-border-line-${type}`);
-    line.setAttribute("stroke", SELECTED_BORDER_COLOR);
-    line.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
+    line.setAttribute("stroke", BORDER_COLOR);
+    line.setAttribute("stroke-width", toPx(BORDER_WIDTH));
 
     lines.push(line);
   });
@@ -43,10 +43,10 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
     const rect = createElementNS<SVGRectElement>('rect');
     rect.setAttribute("class", `${NODE_CLASS_PREFIX}-border-point-${type}`);
     rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", SELECTED_BORDER_COLOR);
-    rect.setAttribute("stroke-width", toPx(SELECTED_BORDER_WIDTH));
-    rect.setAttribute("width", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("height", toPx(SELECTED_BORDER_POINTS_SIDELENGTH));
+    rect.setAttribute("stroke", BORDER_COLOR);
+    rect.setAttribute("stroke-width", toPx(BORDER_WIDTH));
+    rect.setAttribute("width", toPx(BORDER_POINTS_SIDELENGTH));
+    rect.setAttribute("height", toPx(BORDER_POINTS_SIDELENGTH));
     rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
     rect.setAttribute("data-direction", type);
     points.push(rect);
@@ -62,26 +62,26 @@ function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
     switch (type) {
       case "left":
         line.setAttribute("x1", String(seletedRect.x));
-        line.setAttribute("y1", String(seletedRect.y - SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("y1", String(seletedRect.y - BORDER_WIDTH / 2));
         line.setAttribute("x2", String(seletedRect.x));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BORDER_WIDTH / 2));
         break;
       case "right":
         line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y1", String(seletedRect.y - SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("y1", String(seletedRect.y - BORDER_WIDTH / 2));
         line.setAttribute("x2", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BORDER_WIDTH / 2));
         break;
       case "top":
-        line.setAttribute("x1", String(seletedRect.x - SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("x1", String(seletedRect.x - BORDER_WIDTH / 2));
         line.setAttribute("y1", String(seletedRect.y));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BORDER_WIDTH / 2));
         line.setAttribute("y2", String(seletedRect.y));
         break;
       case "bottom":
-        line.setAttribute("x1", String(seletedRect.x - SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("x1", String(seletedRect.x - BORDER_WIDTH / 2));
         line.setAttribute("y1", String(seletedRect.y + seletedRect.h));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + SELECTED_BORDER_WIDTH / 2));
+        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BORDER_WIDTH / 2));
         line.setAttribute("y2", String(seletedRect.y + seletedRect.h));
         break;
     }
@@ -90,7 +90,7 @@ function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
     const rect = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-border-point-${type}`)
     rect.setAttribute("data-owner-id", selected.dataset.id!);
     // 往左上角的偏移量，为边长的一半
-    const offset = SELECTED_BORDER_POINTS_SIDELENGTH / 2;
+    const offset = BORDER_POINTS_SIDELENGTH / 2;
     switch (type) {
       case "left-top":
         rect.setAttribute("x", String(seletedRect.x - offset));

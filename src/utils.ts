@@ -1,5 +1,5 @@
 export function toPx(value: any): string {
-  if (typeof value === 'number') return `${value}px`;
+  if (typeof value === "number") return `${value}px`;
   return String(value);
 }
 
@@ -12,5 +12,10 @@ export function getElement<T>(g: Element, className: string): T {
 }
 
 export function createElementNS<T>(tag: string): T {
-  return document.createElementNS('http://www.w3.org/2000/svg', tag) as T;
+  return document.createElementNS("http://www.w3.org/2000/svg", tag) as T;
+}
+
+export function showNumber(value: number) {
+  if (Number.isInteger(value)) return value.toFixed(0);
+  else return value.toFixed(1);
 }

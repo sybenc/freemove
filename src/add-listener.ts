@@ -7,6 +7,9 @@ function handleMoveNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
   const containerRect = store.container.getBoundingClientRect();
   store.align.reRender(store);
+  store.border.reRender(store);
+  store.gap.reRender(store);
+  store.distance.reRender(store);
   const rect = store.selected.getBoundingClientRect();
   let startX = event.clientX - rect.left;
   let startY = event.clientY - rect.top;
@@ -31,7 +34,8 @@ function handleMoveNode(store: Store, event: PointerEvent) {
       store.selected.style.top = toPx(newY);
       store.align.reRender(store);
       store.border.reRender(store);
-      store.gap.reRender(store)
+      store.gap.reRender(store);
+      store.distance.reRender(store);
 
       animationFrameId = null;
     });
@@ -41,6 +45,7 @@ function handleMoveNode(store: Store, event: PointerEvent) {
     document.removeEventListener("pointermove", handlePointerMove);
     document.removeEventListener("pointerup", handlePointerUp);
     store.align.hidden();
+    store.distance.hidden();
 
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
@@ -186,7 +191,7 @@ export function addPointerListener(store: Store) {
 
       // 如果点击到节点，处理节点拖拽动作
       if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
-        store.selector.hiddenPreview()
+        store.selector.hiddenPreview();
         store.setSelected(seleted.node);
         handleMoveNode(store, event);
       }

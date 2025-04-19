@@ -36,7 +36,7 @@ export default class Rect {
     }
     return false;
   }
-  
+
   // 判断两个矩形是否相交，Tolerance为容差
   isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
   isIntersect(rect: Rect): boolean {
@@ -69,15 +69,13 @@ export default class Rect {
   // 从dom元素的style构建Rect对象
   static from(node: HTMLElement): Rect {
     return new Rect({
-      x: node.offsetLeft,
-      y: node.offsetTop,
-      w: node.offsetWidth,
-      h: node.offsetHeight,
+      x: parseFloat(node.style.left),
+      y: parseFloat(node.style.top),
+      w: parseFloat(node.style.width),
+      h: parseFloat(node.style.height),
       node,
     });
   }
 
-  static error(svg: SVGSVGElement, nodeRects: Rect[]){
-
-  }
+  static error(svg: SVGSVGElement, nodeRects: Rect[]) {}
 }
