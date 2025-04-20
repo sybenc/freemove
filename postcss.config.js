@@ -1,11 +1,12 @@
-// postcss.config.js
 import postcssModules from "postcss-modules";
+
+const NodeClassPrefix = "__freemove";
 
 export default {
   plugins: [
     postcssModules({
       generateScopedName: (name, filename, css) => {
-        return `__freemove-${name}`;
+        return `${NodeClassPrefix}-${name}`;
       },
     }),
   ],

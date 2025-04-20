@@ -1,6 +1,6 @@
 import { AlignLineType } from "./align/type";
 
-const Tolerance = 0.01;
+const Tolerance = 0;
 
 export interface Position {
   x: number;
@@ -65,17 +65,6 @@ export default class Rect {
     const y2B = rect.y + rect.h;
 
     return !(x2A < x1B || x1A > x2B || y2A < y1B || y1A > y2B);
-  }
-
-  getAlignLinePostion(): Record<AlignLineType, number> {
-    return {
-      vl: this.x,
-      vc: this.x + this.w / 2,
-      vr: this.x + this.w,
-      ht: this.y,
-      hc: this.y + this.h / 2,
-      hb: this.y + this.h,
-    };
   }
 
   // 从dom元素的style构建Rect对象

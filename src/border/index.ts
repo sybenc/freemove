@@ -1,8 +1,8 @@
-import { NODE_CLASS_PREFIX } from "../const";
+import { NodeClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, getElement, toPx } from "../utils";
-import { BORDER_COLOR, BORDER_POINTS_SIDELENGTH, BORDER_WIDTH } from "./const";
+import { BorderColor, BorderPointsSideLength, BorderWidth } from "./const";
 import { SelectedBorderLineType, SelectedBorderPointType } from "./type";
 
 const selectedBorderLineTypes: SelectedBorderLineType[] = ["left", "top", "right", "bottom"];
@@ -31,22 +31,17 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   const points: SVGRectElement[] = [];
   const lines: SVGLineElement[] = [];
   selectedBorderLineTypes.forEach((type) => {
-    const line = createElementNS<SVGLineElement>('line');
-    line.setAttribute("class", `${NODE_CLASS_PREFIX}-border-line-${type}`);
-    line.setAttribute("stroke", BORDER_COLOR);
-    line.setAttribute("stroke-width", toPx(BORDER_WIDTH));
-
+    const line = createElementNS<SVGLineElement>("line");
+    line.setAttribute("class", `${NodeClassPrefix}-border-line-${type}`);
+    line.setAttribute("stroke", BorderColor);
     lines.push(line);
   });
 
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = createElementNS<SVGRectElement>('rect');
-    rect.setAttribute("class", `${NODE_CLASS_PREFIX}-border-point-${type}`);
+    const rect = createElementNS<SVGRectElement>("rect");
+    rect.setAttribute("class", `${NodeClassPrefix}-border-point-${type}`);
     rect.setAttribute("fill", "white");
-    rect.setAttribute("stroke", BORDER_COLOR);
-    rect.setAttribute("stroke-width", toPx(BORDER_WIDTH));
-    rect.setAttribute("width", toPx(BORDER_POINTS_SIDELENGTH));
-    rect.setAttribute("height", toPx(BORDER_POINTS_SIDELENGTH));
+    rect.setAttribute("stroke", BorderColor);
     rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
     rect.setAttribute("data-direction", type);
     points.push(rect);
@@ -55,42 +50,46 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   return [points, lines];
 }
 
-function renderSelectedBorder(g: SVGGElement, selected: HTMLElement) {
-  const seletedRect = Rect.from(selected);
+function renderSelectedBorder(g: SVGGElement, store: Store) {
+  const seletedRect = Rect.from(store.selected!);
   selectedBorderLineTypes.forEach((type) => {
-    const line = getElement<SVGLineElement>(g, `${NODE_CLASS_PREFIX}-border-line-${type}`)
+    const line = getElement<SVGLineElement>(g, `${NodeClassPrefix}-border-line-${type}`);
+    line.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
     switch (type) {
       case "left":
         line.setAttribute("x1", String(seletedRect.x));
-        line.setAttribute("y1", String(seletedRect.y - BORDER_WIDTH / 2));
+        line.setAttribute("y1", String(seletedRect.y - BorderWidth/ store.scale / 2));
         line.setAttribute("x2", String(seletedRect.x));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BORDER_WIDTH / 2));
+        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BorderWidth/ store.scale / 2));
         break;
       case "right":
         line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y1", String(seletedRect.y - BORDER_WIDTH / 2));
+        line.setAttribute("y1", String(seletedRect.y - BorderWidth/ store.scale / 2));
         line.setAttribute("x2", String(seletedRect.x + seletedRect.w));
-        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BORDER_WIDTH / 2));
+        line.setAttribute("y2", String(seletedRect.y + seletedRect.h + BorderWidth/ store.scale / 2));
         break;
       case "top":
-        line.setAttribute("x1", String(seletedRect.x - BORDER_WIDTH / 2));
+        line.setAttribute("x1", String(seletedRect.x - BorderWidth/ store.scale / 2));
         line.setAttribute("y1", String(seletedRect.y));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BORDER_WIDTH / 2));
+        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BorderWidth/ store.scale / 2));
         line.setAttribute("y2", String(seletedRect.y));
         break;
       case "bottom":
-        line.setAttribute("x1", String(seletedRect.x - BORDER_WIDTH / 2));
+        line.setAttribute("x1", String(seletedRect.x - BorderWidth/ store.scale / 2));
         line.setAttribute("y1", String(seletedRect.y + seletedRect.h));
-        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BORDER_WIDTH / 2));
+        line.setAttribute("x2", String(seletedRect.x + seletedRect.w + BorderWidth/ store.scale / 2));
         line.setAttribute("y2", String(seletedRect.y + seletedRect.h));
         break;
     }
   });
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-border-point-${type}`)
-    rect.setAttribute("data-owner-id", selected.dataset.id!);
+    const rect = getElement<SVGRectElement>(g, `${NodeClassPrefix}-border-point-${type}`);
+    rect.setAttribute("data-owner-id", store.selected!.dataset.id!);
+    rect.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
+    rect.setAttribute("width", toPx(BorderPointsSideLength / store.scale));
+    rect.setAttribute("height", toPx(BorderPointsSideLength / store.scale));
     // 往左上角的偏移量，为边长的一半
-    const offset = BORDER_POINTS_SIDELENGTH / 2;
+    const offset = BorderPointsSideLength / store.scale / 2;
     switch (type) {
       case "left-top":
         rect.setAttribute("x", String(seletedRect.x - offset));
@@ -134,8 +133,8 @@ export class Border {
   lines: SVGLineElement[];
 
   constructor(svg: SVGSVGElement) {
-    this.g = createElementNS<SVGGElement>('g');
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-border`);
+    this.g = createElementNS<SVGGElement>("g");
+    this.g.setAttribute("class", `${NodeClassPrefix}-border`);
     svg.append(this.g);
     const [points, lines] = createSeletedBorderDom();
     this.points = points;
@@ -151,6 +150,6 @@ export class Border {
   reRender(store: Store) {
     if (!store.selected) return;
     this.g.style.display = "block";
-    renderSelectedBorder(this.g, store.selected);
+    renderSelectedBorder(this.g, store);
   }
 }

@@ -1,12 +1,23 @@
 // align-line.ts
-import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX } from "../const";
+import { NodeAbsorbDelta, NodeClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, toPx } from "../utils";
-import { ALIGNLINE_COLOR, ALIGNLINE_WIDTH } from "./const";
+import { AlignLineColor, AlignLineWidth } from "./const";
 import { AlignLineData, AlignLineType } from "./type";
 
 const alignLineTypes: AlignLineType[] = ["vl", "vc", "vr", "ht", "hc", "hb"];
+
+function getAlignLinePostion(rect: Rect): Record<AlignLineType, number> {
+  return {
+    vl: rect.x,
+    vc: rect.x + rect.w / 2,
+    vr: rect.x + rect.w,
+    ht: rect.y,
+    hc: rect.y + rect.h / 2,
+    hb: rect.y + rect.h,
+  };
+}
 
 function handleSearchAlternateNodes(store: Store, align: Align) {
   const selectedRect = Rect.from(store.selected!);
@@ -17,7 +28,7 @@ function handleSearchAlternateNodes(store: Store, align: Align) {
   // 查找全部符合条件的备选元素
   nodeRects.forEach((nodeRect) => {
     if (selectedRect.isIntersect(nodeRect)) return;
-    const selectedAlignLinePosition = selectedRect.getAlignLinePostion();
+    const selectedAlignLinePosition = getAlignLinePostion(selectedRect);
 
     alignLineTypes.forEach((type) => {
       let source = 10000,
@@ -38,7 +49,7 @@ function handleSearchAlternateNodes(store: Store, align: Align) {
         }
         [nodeRect.y, nodeRect.y + nodeRect.h / 2, nodeRect.y + nodeRect.h].forEach((pos) => {
           absorbDistance = Math.abs(selectedAlignLinePosition[type] - pos);
-          if (absorbDistance <= NODE_ABSORB_DELTA) {
+          if (absorbDistance <= NodeAbsorbDelta) {
             align.alternateNodes[type].push({
               type,
               source,
@@ -65,7 +76,7 @@ function handleSearchAlternateNodes(store: Store, align: Align) {
         }
         [nodeRect.x, nodeRect.x + nodeRect.w / 2, nodeRect.x + nodeRect.w].forEach((pos) => {
           absorbDistance = Math.abs(selectedAlignLinePosition[type] - pos);
-          if (absorbDistance <= NODE_ABSORB_DELTA) {
+          if (absorbDistance <= NodeAbsorbDelta) {
             align.alternateNodes[type].push({
               type,
               source,
@@ -142,8 +153,8 @@ function handleContainerAlignLineAbsorb(store: Store, align: Align) {
   if (!store.selected) return;
   const containerRect = store.container.getBoundingClientRect();
   const selectedRect = Rect.from(store.selected!);
-  const absorbPosition = containerRect.width / 2;
-  if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NODE_ABSORB_DELTA) {
+  const absorbPosition = containerRect.width / store.scale / 2;
+  if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NodeAbsorbDelta) {
     store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
     align.showContainerAlignLine = true;
   }
@@ -206,15 +217,17 @@ function handleDraw(store: Store, align: Align) {
       }
     }
 
+    line.setAttribute("stroke-width", String(AlignLineWidth / store.scale));
     line?.setAttribute("style", "display: 'block");
   });
 
   if (align.showContainerAlignLine) {
     const line = align.lines["vertical"];
-    line.setAttribute("x1", String(containerRect.width / 2));
+    line.setAttribute("x1", String((containerRect.width / store.scale) / 2));
     line.setAttribute("y1", String(0));
-    line.setAttribute("x2", String(containerRect.width / 2));
-    line.setAttribute("y2", String(containerRect.height));
+    line.setAttribute("x2", String((containerRect.width / store.scale) / 2));
+    line.setAttribute("y2", String(containerRect.height / store.scale));
+    line.setAttribute("stroke-width", String(AlignLineWidth / store.scale));
     line?.setAttribute("style", "display: 'block");
   }
 }
@@ -236,13 +249,12 @@ export class Align {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-align`);
+    this.g.setAttribute("class", `${NodeClassPrefix}-align`);
     this.lines = {} as any;
     [...alignLineTypes, "vertical"].forEach((type) => {
       const line = createElementNS<SVGLineElement>("line");
-      line.setAttribute("class", `${NODE_CLASS_PREFIX}-align-${type}`);
-      line.setAttribute("stroke", ALIGNLINE_COLOR);
-      line.setAttribute("stroke-width", String(ALIGNLINE_WIDTH));
+      line.setAttribute("class", `${NodeClassPrefix}-align-${type}`);
+      line.setAttribute("stroke", AlignLineColor);
       line.style.display = "none";
       this.g.append(line);
       this.lines[type as AlignLineType | "vertical"] = line;
@@ -267,7 +279,7 @@ export class Align {
       vc: [],
       vr: [],
     };
-    this.showContainerAlignLine = false
+    this.showContainerAlignLine = false;
     handleSearchAlternateNodes(store, this);
     // 处理吸附
     Object.values(this.alternateNodes)

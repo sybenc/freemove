@@ -1,266 +1,280 @@
-var tt = Object.defineProperty;
-var et = (r, i, t) => i in r ? tt(r, i, { enumerable: !0, configurable: !0, writable: !0, value: t }) : r[i] = t;
-var f = (r, i, t) => et(r, typeof i != "symbol" ? i + "" : i, t);
-const d = "__freemove";
-class y {
-  constructor({ x: i, y: t, h: e, w: s, node: n }) {
-    f(this, "x");
-    f(this, "y");
-    f(this, "w");
-    f(this, "h");
-    f(this, "id");
-    f(this, "node");
-    this.x = i, this.y = t, this.h = e, this.w = s, this.node = n, this.id = n.dataset.id;
+var et = Object.defineProperty;
+var it = (s, e, t) => e in s ? et(s, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : s[e] = t;
+var p = (s, e, t) => it(s, typeof e != "symbol" ? e + "" : e, t);
+const g = "__freemove";
+class f {
+  constructor({ x: e, y: t, h: i, w: n, node: l }) {
+    p(this, "x");
+    p(this, "y");
+    p(this, "w");
+    p(this, "h");
+    p(this, "id");
+    p(this, "node");
+    this.x = e, this.y = t, this.h = i, this.w = n, this.node = l, this.id = l.dataset.id;
   }
   // 将rect的几何信息和node节点同步
   sync() {
     this.x = parseFloat(this.node.style.left), this.y = parseFloat(this.node.style.top), this.w = parseFloat(this.node.style.width), this.h = parseFloat(this.node.style.height);
   }
-  set error(i) {
-    this.node.setAttribute("data-error", String(i));
+  set error(e) {
+    this.node.setAttribute("data-error", String(e));
   }
   get error() {
     return !!this.node.getAttribute("data-error");
   }
   // 判断一个点是否在矩形里面
-  isInSide(i) {
-    return i.x >= this.x && i.x <= this.x + this.w && i.y >= this.y && i.y <= this.y + this.h;
+  isInSide(e) {
+    return e.x >= this.x && e.x <= this.x + this.w && e.y >= this.y && e.y <= this.y + this.h;
   }
   // 判断两个矩形是否相交
-  isIntersect(i) {
-    const t = this.x + 0.01, e = this.y + 0.01, s = this.x + this.w - 0.01, n = this.y + this.h - 0.01, h = i.x, a = i.y, o = i.x + i.w, l = i.y + i.h;
-    return !(s < h || t > o || n < a || e > l);
-  }
-  getAlignLinePostion() {
-    return {
-      vl: this.x,
-      vc: this.x + this.w / 2,
-      vr: this.x + this.w,
-      ht: this.y,
-      hc: this.y + this.h / 2,
-      hb: this.y + this.h
-    };
+  isIntersect(e) {
+    const t = this.x + 0, i = this.y + 0, n = this.x + this.w - 0, l = this.y + this.h - 0, a = e.x, c = e.y, o = e.x + e.w, r = e.y + e.h;
+    return !(n < a || t > o || l < c || i > r);
   }
   // 从dom元素的style构建Rect对象
-  static from(i) {
-    return new y({
-      x: parseFloat(i.style.left),
-      y: parseFloat(i.style.top),
-      w: parseFloat(i.style.width),
-      h: parseFloat(i.style.height),
-      node: i
+  static from(e) {
+    return new f({
+      x: parseFloat(e.style.left),
+      y: parseFloat(e.style.top),
+      w: parseFloat(e.style.width),
+      h: parseFloat(e.style.height),
+      node: e
     });
   }
 }
-function A(r) {
-  return typeof r == "number" ? `${r}px` : String(r);
+function A(s) {
+  return typeof s == "number" ? `${s}px` : String(s);
 }
-function G(r, i, t = 0.1) {
-  return Math.abs(r - i) <= t;
+function V(s, e, t = 0.1) {
+  return Math.abs(s - e) <= t;
 }
-function b(r, i) {
-  return r.getElementsByClassName(i)[0];
+function b(s, e) {
+  return s.getElementsByClassName(e)[0];
 }
-function x(r) {
-  return document.createElementNS("http://www.w3.org/2000/svg", r);
+function x(s) {
+  return document.createElementNS("http://www.w3.org/2000/svg", s);
 }
-function C(r, i = !1) {
-  return i ? Math.round(parseFloat(r.toFixed(1))) : Number.isInteger(r) ? r.toFixed(0) : r.toFixed(1);
+function W(s, e = !1) {
+  return e ? Math.round(parseFloat(s.toFixed(1))) : Number.isInteger(s) ? s.toFixed(0) : s.toFixed(1);
 }
-function it(r, i) {
-  if (!r.selected) return;
-  const t = r.container.getBoundingClientRect();
-  r.selected.dataset.error === "false" && (r.align.reRender(r), r.distance.reRender(r), r.gap.reRender(r)), r.border.reRender(r);
-  const e = r.selected.getBoundingClientRect();
-  let s = i.clientX - e.left, n = i.clientY - e.top, h = null;
-  function a(l) {
-    h || (h = requestAnimationFrame(() => {
-      if (!r.selected) return;
-      let u = l.clientX - t.left - s, c = l.clientY - t.top - n;
-      const g = r.container.clientWidth - r.selected.offsetWidth, S = r.container.clientHeight - r.selected.offsetHeight;
-      u = Math.max(0, Math.min(u, g)), c = Math.max(0, Math.min(c, S)), r.selected.style.left = A(u), r.selected.style.top = A(c), r.searchError(), r.selected.dataset.error === "false" && (r.align.reRender(r), r.distance.reRender(r), r.gap.reRender(r)), r.border.reRender(r), h = null;
+function st(s, e) {
+  if (!s.selected) return;
+  const t = s.container.getBoundingClientRect();
+  s.selected.dataset.error === "false" && (s.align.reRender(s), s.distance.reRender(s), s.gap.reRender(s)), s.border.reRender(s);
+  const i = s.selected.getBoundingClientRect();
+  let n = (e.clientX - i.left) / s.scale, l = (e.clientY - i.top) / s.scale, a = null;
+  function c(r) {
+    a || (a = requestAnimationFrame(() => {
+      if (!s.selected) return;
+      let d = (r.clientX - t.left) / s.scale - n, h = (r.clientY - t.top) / s.scale - l;
+      const u = s.container.clientWidth - s.selected.offsetWidth, y = s.container.clientHeight - s.selected.offsetHeight;
+      d = Math.max(0, Math.min(d, u)), h = Math.max(0, Math.min(h, y)), s.selected.style.left = A(d), s.selected.style.top = A(h), s.searchError(), s.selected.dataset.error === "false" && (s.align.reRender(s), s.distance.reRender(s), s.gap.reRender(s)), s.border.reRender(s), a = null;
     }));
   }
   function o() {
-    document.removeEventListener("pointermove", a), document.removeEventListener("pointerup", o), r.align.hidden(), r.distance.hidden(), r.gap.clear(), h !== null && (cancelAnimationFrame(h), h = null);
+    document.removeEventListener("pointermove", c), document.removeEventListener("pointerup", o), s.align.hidden(), s.distance.hidden(), s.gap.clear(), a !== null && (cancelAnimationFrame(a), a = null);
   }
-  document.addEventListener("pointermove", a), document.addEventListener("pointerup", o);
+  document.addEventListener("pointermove", c), document.addEventListener("pointerup", o);
 }
-function st(r, i) {
-  if (!r.selected) return;
-  const t = r.container.getBoundingClientRect(), s = i.target.dataset.direction;
-  if (!s) return;
-  const n = y.from(r.selected);
-  let h = i.clientX, a = i.clientY, o = n.w, l = n.h, u = n.x, c = n.y;
-  const g = t.width, S = t.height;
-  function k(v) {
-    let N = v.clientX - h, I = v.clientY - a, w = o, E = l, R = u, z = c;
-    s.includes("right") && (w = o + N), s.includes("left") && (w = o - N, R = u + N), s.includes("bottom") && (E = l + I), s.includes("top") && (E = l - I, z = c + I), R < 0 && (w += R, R = 0), z < 0 && (E += z, z = 0), R + w > g && (w = g - R), z + E > S && (E = S - z), w = Math.max(w, 10), E = Math.max(E, 10), r.resize.reRender(r, w, E, s, u, c, o, l), r.border.reRender(r);
+function nt(s, e) {
+  if (!s.selected) return;
+  const t = s.container.getBoundingClientRect(), n = e.target.dataset.direction;
+  if (!n) return;
+  const l = f.from(s.selected);
+  let a = e.clientX, c = e.clientY, o = l.w, r = l.h, d = l.x, h = l.y;
+  const u = t.width, y = t.height;
+  function w(k) {
+    let S = (k.clientX - a) / s.scale, N = (k.clientY - c) / s.scale, v = o, L = r, M = d, B = h;
+    n.includes("right") && (v = o + S), n.includes("left") && (v = o - S, M = d + S), n.includes("bottom") && (L = r + N), n.includes("top") && (L = r - N, B = h + N), M < 0 && (v += M, M = 0), B < 0 && (L += B, B = 0), M + v > u / s.scale && (v = u / s.scale - M), B + L > y / s.scale && (L = y / s.scale - B), v = Math.max(v, 10), L = Math.max(L, 10), s.resize.reRender(s, v, L, n, d, h, o, r), s.border.reRender(s);
   }
-  function L() {
-    r.resize.hidden(), document.removeEventListener("pointermove", k), document.removeEventListener("pointerup", L);
+  function $() {
+    s.resize.hidden(), document.removeEventListener("pointermove", w), document.removeEventListener("pointerup", $);
   }
-  document.addEventListener("pointermove", k), document.addEventListener("pointerup", L);
+  document.addEventListener("pointermove", w), document.addEventListener("pointerup", $);
 }
-function rt(r, i) {
-  const t = r.container.getBoundingClientRect(), e = i.clientX - t.left, s = i.clientY - t.top;
-  function n(a) {
-    const o = a.clientX - t.left, l = a.clientY - t.top;
-    r.selector.reRender(r, e, s, o, l);
+function rt(s, e) {
+  const t = s.container.getBoundingClientRect(), i = (e.clientX - t.left) / s.scale, n = (e.clientY - t.top) / s.scale;
+  function l(c) {
+    const o = (c.clientX - t.left) / s.scale, r = (c.clientY - t.top) / s.scale;
+    s.selector.reRender(s, i, n, o, r), s.selector.showPreview();
   }
-  function h() {
-    r.selector.hiddenSelector(), r.selector.showPreview(), document.removeEventListener("pointermove", n), document.removeEventListener("pointerup", h);
+  function a() {
+    s.selector.hiddenSelector(), document.removeEventListener("pointermove", l), document.removeEventListener("pointerup", a);
   }
-  document.addEventListener("pointermove", n), document.addEventListener("pointerup", h);
+  document.addEventListener("pointermove", l), document.addEventListener("pointerup", a);
 }
-function nt(r) {
-  r.svg.addEventListener("pointerdown", (i) => {
-    i.preventDefault();
-    const t = i.target;
-    if (t.classList[0].includes(`${d}-border-point-`)) {
-      const e = t.dataset.ownerId;
-      for (let s = 0; s < r.nodes.length; s++)
-        e === r.nodes[s].dataset.ownerId && r.setSelected(r.nodes[s]);
-      r.selected && st(r, i);
+function lt(s) {
+  s.svg.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    const t = e.target;
+    if (t.classList[0].includes(`${g}-border-point-`)) {
+      const i = t.dataset.ownerId;
+      for (let n = 0; n < s.nodes.length; n++)
+        i === s.nodes[n].dataset.ownerId && s.setSelected(s.nodes[n]);
+      s.selected && nt(s, e);
       return;
     }
-    if (t.classList.contains(`${d}-svg`)) {
-      let e = null;
-      for (const s of r.nodes) {
-        const n = y.from(s);
-        if (n.isInSide({ x: i.offsetX, y: i.offsetY })) {
-          e = n;
+    if (t.classList.contains(`${g}-svg`)) {
+      let i = null;
+      for (const n of s.nodes) {
+        const l = f.from(n);
+        if (l.isInSide({ x: e.offsetX, y: e.offsetY })) {
+          i = l;
           break;
         }
       }
-      e && e.node.classList.contains(`${d}-movable-node`) && (r.selector.hiddenPreview(), r.setSelected(e.node), r.searchError(), it(r, i)), e || (r.border.hidden(), rt(r, i));
+      i && i.node.classList.contains(`${g}-movable-node`) && (s.selector.hiddenPreview(), s.setSelected(i.node), s.searchError(), st(s, e)), i || (s.border.hidden(), rt(s, e));
     }
+  }), document.body.addEventListener("wheel", (e) => {
+    const [t, i] = s.scaleRange;
+    e.preventDefault();
+    const n = s.container.getBoundingClientRect(), l = e.clientX - n.left, a = e.clientY - n.top;
+    function c() {
+      s.container.style.transform = `translate(${s.translateX}px, ${s.translateY}px) scale(${s.scale})`, s.container.style.transformOrigin = "0 0", s.border.reRender(s);
+    }
+    if (e.ctrlKey) {
+      let o = e.deltaY * -1e-3 * 5, r = s.scale + o;
+      r = Math.max(t, Math.min(i, r));
+      const d = r / s.scale;
+      s.translateX = l - (l - s.translateX) * d, s.translateY = a - (a - s.translateY) * d, s.scale = r, c();
+    } else
+      s.translateX -= e.deltaX, s.translateY -= e.deltaY, c();
   });
 }
-const lt = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
-let ht = (r = 21) => {
-  let i = "", t = crypto.getRandomValues(new Uint8Array(r |= 0));
-  for (; r--; )
-    i += lt[t[r] & 63];
-  return i;
+const at = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
+let ct = (s = 21) => {
+  let e = "", t = crypto.getRandomValues(new Uint8Array(s |= 0));
+  for (; s--; )
+    e += at[t[s] & 63];
+  return e;
 };
-const ot = 1, ct = "red", H = ["vl", "vc", "vr", "ht", "hc", "hb"];
-function q(r, i) {
-  const t = y.from(r.selected), e = r.nodes.filter((s) => s !== r.selected).map((s) => y.from(s));
-  H.forEach((s) => i.alternateNodes[s] = []), e.forEach((s) => {
-    if (t.isIntersect(s)) return;
-    const n = t.getAlignLinePostion();
-    H.forEach((h) => {
-      let a = 1e4, o = 1e4, l;
-      /^h/.test(h) && (t.x > s.x + s.w ? (a = t.x + t.w, o = s.x) : t.x + t.w < s.x ? (a = t.x, o = s.x + s.w) : (a = Math.min(t.x, s.x), o = Math.max(t.x + t.w, s.x + s.w)), [s.y, s.y + s.h / 2, s.y + s.h].forEach((u) => {
-        l = Math.abs(n[h] - u), l <= 3 && i.alternateNodes[h].push({
-          type: h,
-          source: a,
+const U = 1, ht = "red", P = ["vl", "vc", "vr", "ht", "hc", "hb"];
+function ot(s) {
+  return {
+    vl: s.x,
+    vc: s.x + s.w / 2,
+    vr: s.x + s.w,
+    ht: s.y,
+    hc: s.y + s.h / 2,
+    hb: s.y + s.h
+  };
+}
+function j(s, e) {
+  const t = f.from(s.selected), i = s.nodes.filter((n) => n !== s.selected).map((n) => f.from(n));
+  P.forEach((n) => e.alternateNodes[n] = []), i.forEach((n) => {
+    if (t.isIntersect(n)) return;
+    const l = ot(t);
+    P.forEach((a) => {
+      let c = 1e4, o = 1e4, r;
+      /^h/.test(a) && (t.x > n.x + n.w ? (c = t.x + t.w, o = n.x) : t.x + t.w < n.x ? (c = t.x, o = n.x + n.w) : (c = Math.min(t.x, n.x), o = Math.max(t.x + t.w, n.x + n.w)), [n.y, n.y + n.h / 2, n.y + n.h].forEach((d) => {
+        r = Math.abs(l[a] - d), r <= 3 && e.alternateNodes[a].push({
+          type: a,
+          source: c,
           target: o,
-          absorbDistance: l,
-          absorbPosition: u,
-          nodeRects: [s]
+          absorbDistance: r,
+          absorbPosition: d,
+          nodeRects: [n]
         });
-      })), /^v/.test(h) && (t.y > s.y + s.h ? (a = t.y + t.h, o = s.y) : t.y + t.h < s.y ? (a = t.y, o = s.y + s.h) : (a = Math.min(t.y, s.y), o = Math.max(t.y + t.h, s.y + s.h)), [s.x, s.x + s.w / 2, s.x + s.w].forEach((u) => {
-        l = Math.abs(n[h] - u), l <= 3 && i.alternateNodes[h].push({
-          type: h,
-          source: a,
+      })), /^v/.test(a) && (t.y > n.y + n.h ? (c = t.y + t.h, o = n.y) : t.y + t.h < n.y ? (c = t.y, o = n.y + n.h) : (c = Math.min(t.y, n.y), o = Math.max(t.y + t.h, n.y + n.h)), [n.x, n.x + n.w / 2, n.x + n.w].forEach((d) => {
+        r = Math.abs(l[a] - d), r <= 3 && e.alternateNodes[a].push({
+          type: a,
+          source: c,
           target: o,
-          absorbDistance: l,
-          absorbPosition: u,
-          nodeRects: [s]
+          absorbDistance: r,
+          absorbPosition: d,
+          nodeRects: [n]
         });
       }));
     });
-  }), H.forEach((s) => {
-    const n = /* @__PURE__ */ new Map();
-    i.alternateNodes[s].forEach((o) => {
-      const l = n.get(o.absorbDistance) || [];
-      l.push(o), n.set(o.absorbDistance, l);
+  }), P.forEach((n) => {
+    const l = /* @__PURE__ */ new Map();
+    e.alternateNodes[n].forEach((o) => {
+      const r = l.get(o.absorbDistance) || [];
+      r.push(o), l.set(o.absorbDistance, r);
     });
-    let h = 1 / 0, a = 0;
-    n.forEach((o) => {
-      o.forEach((l) => {
-        h = Math.min(h, l.source, l.target), a = Math.max(a, l.source, l.target);
+    let a = 1 / 0, c = 0;
+    l.forEach((o) => {
+      o.forEach((r) => {
+        a = Math.min(a, r.source, r.target), c = Math.max(c, r.source, r.target);
       });
-    }), n.forEach((o) => {
-      o.forEach((l) => {
-        l.source = h, l.target = a;
+    }), l.forEach((o) => {
+      o.forEach((r) => {
+        r.source = a, r.target = c;
       });
-    }), i.alternateNodes[s] = Array.from(n.values()).flat();
+    }), e.alternateNodes[n] = Array.from(l.values()).flat();
   });
 }
-function at(r, i, t) {
-  const { absorbPosition: e, type: s } = t, n = r.selected;
-  switch (s) {
+function dt(s, e, t) {
+  const { absorbPosition: i, type: n } = t, l = s.selected;
+  switch (n) {
     case "ht":
-      n.style.top = A(e);
+      l.style.top = A(i);
       break;
     case "hc":
-      n.style.top = A(e - parseFloat(n.style.height) / 2);
+      l.style.top = A(i - parseFloat(l.style.height) / 2);
       break;
     case "hb":
-      n.style.top = A(e - parseFloat(n.style.height));
+      l.style.top = A(i - parseFloat(l.style.height));
       break;
     case "vl":
-      n.style.left = A(e);
+      l.style.left = A(i);
       break;
     case "vc":
-      n.style.left = A(e - parseFloat(n.style.width) / 2);
+      l.style.left = A(i - parseFloat(l.style.width) / 2);
       break;
     case "vr":
-      n.style.left = A(e - parseFloat(n.style.width));
+      l.style.left = A(i - parseFloat(l.style.width));
       break;
   }
-  q(r, i), r.border.reRender(r);
+  j(s, e), s.border.reRender(s);
 }
-function dt(r, i) {
-  if (!r.selected) return;
-  const t = r.container.getBoundingClientRect(), e = y.from(r.selected), s = t.width / 2;
-  Math.abs(e.x + e.w / 2 - s) <= 3 && (r.selected.style.left = A(s - e.w / 2), i.showContainerAlignLine = !0), q(r, i), r.border.reRender(r);
+function gt(s, e) {
+  if (!s.selected) return;
+  const t = s.container.getBoundingClientRect(), i = f.from(s.selected), n = t.width / s.scale / 2;
+  Math.abs(i.x + i.w / 2 - n) <= 3 && (s.selected.style.left = A(n - i.w / 2), e.showContainerAlignLine = !0), j(s, e), s.border.reRender(s);
 }
-function ut(r, i) {
-  if (!r.selected) return;
-  const t = r.container.getBoundingClientRect(), e = y.from(r.selected), s = Object.values(i.alternateNodes).flat();
-  if ([...i.alternateNodes.hb, ...i.alternateNodes.hc, ...i.alternateNodes.ht].length === 0 ? i.isHAlign = !1 : i.isHAlign = !0, [...i.alternateNodes.vc, ...i.alternateNodes.vl, ...i.alternateNodes.vr].length === 0 ? i.isVAlign = !1 : i.isVAlign = !0, s.forEach((n) => {
-    const { source: h, target: a, type: o } = n, l = i.lines[o];
+function ut(s, e) {
+  if (!s.selected) return;
+  const t = s.container.getBoundingClientRect(), i = f.from(s.selected), n = Object.values(e.alternateNodes).flat();
+  if ([...e.alternateNodes.hb, ...e.alternateNodes.hc, ...e.alternateNodes.ht].length === 0 ? e.isHAlign = !1 : e.isHAlign = !0, [...e.alternateNodes.vc, ...e.alternateNodes.vl, ...e.alternateNodes.vr].length === 0 ? e.isVAlign = !1 : e.isVAlign = !0, n.forEach((l) => {
+    const { source: a, target: c, type: o } = l, r = e.lines[o];
     if (/^h/.test(o))
-      switch (l == null || l.setAttribute("x1", String(h)), l == null || l.setAttribute("x2", String(a)), o) {
+      switch (r == null || r.setAttribute("x1", String(a)), r == null || r.setAttribute("x2", String(c)), o) {
         case "ht":
-          l.setAttribute("y1", String(e.y)), l.setAttribute("y2", String(e.y));
+          r.setAttribute("y1", String(i.y)), r.setAttribute("y2", String(i.y));
           break;
         case "hc":
-          l.setAttribute("y1", String(e.y + e.h / 2)), l.setAttribute("y2", String(e.y + e.h / 2));
+          r.setAttribute("y1", String(i.y + i.h / 2)), r.setAttribute("y2", String(i.y + i.h / 2));
           break;
         case "hb":
-          l.setAttribute("y1", String(e.y + e.h)), l.setAttribute("y2", String(e.y + e.h));
+          r.setAttribute("y1", String(i.y + i.h)), r.setAttribute("y2", String(i.y + i.h));
           break;
       }
     if (/^v/.test(o))
-      switch (l == null || l.setAttribute("y1", String(h)), l == null || l.setAttribute("y2", String(a)), o) {
+      switch (r == null || r.setAttribute("y1", String(a)), r == null || r.setAttribute("y2", String(c)), o) {
         case "vl":
-          l.setAttribute("x1", String(e.x)), l.setAttribute("x2", String(e.x));
+          r.setAttribute("x1", String(i.x)), r.setAttribute("x2", String(i.x));
           break;
         case "vc":
-          l.setAttribute("x1", String(e.x + e.w / 2)), l.setAttribute("x2", String(e.x + e.w / 2));
+          r.setAttribute("x1", String(i.x + i.w / 2)), r.setAttribute("x2", String(i.x + i.w / 2));
           break;
         case "vr":
-          l.setAttribute("x1", String(e.x + e.w)), l.setAttribute("x2", String(e.x + e.w));
+          r.setAttribute("x1", String(i.x + i.w)), r.setAttribute("x2", String(i.x + i.w));
           break;
       }
-    l == null || l.setAttribute("style", "display: 'block");
-  }), i.showContainerAlignLine) {
-    const n = i.lines.vertical;
-    n.setAttribute("x1", String(t.width / 2)), n.setAttribute("y1", String(0)), n.setAttribute("x2", String(t.width / 2)), n.setAttribute("y2", String(t.height)), n == null || n.setAttribute("style", "display: 'block");
+    r.setAttribute("stroke-width", String(U / s.scale)), r == null || r.setAttribute("style", "display: 'block");
+  }), e.showContainerAlignLine) {
+    const l = e.lines.vertical;
+    l.setAttribute("x1", String(t.width / s.scale / 2)), l.setAttribute("y1", String(0)), l.setAttribute("x2", String(t.width / s.scale / 2)), l.setAttribute("y2", String(t.height / s.scale)), l.setAttribute("stroke-width", String(U / s.scale)), l == null || l.setAttribute("style", "display: 'block");
   }
 }
-class gt {
-  constructor(i) {
-    f(this, "g");
-    f(this, "lines");
-    f(this, "isHAlign", !1);
-    f(this, "isVAlign", !1);
-    f(this, "alternateNodes", {
+class bt {
+  constructor(e) {
+    p(this, "g");
+    p(this, "lines");
+    p(this, "isHAlign", !1);
+    p(this, "isVAlign", !1);
+    p(this, "alternateNodes", {
       ht: [],
       hc: [],
       hb: [],
@@ -268,19 +282,19 @@ class gt {
       vc: [],
       vr: []
     });
-    f(this, "showContainerAlignLine", !1);
-    this.g = x("g"), this.g.setAttribute("class", `${d}-align`), this.lines = {}, [...H, "vertical"].forEach((t) => {
-      const e = x("line");
-      e.setAttribute("class", `${d}-align-${t}`), e.setAttribute("stroke", ct), e.setAttribute("stroke-width", String(ot)), e.style.display = "none", this.g.append(e), this.lines[t] = e;
-    }), i.append(this.g);
+    p(this, "showContainerAlignLine", !1);
+    this.g = x("g"), this.g.setAttribute("class", `${g}-align`), this.lines = {}, [...P, "vertical"].forEach((t) => {
+      const i = x("line");
+      i.setAttribute("class", `${g}-align-${t}`), i.setAttribute("stroke", ht), i.style.display = "none", this.g.append(i), this.lines[t] = i;
+    }), e.append(this.g);
   }
   hidden() {
-    Object.values(this.lines).forEach((i) => {
-      i.style.display = "none";
+    Object.values(this.lines).forEach((e) => {
+      e.style.display = "none";
     });
   }
-  reRender(i) {
-    if (!i.selected) return;
+  reRender(e) {
+    if (!e.selected) return;
     this.hidden(), this.alternateNodes = {
       ht: [],
       hc: [],
@@ -288,22 +302,22 @@ class gt {
       vl: [],
       vc: [],
       vr: []
-    }, this.showContainerAlignLine = !1, q(i, this), Object.values(this.alternateNodes).flat().forEach((e) => {
-      at(i, this, e);
-    }), dt(i, this);
+    }, this.showContainerAlignLine = !1, j(e, this), Object.values(this.alternateNodes).flat().forEach((i) => {
+      dt(e, this, i);
+    }), gt(e, this);
     let t = 1 / 0;
-    H.forEach((e) => {
-      this.alternateNodes[e].forEach((s) => {
-        s.absorbDistance < t && (t = s.absorbDistance);
+    P.forEach((i) => {
+      this.alternateNodes[i].forEach((n) => {
+        n.absorbDistance < t && (t = n.absorbDistance);
       });
-    }), H.forEach((e) => {
-      this.alternateNodes[e] = this.alternateNodes[e].filter(
-        (s) => G(s.absorbDistance, t, 0.01)
+    }), P.forEach((i) => {
+      this.alternateNodes[i] = this.alternateNodes[i].filter(
+        (n) => V(n.absorbDistance, t, 0.01)
       );
-    }), ut(i, this);
+    }), ut(e, this);
   }
 }
-const F = 1, Y = "#000", X = 6, Q = ["left", "top", "right", "bottom"], J = [
+const z = 1, K = "#000", G = 6, J = ["left", "top", "right", "bottom"], Z = [
   "left-top",
   "top",
   "right-top",
@@ -312,7 +326,7 @@ const F = 1, Y = "#000", X = 6, Q = ["left", "top", "right", "bottom"], J = [
   "bottom",
   "left-bottom",
   "left"
-], bt = [
+], yt = [
   "nwse-resize",
   "ns-resize",
   "nesw-resize",
@@ -323,195 +337,195 @@ const F = 1, Y = "#000", X = 6, Q = ["left", "top", "right", "bottom"], J = [
   "ew-resize"
 ];
 function At() {
-  const r = [], i = [];
-  return Q.forEach((t) => {
-    const e = x("line");
-    e.setAttribute("class", `${d}-border-line-${t}`), e.setAttribute("stroke", Y), e.setAttribute("stroke-width", A(F)), i.push(e);
-  }), J.forEach((t, e) => {
-    const s = x("rect");
-    s.setAttribute("class", `${d}-border-point-${t}`), s.setAttribute("fill", "white"), s.setAttribute("stroke", Y), s.setAttribute("stroke-width", A(F)), s.setAttribute("width", A(X)), s.setAttribute("height", A(X)), s.setAttribute("style", `cursor: ${bt[e]}`), s.setAttribute("data-direction", t), r.push(s);
-  }), [r, i];
+  const s = [], e = [];
+  return J.forEach((t) => {
+    const i = x("line");
+    i.setAttribute("class", `${g}-border-line-${t}`), i.setAttribute("stroke", K), e.push(i);
+  }), Z.forEach((t, i) => {
+    const n = x("rect");
+    n.setAttribute("class", `${g}-border-point-${t}`), n.setAttribute("fill", "white"), n.setAttribute("stroke", K), n.setAttribute("style", `cursor: ${yt[i]}`), n.setAttribute("data-direction", t), s.push(n);
+  }), [s, e];
 }
-function yt(r, i) {
-  const t = y.from(i);
-  Q.forEach((e) => {
-    const s = b(r, `${d}-border-line-${e}`);
-    switch (e) {
+function ft(s, e) {
+  const t = f.from(e.selected);
+  J.forEach((i) => {
+    const n = b(s, `${g}-border-line-${i}`);
+    switch (n.setAttribute("stroke-width", A(z / e.scale)), i) {
       case "left":
-        s.setAttribute("x1", String(t.x)), s.setAttribute("y1", String(t.y - F / 2)), s.setAttribute("x2", String(t.x)), s.setAttribute("y2", String(t.y + t.h + F / 2));
+        n.setAttribute("x1", String(t.x)), n.setAttribute("y1", String(t.y - z / e.scale / 2)), n.setAttribute("x2", String(t.x)), n.setAttribute("y2", String(t.y + t.h + z / e.scale / 2));
         break;
       case "right":
-        s.setAttribute("x1", String(t.x + t.w)), s.setAttribute("y1", String(t.y - F / 2)), s.setAttribute("x2", String(t.x + t.w)), s.setAttribute("y2", String(t.y + t.h + F / 2));
+        n.setAttribute("x1", String(t.x + t.w)), n.setAttribute("y1", String(t.y - z / e.scale / 2)), n.setAttribute("x2", String(t.x + t.w)), n.setAttribute("y2", String(t.y + t.h + z / e.scale / 2));
         break;
       case "top":
-        s.setAttribute("x1", String(t.x - F / 2)), s.setAttribute("y1", String(t.y)), s.setAttribute("x2", String(t.x + t.w + F / 2)), s.setAttribute("y2", String(t.y));
+        n.setAttribute("x1", String(t.x - z / e.scale / 2)), n.setAttribute("y1", String(t.y)), n.setAttribute("x2", String(t.x + t.w + z / e.scale / 2)), n.setAttribute("y2", String(t.y));
         break;
       case "bottom":
-        s.setAttribute("x1", String(t.x - F / 2)), s.setAttribute("y1", String(t.y + t.h)), s.setAttribute("x2", String(t.x + t.w + F / 2)), s.setAttribute("y2", String(t.y + t.h));
+        n.setAttribute("x1", String(t.x - z / e.scale / 2)), n.setAttribute("y1", String(t.y + t.h)), n.setAttribute("x2", String(t.x + t.w + z / e.scale / 2)), n.setAttribute("y2", String(t.y + t.h));
         break;
     }
-  }), J.forEach((e, s) => {
-    const n = b(r, `${d}-border-point-${e}`);
-    n.setAttribute("data-owner-id", i.dataset.id);
-    const h = X / 2;
-    switch (e) {
+  }), Z.forEach((i, n) => {
+    const l = b(s, `${g}-border-point-${i}`);
+    l.setAttribute("data-owner-id", e.selected.dataset.id), l.setAttribute("stroke-width", A(z / e.scale)), l.setAttribute("width", A(G / e.scale)), l.setAttribute("height", A(G / e.scale));
+    const a = G / e.scale / 2;
+    switch (i) {
       case "left-top":
-        n.setAttribute("x", String(t.x - h)), n.setAttribute("y", String(t.y - h));
+        l.setAttribute("x", String(t.x - a)), l.setAttribute("y", String(t.y - a));
         break;
       case "top":
-        n.setAttribute("x", String(t.x + t.w / 2 - h)), n.setAttribute("y", String(t.y - h));
+        l.setAttribute("x", String(t.x + t.w / 2 - a)), l.setAttribute("y", String(t.y - a));
         break;
       case "right-top":
-        n.setAttribute("x", String(t.x + t.w - h)), n.setAttribute("y", String(t.y - h));
+        l.setAttribute("x", String(t.x + t.w - a)), l.setAttribute("y", String(t.y - a));
         break;
       case "right":
-        n.setAttribute("x", String(t.x + t.w - h)), n.setAttribute("y", String(t.y + t.h / 2 - h));
+        l.setAttribute("x", String(t.x + t.w - a)), l.setAttribute("y", String(t.y + t.h / 2 - a));
         break;
       case "right-bottom":
-        n.setAttribute("x", String(t.x + t.w - h)), n.setAttribute("y", String(t.y + t.h - h));
+        l.setAttribute("x", String(t.x + t.w - a)), l.setAttribute("y", String(t.y + t.h - a));
         break;
       case "bottom":
-        n.setAttribute("x", String(t.x + t.w / 2 - h)), n.setAttribute("y", String(t.y + t.h - h));
+        l.setAttribute("x", String(t.x + t.w / 2 - a)), l.setAttribute("y", String(t.y + t.h - a));
         break;
       case "left-bottom":
-        n.setAttribute("x", String(t.x - h)), n.setAttribute("y", String(t.y + t.h - h));
+        l.setAttribute("x", String(t.x - a)), l.setAttribute("y", String(t.y + t.h - a));
         break;
       case "left":
-        n.setAttribute("x", String(t.x - h)), n.setAttribute("y", String(t.y + t.h / 2 - h));
+        l.setAttribute("x", String(t.x - a)), l.setAttribute("y", String(t.y + t.h / 2 - a));
         break;
     }
   });
 }
-class ft {
-  constructor(i) {
-    f(this, "g");
-    f(this, "points");
-    f(this, "lines");
-    this.g = x("g"), this.g.setAttribute("class", `${d}-border`), i.append(this.g);
-    const [t, e] = At();
-    this.points = t, this.lines = e, this.g.append(...e, ...t), this.g.style.display = "none";
+class xt {
+  constructor(e) {
+    p(this, "g");
+    p(this, "points");
+    p(this, "lines");
+    this.g = x("g"), this.g.setAttribute("class", `${g}-border`), e.append(this.g);
+    const [t, i] = At();
+    this.points = t, this.lines = i, this.g.append(...i, ...t), this.g.style.display = "none";
   }
   hidden() {
     this.g.style.display = "none";
   }
-  reRender(i) {
-    i.selected && (this.g.style.display = "block", yt(this.g, i.selected));
+  reRender(e) {
+    e.selected && (this.g.style.display = "block", ft(this.g, e));
   }
 }
-const _ = 1, O = "#2A63F4", D = 8, B = 10, j = 10;
-function U(r) {
-  const i = r.nodes.map((s) => y.from(s)), t = /* @__PURE__ */ new Map(), e = /* @__PURE__ */ new Map();
-  return i.forEach((s) => {
-    var a, o;
-    const n = {
+const H = 1, T = "#2A63F4", F = 8, I = 10, Q = 10;
+function _(s) {
+  const e = s.nodes.map((n) => f.from(n)), t = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
+  return e.forEach((n) => {
+    var c, o;
+    const l = {
       type: "width",
-      nodeRect: s
-    }, h = {
+      nodeRect: n
+    }, a = {
       type: "height",
-      nodeRect: s
+      nodeRect: n
     };
-    t.has(s.w) ? (a = t.get(s.w)) == null || a.push(n) : t.set(s.w, [n]), e.has(s.h) ? (o = e.get(s.h)) == null || o.push(h) : e.set(s.h, [h]);
+    t.has(n.w) ? (c = t.get(n.w)) == null || c.push(l) : t.set(n.w, [l]), i.has(n.h) ? (o = i.get(n.h)) == null || o.push(a) : i.set(n.h, [a]);
   }), {
     widthMap: t,
-    heightMap: e
+    heightMap: i
   };
 }
-function xt(r) {
-  r.nodes.forEach((i) => {
-    const t = y.from(i), e = r.resize.g.querySelector(`[data-ower-id="${t.id}"]`), s = b(e, `${d}-resize-line-group-width-line`), n = b(e, `${d}-resize-line-group-width-line-start`), h = b(e, `${d}-resize-line-group-width-line-end`), a = b(e, `${d}-resize-line-group-width-text`), o = b(e, `${d}-resize-line-group-height-line`), l = b(e, `${d}-resize-line-group-height-text`), u = b(e, `${d}-resize-line-group-height-line-start`), c = b(e, `${d}-resize-line-group-height-line-end`);
-    s.setAttribute("x1", String(t.x)), s.setAttribute("y1", String(t.y - D)), s.setAttribute("x2", String(t.x + t.w)), s.setAttribute("y2", String(t.y - D)), n.setAttribute("x", String(t.x - _ / 2)), n.setAttribute("y", String(t.y - D - B / 2)), n.setAttribute("width", String(_)), n.setAttribute("height", String(B)), n.setAttribute("fill", String(O)), h.setAttribute("x", String(t.x + t.w - _ / 2)), h.setAttribute("y", String(t.y - D - B / 2)), h.setAttribute("width", String(_)), h.setAttribute("height", String(B)), h.setAttribute("fill", String(O)), a.textContent = `${C(t.w)}`, a.setAttribute("x", String(t.x + t.w / 2)), a.setAttribute("y", String(t.y - D - 8)), a.setAttribute("fill", String(O)), a.setAttribute("font-size", String(j)), a.setAttribute("text-anchor", "middle"), a.setAttribute("alignment-baseline", "middle"), o.setAttribute("x1", String(t.x - D)), o.setAttribute("y1", String(t.y)), o.setAttribute("x2", String(t.x - D)), o.setAttribute("y2", String(t.y + t.h)), u.setAttribute("x", String(t.x - D - B / 2)), u.setAttribute("y", String(t.y - _ / 2)), u.setAttribute("width", String(B)), u.setAttribute("height", String(_)), u.setAttribute("fill", String(O)), c.setAttribute("x", String(t.x - D - B / 2)), c.setAttribute("y", String(t.y + t.h - _ / 2)), c.setAttribute("width", String(B)), c.setAttribute("height", String(_)), c.setAttribute("fill", String(O)), l.textContent = `${C(t.h)}`, l.setAttribute("x", String(t.x - D - 8)), l.setAttribute("y", String(t.y + t.h / 2)), l.setAttribute("fill", String(O)), l.setAttribute("font-size", String(j)), l.setAttribute("text-anchor", "middle"), l.setAttribute("alignment-baseline", "middle"), l.setAttribute(
+function pt(s) {
+  s.nodes.forEach((e) => {
+    const t = f.from(e), i = s.resize.g.querySelector(`[data-ower-id="${t.id}"]`), n = b(i, `${g}-resize-line-group-width-line`), l = b(i, `${g}-resize-line-group-width-line-start`), a = b(i, `${g}-resize-line-group-width-line-end`), c = b(i, `${g}-resize-line-group-width-text`), o = b(i, `${g}-resize-line-group-height-line`), r = b(i, `${g}-resize-line-group-height-text`), d = b(i, `${g}-resize-line-group-height-line-start`), h = b(i, `${g}-resize-line-group-height-line-end`);
+    n.setAttribute("x1", String(t.x)), n.setAttribute("y1", String(t.y - F)), n.setAttribute("x2", String(t.x + t.w)), n.setAttribute("y2", String(t.y - F)), l.setAttribute("x", String(t.x - H / s.scale / 2)), l.setAttribute("y", String(t.y - F - I / s.scale / 2)), l.setAttribute("width", String(H / s.scale)), l.setAttribute("height", String(I)), l.setAttribute("fill", String(T)), a.setAttribute("x", String(t.x + t.w - H / s.scale / 2)), a.setAttribute("y", String(t.y - F - I / s.scale / 2)), a.setAttribute("width", String(H / s.scale)), a.setAttribute("height", String(I)), a.setAttribute("fill", String(T)), c.textContent = `${W(t.w)}`, c.setAttribute("x", String(t.x + t.w / 2)), c.setAttribute("y", String(t.y - F - 8)), c.setAttribute("fill", String(T)), c.setAttribute("font-size", String(Q / s.scale)), c.setAttribute("text-anchor", "middle"), c.setAttribute("alignment-baseline", "middle"), o.setAttribute("x1", String(t.x - F)), o.setAttribute("y1", String(t.y)), o.setAttribute("x2", String(t.x - F)), o.setAttribute("y2", String(t.y + t.h)), d.setAttribute("x", String(t.x - F - I / s.scale / 2)), d.setAttribute("y", String(t.y - H / s.scale / 2)), d.setAttribute("width", String(I)), d.setAttribute("height", String(H / s.scale)), d.setAttribute("fill", String(T)), h.setAttribute("x", String(t.x - F - I / s.scale / 2)), h.setAttribute("y", String(t.y + t.h - H / s.scale / 2)), h.setAttribute("width", String(I)), h.setAttribute("height", String(H / s.scale)), h.setAttribute("fill", String(T)), r.textContent = `${W(t.h)}`, r.setAttribute("x", String(t.x - F - 8)), r.setAttribute("y", String(t.y + t.h / 2)), r.setAttribute("fill", String(T)), r.setAttribute("font-size", String(Q / s.scale)), r.setAttribute("text-anchor", "middle"), r.setAttribute("alignment-baseline", "middle"), r.setAttribute(
       "transform",
-      `rotate(-90 ${t.x - D - 8} ${t.y + t.h / 2})`
-    ), [s, o].forEach((g) => {
-      g.setAttribute("stroke", O), g.setAttribute("stroke-width", String(_));
+      `rotate(-90 ${t.x - F - 8} ${t.y + t.h / 2})`
+    ), [n, o].forEach((u) => {
+      u.setAttribute("stroke", T), u.setAttribute("stroke-width", String(H / s.scale));
     });
   });
 }
-class pt {
-  constructor(i, t) {
-    f(this, "g");
-    f(this, "lines");
-    this.g = x("g"), this.g.setAttribute("class", `${d}-resize`);
-    const e = [];
-    t.forEach((s) => {
-      const n = y.from(s), h = x("g");
-      h.setAttribute("class", `${d}-resize-line`), h.setAttribute("data-ower-id", n.id);
-      const a = x("g");
-      a.setAttribute("class", `${d}-resize-line-group-width`);
+class wt {
+  constructor(e, t) {
+    p(this, "g");
+    p(this, "lines");
+    this.g = x("g"), this.g.setAttribute("class", `${g}-resize`);
+    const i = [];
+    t.forEach((n) => {
+      const l = f.from(n), a = x("g");
+      a.setAttribute("class", `${g}-resize-line`), a.setAttribute("data-ower-id", l.id);
+      const c = x("g");
+      c.setAttribute("class", `${g}-resize-line-group-width`);
       const o = x("line");
-      o.setAttribute("class", `${d}-resize-line-group-width-line`);
-      const l = x("text");
-      l.setAttribute("class", `${d}-resize-line-group-width-text`);
-      const u = x("rect");
-      u.setAttribute("class", `${d}-resize-line-group-width-line-start`);
-      const c = x("rect");
-      c.setAttribute("class", `${d}-resize-line-group-width-line-end`), a.append(o, l, u, c);
-      const g = x("g");
-      g.setAttribute("class", `${d}-resize-line-group-height`);
-      const S = x("line");
-      S.setAttribute("class", `${d}-resize-line-group-height-line`);
-      const k = x("text");
-      k.setAttribute("class", `${d}-resize-line-group-height-text`);
-      const L = x("rect");
-      L.setAttribute("class", `${d}-resize-line-group-height-line-start`);
-      const v = x("rect");
-      v.setAttribute("class", `${d}-resize-line-group-height-line-end`), g.append(S, k, L, v), h.append(a, g), e.push(h);
-    }), this.lines = e, this.g.append(...this.lines), i.append(this.g), this.hidden();
+      o.setAttribute("class", `${g}-resize-line-group-width-line`);
+      const r = x("text");
+      r.setAttribute("class", `${g}-resize-line-group-width-text`);
+      const d = x("rect");
+      d.setAttribute("class", `${g}-resize-line-group-width-line-start`);
+      const h = x("rect");
+      h.setAttribute("class", `${g}-resize-line-group-width-line-end`), c.append(o, r, d, h);
+      const u = x("g");
+      u.setAttribute("class", `${g}-resize-line-group-height`);
+      const y = x("line");
+      y.setAttribute("class", `${g}-resize-line-group-height-line`);
+      const w = x("text");
+      w.setAttribute("class", `${g}-resize-line-group-height-text`);
+      const $ = x("rect");
+      $.setAttribute("class", `${g}-resize-line-group-height-line-start`);
+      const k = x("rect");
+      k.setAttribute("class", `${g}-resize-line-group-height-line-end`), u.append(y, w, $, k), a.append(c, u), i.push(a);
+    }), this.lines = i, this.g.append(...this.lines), e.append(this.g), this.hidden();
   }
   hidden() {
-    this.lines.forEach((i) => {
-      Array.from(i.children).forEach((t) => {
+    this.lines.forEach((e) => {
+      Array.from(e.children).forEach((t) => {
         t.style.display = "none";
       });
     });
   }
-  reRender(i, t, e, s, n, h, a, o) {
-    var V, Z;
-    if (!i.selected) return;
+  reRender(e, t, i, n, l, a, c, o) {
+    var q, O;
+    if (!e.selected) return;
     this.hidden();
-    const { widthMap: l, heightMap: u } = U(i), c = [], g = [];
-    l.forEach((m, M) => {
-      var T;
-      m.length === 1 && m[0].nodeRect.id === ((T = i.selected) == null ? void 0 : T.dataset.id) || Math.abs(t - M) <= 3 && c.push(M);
-    }), u.forEach((m, M) => {
-      var T;
-      m.length === 1 && m[0].nodeRect.id === ((T = i.selected) == null ? void 0 : T.dataset.id) || Math.abs(e - M) <= 3 && g.push(M);
+    const { widthMap: r, heightMap: d } = _(e), h = [], u = [];
+    r.forEach((R, D) => {
+      var C;
+      R.length === 1 && R[0].nodeRect.id === ((C = e.selected) == null ? void 0 : C.dataset.id) || Math.abs(t - D) <= 3 && h.push(D);
+    }), d.forEach((R, D) => {
+      var C;
+      R.length === 1 && R[0].nodeRect.id === ((C = e.selected) == null ? void 0 : C.dataset.id) || Math.abs(i - D) <= 3 && u.push(D);
     });
-    const S = c.length === 0 ? t : Math.max(...c), k = g.length === 0 ? e : Math.max(...g), L = Math.max(S, 10), v = Math.max(k, 10);
-    if (s.includes("left")) {
-      const m = n + a;
-      i.selected.style.left = A(m - L);
+    const y = h.length === 0 ? t : Math.max(...h), w = u.length === 0 ? i : Math.max(...u), $ = Math.max(y, 10), k = Math.max(w, 10);
+    if (n.includes("left")) {
+      const R = l + c;
+      e.selected.style.left = A(R - $);
     } else
-      i.selected.style.left = A(n);
-    if (i.selected.style.width = A(L), s.includes("top")) {
-      const m = h + o;
-      i.selected.style.top = A(m - v);
+      e.selected.style.left = A(l);
+    if (e.selected.style.width = A($), n.includes("top")) {
+      const R = a + o;
+      e.selected.style.top = A(R - k);
     } else
-      i.selected.style.top = A(h);
-    i.selected.style.height = A(v);
-    const N = parseFloat(i.selected.style.width), I = parseFloat(i.selected.style.height), { widthMap: w, heightMap: E } = U(i);
-    (V = w.get(N)) == null || V.forEach((m) => {
-      const M = this.g.querySelector(`[data-ower-id="${m.nodeRect.id}"]`), T = b(M, `${d}-resize-line-group-width`);
-      T.style.display = "block";
-    }), (Z = E.get(I)) == null || Z.forEach((m) => {
-      const M = this.g.querySelector(`[data-ower-id="${m.nodeRect.id}"]`), T = b(M, `${d}-resize-line-group-height`);
-      T.style.display = "block";
+      e.selected.style.top = A(a);
+    e.selected.style.height = A(k);
+    const S = parseFloat(e.selected.style.width), N = parseFloat(e.selected.style.height), { widthMap: v, heightMap: L } = _(e);
+    (q = v.get(S)) == null || q.forEach((R) => {
+      const D = this.g.querySelector(`[data-ower-id="${R.nodeRect.id}"]`), C = b(D, `${g}-resize-line-group-width`);
+      C.style.display = "block";
+    }), (O = L.get(N)) == null || O.forEach((R) => {
+      const D = this.g.querySelector(`[data-ower-id="${R.nodeRect.id}"]`), C = b(D, `${g}-resize-line-group-height`);
+      C.style.display = "block";
     });
-    const R = this.g.querySelector(`[data-ower-id="${i.selected.dataset.id}"]`), z = b(R, `${d}-resize-line-group-width`), K = b(R, `${d}-resize-line-group-height`);
-    K.style.display = "block", z.style.display = "block", xt(i), i.border.reRender(i);
+    const M = this.g.querySelector(`[data-ower-id="${e.selected.dataset.id}"]`), B = b(M, `${g}-resize-line-group-width`), tt = b(M, `${g}-resize-line-group-height`);
+    tt.style.display = "block", B.style.display = "block", pt(e), e.border.reRender(e);
   }
 }
-function St(r, i, t, e) {
-  return t - r > 0 && e - i > 0 ? "4" : t - r < 0 && e - i > 0 ? "3" : t - r < 0 && e - i < 0 ? "2" : t - r > 0 && e - i < 0 ? "1" : "0";
+function St(s, e, t, i) {
+  return t - s > 0 && i - e > 0 ? "4" : t - s < 0 && i - e > 0 ? "3" : t - s < 0 && i - e < 0 ? "2" : t - s > 0 && i - e < 0 ? "1" : "0";
 }
-class wt {
-  constructor(i) {
-    f(this, "g");
+class mt {
+  constructor(e) {
+    p(this, "g");
     // 选择框矩形
-    f(this, "selectorRect");
-    f(this, "previewRect");
-    f(this, "selectedGroup", []);
-    this.g = x("g"), this.g.setAttribute("class", `${d}-selector`), this.selectorRect = x("rect"), this.selectorRect.setAttribute("class", `${d}-selector-rect`), this.selectorRect.setAttribute("stroke", "#919191"), this.selectorRect.setAttribute("stroke-width", "1px"), this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)"), this.selectorRect.style.display = "none", this.previewRect = x("rect"), this.previewRect.setAttribute("class", `${d}-selector-preview`), this.previewRect.setAttribute("stroke", "#000"), this.previewRect.setAttribute("stroke-width", "1px"), this.previewRect.setAttribute("fill", "transparent"), this.previewRect.style.display = "none", this.g.append(this.selectorRect, this.previewRect), i.append(this.g);
+    p(this, "selectorRect");
+    p(this, "previewRect");
+    p(this, "selectedGroup", []);
+    this.g = x("g"), this.g.setAttribute("class", `${g}-selector`), this.selectorRect = x("rect"), this.selectorRect.setAttribute("class", `${g}-selector-rect`), this.selectorRect.setAttribute("stroke", "#919191"), this.selectorRect.setAttribute("stroke-width", "1px"), this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)"), this.selectorRect.style.display = "none", this.previewRect = x("rect"), this.previewRect.setAttribute("class", `${g}-selector-preview`), this.previewRect.setAttribute("stroke", "#000"), this.previewRect.setAttribute("stroke-width", "1px"), this.previewRect.setAttribute("fill", "transparent"), this.previewRect.style.display = "none", this.g.append(this.selectorRect, this.previewRect), e.append(this.g);
   }
   hiddenSelector() {
     this.selectorRect.style.display = "none";
@@ -525,105 +539,118 @@ class wt {
   showPreview() {
     this.previewRect.style.display = "block";
   }
-  reRender(i, t, e, s, n) {
+  reRender(e, t, i, n, l) {
     this.showSelector(), this.hiddenPreview(), this.selectedGroup = [];
-    const h = St(t, e, s, n), a = Math.abs(t - s), o = Math.abs(e - n);
-    this.selectorRect.setAttribute("width", String(a)), this.selectorRect.setAttribute("height", String(o));
-    let l = t, u = e;
-    switch (h) {
+    const a = St(t, i, n, l), c = Math.abs(t - n), o = Math.abs(i - l);
+    this.selectorRect.setAttribute("width", String(c)), this.selectorRect.setAttribute("height", String(o));
+    let r = t, d = i;
+    switch (a) {
       case "3": {
-        l = l - a;
+        r = r - c;
         break;
       }
       case "2": {
-        l = l - a, u = u - o;
+        r = r - c, d = d - o;
         break;
       }
       case "1": {
-        u = u - o;
+        d = d - o;
         break;
       }
     }
-    this.selectorRect.setAttribute("x", String(l)), this.selectorRect.setAttribute("y", String(u)), i.nodes.forEach((N) => {
-      y.from(N).isIntersect({
-        x: l,
-        y: u,
-        w: a,
+    this.selectorRect.setAttribute("x", String(r)), this.selectorRect.setAttribute("y", String(d)), e.nodes.forEach((S) => {
+      f.from(S).isIntersect({
+        x: r,
+        y: d,
+        w: c,
         h: o
-      }) && this.selectedGroup.push(N);
+      }) && this.selectedGroup.push(S);
     });
-    const c = [], g = [], S = [], k = [];
-    this.selectedGroup.forEach((N) => {
-      const { x: I, y: w, w: E, h: R } = y.from(N);
-      c.push(I), g.push(w), S.push(I + E), k.push(w + R);
+    const h = [], u = [], y = [], w = [];
+    this.selectedGroup.forEach((S) => {
+      const { x: N, y: v, w: L, h: M } = f.from(S);
+      h.push(N), u.push(v), y.push(N + L), w.push(v + M);
     });
-    const L = Math.min(...c), v = Math.min(...g);
-    this.previewRect.setAttribute("x", String(c.length ? L : 0)), this.previewRect.setAttribute("y", String(g.length ? v : 0)), this.previewRect.setAttribute("width", String(S.length ? Math.max(...S) - L : 0)), this.previewRect.setAttribute("height", String(k.length ? Math.max(...k) - v : 0));
+    const $ = Math.min(...h), k = Math.min(...u);
+    this.previewRect.setAttribute("x", String(h.length ? $ : 0)), this.previewRect.setAttribute("y", String(u.length ? k : 0)), this.previewRect.setAttribute("width", String(y.length ? Math.max(...y) - $ : 0)), this.previewRect.setAttribute("height", String(w.length ? Math.max(...w) - k : 0));
   }
 }
-const p = "#3875F6", W = 1, $ = 10, mt = ["left", "right", "top", "bottom"];
-function Et(r) {
-  const i = [], t = y.from(r.selected);
-  r.nodes.forEach((e) => {
-    if (t.node === e) return;
-    const s = y.from(e);
-    i.push(s);
-  }), i.forEach((e) => {
-    if (e.isIntersect(t)) return;
-    if (e.y <= t.y && e.y + e.h >= t.y || e.y <= t.y + t.h / 2 && e.y + e.h >= t.y + t.h / 2 || e.y <= t.y + t.h && e.y + e.h >= t.y + t.h) {
-      if (t.x + t.w < e.x) {
-        const n = Math.abs(t.x + t.w - e.x);
-        r.distance.right.length > n && (r.distance.right.length = n, r.distance.right.node = e.node);
+const m = "#3875F6", X = 1, E = 10, $t = ["left", "right", "top", "bottom"];
+function kt(s) {
+  if (!s.selected || !s.nodes || s.nodes.length === 0)
+    return;
+  s.distance.left = {
+    length: 1 / 0,
+    node: null
+  }, s.distance.right = {
+    length: 1 / 0,
+    node: null
+  }, s.distance.top = {
+    length: 1 / 0,
+    node: null
+  }, s.distance.bottom = {
+    length: 1 / 0,
+    node: null
+  };
+  const e = [], t = f.from(s.selected);
+  s.nodes.forEach((i) => {
+    if (t.node === i) return;
+    const n = f.from(i);
+    e.push(n);
+  }), e.forEach((i) => {
+    if (i.isIntersect(t)) return;
+    if (i.y <= t.y + t.h && i.y + i.h >= t.y) {
+      if (t.x + t.w < i.x) {
+        const a = Math.abs(t.x + t.w - i.x);
+        s.distance.right.length > a && (s.distance.right.length = a, s.distance.right.node = i.node);
       }
-      if (t.x > e.x + e.w) {
-        const n = Math.abs(t.x - e.x - e.w);
-        r.distance.left.length > n && (r.distance.left.length = n, r.distance.left.node = e.node);
+      if (t.x > i.x + i.w) {
+        const a = Math.abs(t.x - i.x - i.w);
+        s.distance.left.length > a && (s.distance.left.length = a, s.distance.left.node = i.node);
       }
     }
-  }), i.forEach((e) => {
-    if (e.isIntersect(t)) return;
-    if (e.x <= t.x && e.x + e.w >= t.x || e.x <= t.x + t.w / 2 && e.x + e.w >= t.x + t.w / 2 || e.x <= t.x + t.w && e.x + e.w >= t.x + t.w) {
-      if (t.y + t.h < e.y) {
-        const n = Math.abs(t.y + t.h - e.y);
-        r.distance.bottom.length > n && (r.distance.bottom.length = n, r.distance.bottom.node = e.node);
+    if (i.x <= t.x + t.w && i.x + i.w >= t.x) {
+      if (t.y + t.h < i.y) {
+        const a = Math.abs(t.y + t.h - i.y);
+        s.distance.bottom.length > a && (s.distance.bottom.length = a, s.distance.bottom.node = i.node);
       }
-      if (t.y > e.y + e.h) {
-        const n = Math.abs(t.y - e.y - e.h);
-        r.distance.top.length > n && (r.distance.top.length = n, r.distance.top.node = e.node);
+      if (t.y > i.y + i.h) {
+        const a = Math.abs(t.y - i.y - i.h);
+        s.distance.top.length > a && (s.distance.top.length = a, s.distance.top.node = i.node);
       }
     }
   });
 }
-function P(r) {
-  const i = [0, 4, 8, 12, 16];
-  for (const t of i)
-    if (t - 2 <= r && t + 2 >= r) return t;
-  return r;
+function Y(s) {
+  const e = [4, 8, 12, 16];
+  for (const t of e)
+    if (t - 2 <= s && t + 2 >= s) return t;
+  return s;
 }
-class $t {
-  constructor(i) {
-    f(this, "g");
-    f(this, "lines");
-    f(this, "left");
-    f(this, "right");
-    f(this, "top");
-    f(this, "bottom");
-    this.g = x("g"), this.g.setAttribute("class", `${d}-distance`), this.lines = {};
-    const t = (e) => {
-      const s = x("g");
-      s.setAttribute("class", `${d}-distance-${e}`);
-      const n = x("line");
-      n.setAttribute("class", `${d}-distance-${e}-line`);
-      const h = x("line");
-      h.setAttribute("class", `${d}-distance-${e}-dash-line`);
-      const a = x("text");
-      a.setAttribute("class", `${d}-distance-${e}-text`);
+class Et {
+  constructor(e) {
+    p(this, "g");
+    p(this, "lines");
+    p(this, "left");
+    p(this, "right");
+    p(this, "top");
+    p(this, "bottom");
+    this.g = x("g"), this.g.setAttribute("class", `${g}-distance`), this.lines = {};
+    const t = (i) => {
+      const n = x("g");
+      n.setAttribute("class", `${g}-distance-${i}`);
+      const l = x("line");
+      l.setAttribute("class", `${g}-distance-${i}-line`);
+      const a = x("line");
+      a.setAttribute("class", `${g}-distance-${i}-dash-line`);
+      const c = x("text");
+      c.setAttribute("class", `${g}-distance-${i}-text`);
       const o = x("rect");
-      o.setAttribute("class", `${d}-distance-${e}-text-bg`);
-      const l = x("rect");
-      l.setAttribute("class", `${d}-distance-${e}-line-start`);
-      const u = x("rect");
-      return u.setAttribute("class", `${d}-distance-${e}-line-end`), s.appendChild(n), s.appendChild(h), s.appendChild(o), s.appendChild(a), s.appendChild(l), s.appendChild(u), s;
+      o.setAttribute("class", `${g}-distance-${i}-text-bg`);
+      const r = x("rect");
+      r.setAttribute("class", `${g}-distance-${i}-line-start`);
+      const d = x("rect");
+      return d.setAttribute("class", `${g}-distance-${i}-line-end`), n.appendChild(l), n.appendChild(a), n.appendChild(o), n.appendChild(c), n.appendChild(r), n.appendChild(d), n;
     };
     this.left = {
       length: 1 / 0,
@@ -637,153 +664,228 @@ class $t {
     }, this.bottom = {
       length: 1 / 0,
       node: null
-    }, mt.forEach((e) => {
-      const s = t(e);
-      this.lines[e] = s;
-    }), this.g.append(...Object.values(this.lines)), i.append(this.g);
+    }, $t.forEach((i) => {
+      const n = t(i);
+      this.lines[i] = n;
+    }), this.g.append(...Object.values(this.lines)), e.append(this.g);
   }
   hidden() {
-    Object.values(this.lines).forEach((i) => {
-      i.setAttribute("style", "display: none;");
-    }), this.left = {
-      length: 1 / 0,
-      node: null
-    }, this.right = {
-      length: 1 / 0,
-      node: null
-    }, this.top = {
-      length: 1 / 0,
-      node: null
-    }, this.bottom = {
-      length: 1 / 0,
-      node: null
-    };
+    Object.values(this.lines).forEach((e) => {
+      e.setAttribute("style", "display: none;");
+    });
   }
-  reRender(i) {
-    if (i.selected) {
-      if (this.hidden(), Et(i), this.left.node && this.left.node.id !== i.selected.dataset.id) {
-        if (i.align.isHAlign) {
-          const g = P(this.left.length);
-          g !== this.left.length && (i.selected.style.left = A(parseFloat(i.selected.style.left) - this.left.length + g), this.left.length = g, i.align.reRender(i), i.border.reRender(i));
+  reRender(e) {
+    if (e.selected) {
+      if (this.hidden(), kt(e), this.left.node && this.left.node.id !== e.selected.dataset.id) {
+        if (e.align.isHAlign && !e.align.isVAlign) {
+          const u = Y(this.left.length);
+          u !== this.left.length && (e.selected.style.left = A(parseFloat(e.selected.style.left) - this.left.length + u), this.left.length = u, e.align.reRender(e), e.border.reRender(e));
         }
-        const t = y.from(this.left.node), e = y.from(i.selected), s = b(this.lines.left, `${d}-distance-left-line`);
-        s.setAttribute("x1", String(t.x + t.w)), s.setAttribute("x2", String(e.x)), s.setAttribute("y1", String(e.y + e.h / 2)), s.setAttribute("y2", String(e.y + e.h / 2)), s.setAttribute("stroke", p), s.setAttribute("stroke-width", String(W));
-        const n = b(this.lines.left, `${d}-distance-left-text`);
-        n.textContent = `${C(this.left.length, !0)}`, n.setAttribute("x", String((t.x + t.w + e.x) / 2)), n.setAttribute("y", String(e.y + e.h / 2 - 9)), n.setAttribute("fill", "#FFFFFF"), n.setAttribute("font-size", String($)), n.setAttribute("text-anchor", "middle"), n.setAttribute("alignment-baseline", "middle");
-        const h = b(this.lines.left, `${d}-distance-left-text-bg`);
-        h.setAttribute(
+        const t = f.from(this.left.node), i = f.from(e.selected), n = b(this.lines.left, `${g}-distance-left-line`);
+        n.setAttribute("x1", String(t.x + t.w)), n.setAttribute("x2", String(i.x)), n.setAttribute("y1", String(i.y + i.h / 2)), n.setAttribute("y2", String(i.y + i.h / 2)), n.setAttribute("stroke", m), n.setAttribute("stroke-width", String(X / e.scale));
+        const l = b(this.lines.left, `${g}-distance-left-text`);
+        l.textContent = `${W(i.x - t.x - t.w, !0)}`, l.setAttribute("x", String((t.x + t.w + i.x) / 2)), l.setAttribute(
+          "y",
+          String(i.y + i.h / 2 - (E + 4) / 2 / e.scale - 2 / e.scale)
+        ), l.setAttribute("fill", "#FFFFFF"), l.setAttribute("font-size", String(E / e.scale)), l.setAttribute("text-anchor", "middle"), l.setAttribute("alignment-baseline", "middle");
+        const a = b(this.lines.left, `${g}-distance-left-text-bg`);
+        a.setAttribute(
           "x",
-          String((t.x + t.w + e.x) / 2 - (n.getComputedTextLength() + 10) / 2)
-        ), h.setAttribute("y", String(e.y + e.h / 2 - $ / 2 - 12)), h.setAttribute("width", String(n.getComputedTextLength() + 10)), h.setAttribute("height", String($ + 4)), h.setAttribute("fill", p), h.setAttribute("rx", "4"), h.setAttribute("ry", "4");
-        const a = 1, o = 8, l = b(this.lines.left, `${d}-distance-left-line-start`);
-        l.setAttribute("x", String(t.x + t.w - a / 2)), l.setAttribute("y", String(e.y + e.h / 2 - o / 2)), l.setAttribute("width", String(a)), l.setAttribute("height", String(o)), l.setAttribute("fill", p);
-        const u = b(this.lines.left, `${d}-distance-left-line-end`);
-        u.setAttribute("x", String(e.x - a / 2)), u.setAttribute("y", String(e.y + e.h / 2 - o / 2)), u.setAttribute("width", String(a)), u.setAttribute("height", String(o)), u.setAttribute("fill", p);
-        const c = b(this.lines.left, `${d}-distance-left-dash-line`);
-        e.y < t.y ? (c.setAttribute("x1", String(t.x + t.w)), c.setAttribute("x2", String(t.x + t.w)), c.setAttribute("y1", String(e.y)), c.setAttribute("y2", String(t.y)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : e.y + e.h > t.y + t.h ? (c.setAttribute("x1", String(t.x + t.w)), c.setAttribute("x2", String(t.x + t.w)), c.setAttribute("y1", String(t.y + t.h)), c.setAttribute("y2", String(e.y + e.h)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : c.setAttribute("style", "display: none;");
+          String((t.x + t.w + i.x) / 2 - (l.getComputedTextLength() + 10) / 2)
+        ), a.setAttribute(
+          "y",
+          String(i.y + i.h / 2 - E / e.scale / 2 - 12 / e.scale)
+        ), a.setAttribute("width", String(l.getComputedTextLength() + 10)), a.setAttribute("height", String((E + 4) / e.scale)), a.setAttribute("fill", m), a.setAttribute("rx", "4"), a.setAttribute("ry", "4");
+        const c = 1, o = 8, r = b(this.lines.left, `${g}-distance-left-line-start`);
+        r.setAttribute("x", String(t.x + t.w - c / 2)), r.setAttribute("y", String(i.y + i.h / 2 - o / 2)), r.setAttribute("width", String(c)), r.setAttribute("height", String(o)), r.setAttribute("fill", m);
+        const d = b(this.lines.left, `${g}-distance-left-line-end`);
+        d.setAttribute("x", String(i.x - c / 2)), d.setAttribute("y", String(i.y + i.h / 2 - o / 2)), d.setAttribute("width", String(c)), d.setAttribute("height", String(o)), d.setAttribute("fill", m);
+        const h = b(this.lines.left, `${g}-distance-left-dash-line`);
+        i.y < t.y ? (h.setAttribute("x1", String(t.x + t.w)), h.setAttribute("x2", String(t.x + t.w)), h.setAttribute("y1", String(i.y)), h.setAttribute("y2", String(t.y)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : i.y + i.h > t.y + t.h ? (h.setAttribute("x1", String(t.x + t.w)), h.setAttribute("x2", String(t.x + t.w)), h.setAttribute("y1", String(t.y + t.h)), h.setAttribute("y2", String(i.y + i.h)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : h.setAttribute("style", "display: none;");
       }
-      if (this.right.node && this.right.node.id !== i.selected.dataset.id) {
-        if (i.align.isHAlign) {
-          const g = P(this.right.length);
-          g !== this.right.length && (i.selected.style.left = A(parseFloat(i.selected.style.left) + this.right.length - g), this.right.length = g, i.align.reRender(i), i.border.reRender(i));
+      if (this.right.node && this.right.node.id !== e.selected.dataset.id) {
+        if (e.align.isHAlign && !e.align.isVAlign) {
+          const u = Y(this.right.length);
+          u !== this.right.length && (e.selected.style.left = A(parseFloat(e.selected.style.left) + this.right.length - u), this.right.length = u, e.align.reRender(e), e.border.reRender(e));
         }
-        const t = y.from(this.right.node), e = y.from(i.selected), s = b(this.lines.right, `${d}-distance-right-line`);
-        s.setAttribute("x1", String(e.x + e.w)), s.setAttribute("x2", String(t.x)), s.setAttribute("y1", String(e.y + e.h / 2)), s.setAttribute("y2", String(e.y + e.h / 2)), s.setAttribute("stroke", p), s.setAttribute("stroke-width", String(W));
-        const n = b(this.lines.right, `${d}-distance-right-text`);
-        n.textContent = `${C(this.right.length, !0)}`, n.setAttribute("x", String((e.x + e.w + t.x) / 2)), n.setAttribute("y", String(e.y + e.h / 2 - 9)), n.setAttribute("fill", "#FFFFFF"), n.setAttribute("font-size", String($)), n.setAttribute("text-anchor", "middle"), n.setAttribute("alignment-baseline", "middle");
-        const h = b(this.lines.right, `${d}-distance-right-text-bg`);
-        h.setAttribute(
+        const t = f.from(this.right.node), i = f.from(e.selected), n = b(this.lines.right, `${g}-distance-right-line`);
+        n.setAttribute("x1", String(i.x + i.w)), n.setAttribute("x2", String(t.x)), n.setAttribute("y1", String(i.y + i.h / 2)), n.setAttribute("y2", String(i.y + i.h / 2)), n.setAttribute("stroke", m), n.setAttribute("stroke-width", String(X / e.scale));
+        const l = b(this.lines.right, `${g}-distance-right-text`);
+        l.textContent = `${W(t.x - i.x - i.w, !0)}`, l.setAttribute("x", String((i.x + i.w + t.x) / 2)), l.setAttribute("y", String(i.y + i.h / 2 - (E + 4) / 2 / e.scale - 2 / e.scale)), l.setAttribute("fill", "#FFFFFF"), l.setAttribute("font-size", String(E / e.scale)), l.setAttribute("text-anchor", "middle"), l.setAttribute("alignment-baseline", "middle");
+        const a = b(this.lines.right, `${g}-distance-right-text-bg`);
+        a.setAttribute(
           "x",
-          String((e.x + e.w + t.x) / 2 - (n.getComputedTextLength() + 10) / 2)
-        ), h.setAttribute("y", String(e.y + e.h / 2 - $ / 2 - 12)), h.setAttribute("width", String(n.getComputedTextLength() + 10)), h.setAttribute("height", String($ + 4)), h.setAttribute("fill", p), h.setAttribute("rx", "4"), h.setAttribute("ry", "4");
-        const a = 1, o = 8, l = b(this.lines.right, `${d}-distance-right-line-start`);
-        l.setAttribute("x", String(e.x + e.w - a / 2)), l.setAttribute("y", String(e.y + e.h / 2 - o / 2)), l.setAttribute("width", String(a)), l.setAttribute("height", String(o)), l.setAttribute("fill", p);
-        const u = b(this.lines.right, `${d}-distance-right-line-end`);
-        u.setAttribute("x", String(t.x - a / 2)), u.setAttribute("y", String(e.y + e.h / 2 - o / 2)), u.setAttribute("width", String(a)), u.setAttribute("height", String(o)), u.setAttribute("fill", p);
-        const c = b(this.lines.right, `${d}-distance-right-dash-line`);
-        e.y < t.y ? (c.setAttribute("x1", String(t.x)), c.setAttribute("x2", String(t.x)), c.setAttribute("y1", String(e.y)), c.setAttribute("y2", String(t.y)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : e.y + e.h > t.y + t.h ? (c.setAttribute("x1", String(t.x)), c.setAttribute("x2", String(t.x)), c.setAttribute("y1", String(t.y + t.h)), c.setAttribute("y2", String(e.y + e.h)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : c.setAttribute("style", "display: none;");
+          String((i.x + i.w + t.x) / 2 - (l.getComputedTextLength() + 10) / 2)
+        ), a.setAttribute(
+          "y",
+          String(i.y + i.h / 2 - E / e.scale / 2 - 12 / e.scale)
+        ), a.setAttribute("width", String(l.getComputedTextLength() + 10)), a.setAttribute("height", String((E + 4) / e.scale)), a.setAttribute("fill", m), a.setAttribute("rx", "4"), a.setAttribute("ry", "4");
+        const c = 1, o = 8, r = b(this.lines.right, `${g}-distance-right-line-start`);
+        r.setAttribute("x", String(i.x + i.w - c / 2)), r.setAttribute("y", String(i.y + i.h / 2 - o / 2)), r.setAttribute("width", String(c)), r.setAttribute("height", String(o)), r.setAttribute("fill", m);
+        const d = b(this.lines.right, `${g}-distance-right-line-end`);
+        d.setAttribute("x", String(t.x - c / 2)), d.setAttribute("y", String(i.y + i.h / 2 - o / 2)), d.setAttribute("width", String(c)), d.setAttribute("height", String(o)), d.setAttribute("fill", m);
+        const h = b(this.lines.right, `${g}-distance-right-dash-line`);
+        i.y < t.y ? (h.setAttribute("x1", String(t.x)), h.setAttribute("x2", String(t.x)), h.setAttribute("y1", String(i.y)), h.setAttribute("y2", String(t.y)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : i.y + i.h > t.y + t.h ? (h.setAttribute("x1", String(t.x)), h.setAttribute("x2", String(t.x)), h.setAttribute("y1", String(t.y + t.h)), h.setAttribute("y2", String(i.y + i.h)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : h.setAttribute("style", "display: none;");
       }
-      if (this.top.node && this.top.node.id !== i.selected.dataset.id) {
-        if (i.align.isVAlign) {
-          const g = P(this.top.length);
-          g !== this.top.length && (i.selected.style.top = A(parseFloat(i.selected.style.top) - this.top.length + g), this.top.length = g, i.align.reRender(i), i.border.reRender(i));
+      if (this.top.node && this.top.node.id !== e.selected.dataset.id) {
+        if (e.align.isVAlign && !e.align.isHAlign) {
+          const u = Y(this.top.length);
+          u !== this.top.length && (e.selected.style.top = A(parseFloat(e.selected.style.top) - this.top.length + u), this.top.length = u, e.align.reRender(e), e.border.reRender(e));
         }
-        const t = y.from(this.top.node), e = y.from(i.selected), s = b(this.lines.top, `${d}-distance-top-line`);
-        s.setAttribute("x1", String(e.x + e.w / 2)), s.setAttribute("x2", String(e.x + e.w / 2)), s.setAttribute("y1", String(e.y)), s.setAttribute("y2", String(t.y + t.h)), s.setAttribute("stroke", p), s.setAttribute("stroke-width", String(W));
-        const n = b(this.lines.top, `${d}-distance-top-text`);
-        n.textContent = `${C(this.top.length, !0)}`, n.setAttribute("x", String(e.x + e.w / 2 + (n.getComputedTextLength() + 10) / 2 + 3)), n.setAttribute("y", String((e.y + t.y + t.h) / 2 + 1)), n.setAttribute("fill", "#FFFFFF"), n.setAttribute("font-size", String($)), n.setAttribute("text-anchor", "middle"), n.setAttribute("alignment-baseline", "middle");
-        const h = b(this.lines.top, `${d}-distance-top-text-bg`);
-        h.setAttribute("x", String(e.x + e.w / 2 + 3)), h.setAttribute("y", String((e.y + t.y + t.h) / 2 - ($ + 4) / 2)), h.setAttribute("width", String(n.getComputedTextLength() + 10)), h.setAttribute("height", String($ + 4)), h.setAttribute("fill", p), h.setAttribute("rx", "4"), h.setAttribute("ry", "4");
-        const a = 8, o = 1, l = b(this.lines.top, `${d}-distance-top-line-start`);
-        l.setAttribute("x", String(e.x + e.w / 2 - a / 2)), l.setAttribute("y", String(t.y + t.h - o / 2)), l.setAttribute("width", String(a)), l.setAttribute("height", String(o)), l.setAttribute("fill", p);
-        const u = b(this.lines.top, `${d}-distance-top-line-end`);
-        u.setAttribute("x", String(e.x + e.w / 2 - a / 2)), u.setAttribute("y", String(e.y - o / 2)), u.setAttribute("width", String(a)), u.setAttribute("height", String(o)), u.setAttribute("fill", p);
-        const c = b(this.lines.top, `${d}-distance-top-dash-line`);
-        e.x < t.x ? (c.setAttribute("x1", String(e.x)), c.setAttribute("x2", String(t.x)), c.setAttribute("y1", String(t.y + t.h)), c.setAttribute("y2", String(t.y + t.h)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : e.x + e.w > t.x + t.w ? (c.setAttribute("x1", String(t.x + t.w)), c.setAttribute("x2", String(e.x + e.w)), c.setAttribute("y1", String(t.y + t.h)), c.setAttribute("y2", String(t.y + t.h)), c.setAttribute("stroke", p), c.setAttribute("stroke-width", "1"), c.setAttribute("stroke-dasharray", "4 4"), c.setAttribute("style", "display: block;")) : c.setAttribute("style", "display: none;");
+        const t = f.from(this.top.node), i = f.from(e.selected), n = b(this.lines.top, `${g}-distance-top-line`);
+        n.setAttribute("x1", String(i.x + i.w / 2)), n.setAttribute("x2", String(i.x + i.w / 2)), n.setAttribute("y1", String(i.y)), n.setAttribute("y2", String(t.y + t.h)), n.setAttribute("stroke", m), n.setAttribute("stroke-width", String(X / e.scale));
+        const l = b(this.lines.top, `${g}-distance-top-text`);
+        l.textContent = `${W(i.y - t.h - t.y, !0)}`, l.setAttribute(
+          "x",
+          String(i.x + i.w / 2 + (l.getComputedTextLength() + 10) / 2 + 3 / e.scale)
+        ), l.setAttribute("y", String((i.y + t.y + t.h) / 2 + 1 / e.scale)), l.setAttribute("fill", "#FFFFFF"), l.setAttribute("font-size", String(E / e.scale)), l.setAttribute("text-anchor", "middle"), l.setAttribute("alignment-baseline", "middle");
+        const a = b(this.lines.top, `${g}-distance-top-text-bg`);
+        a.setAttribute("x", String(i.x + i.w / 2 + 3 / e.scale)), a.setAttribute(
+          "y",
+          String((i.y + t.y + t.h) / 2 - (E / e.scale + 4) / 2)
+        ), a.setAttribute("width", String(l.getComputedTextLength() + 10)), a.setAttribute("height", String(E / e.scale + 4)), a.setAttribute("fill", m), a.setAttribute("rx", "4"), a.setAttribute("ry", "4");
+        const c = 8, o = 1, r = b(this.lines.top, `${g}-distance-top-line-start`);
+        r.setAttribute("x", String(i.x + i.w / 2 - c / 2)), r.setAttribute("y", String(t.y + t.h - o / 2)), r.setAttribute("width", String(c)), r.setAttribute("height", String(o)), r.setAttribute("fill", m);
+        const d = b(this.lines.top, `${g}-distance-top-line-end`);
+        d.setAttribute("x", String(i.x + i.w / 2 - c / 2)), d.setAttribute("y", String(i.y - o / 2)), d.setAttribute("width", String(c)), d.setAttribute("height", String(o)), d.setAttribute("fill", m);
+        const h = b(this.lines.top, `${g}-distance-top-dash-line`);
+        i.x < t.x ? (h.setAttribute("x1", String(i.x)), h.setAttribute("x2", String(t.x)), h.setAttribute("y1", String(t.y + t.h)), h.setAttribute("y2", String(t.y + t.h)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : i.x + i.w > t.x + t.w ? (h.setAttribute("x1", String(t.x + t.w)), h.setAttribute("x2", String(i.x + i.w)), h.setAttribute("y1", String(t.y + t.h)), h.setAttribute("y2", String(t.y + t.h)), h.setAttribute("stroke", m), h.setAttribute("stroke-width", "1"), h.setAttribute("stroke-dasharray", "4 4"), h.setAttribute("style", "display: block;")) : h.setAttribute("style", "display: none;");
       }
-      if (this.bottom.node && this.bottom.node.id !== i.selected.dataset.id) {
-        if (i.align.isVAlign) {
-          const S = P(this.bottom.length);
-          S !== this.bottom.length && (i.selected.style.top = A(parseFloat(i.selected.style.top) + this.bottom.length - S), this.bottom.length = S, i.align.reRender(i), i.border.reRender(i));
+      if (this.bottom.node && this.bottom.node.id !== e.selected.dataset.id) {
+        if (e.align.isVAlign && !e.align.isHAlign) {
+          const y = Y(this.bottom.length);
+          y !== this.bottom.length && (e.selected.style.top = A(parseFloat(e.selected.style.top) + this.bottom.length - y), this.bottom.length = y, e.align.reRender(e), e.border.reRender(e));
         }
-        const t = y.from(this.bottom.node), e = y.from(i.selected), s = b(this.lines.bottom, `${d}-distance-bottom-line`);
-        s.setAttribute("x1", String(e.x + e.w / 2)), s.setAttribute("x2", String(e.x + e.w / 2)), s.setAttribute("y1", String(e.y + e.h)), s.setAttribute("y2", String(t.y)), s.setAttribute("stroke", p), s.setAttribute("stroke-width", String(W));
-        const n = b(this.lines.bottom, `${d}-distance-bottom-text`);
-        n.textContent = `${C(this.bottom.length, !0)}`;
-        const h = e.x + e.w / 2 + (n.getComputedTextLength() + 10) / 2 + 3;
-        n.setAttribute("x", String(h)), n.setAttribute("y", String((e.y + e.h + t.y) / 2 + 1)), n.setAttribute("fill", "#FFFFFF"), n.setAttribute("font-size", String($)), n.setAttribute("text-anchor", "middle"), n.setAttribute("alignment-baseline", "middle");
-        const a = b(this.lines.bottom, `${d}-distance-bottom-text-bg`);
-        a.setAttribute("x", String(e.x + e.w / 2 + 3)), a.setAttribute("y", String((e.y + e.h + t.y) / 2 - ($ + 4) / 2)), a.setAttribute("width", String(n.getComputedTextLength() + 10)), a.setAttribute("height", String($ + 4)), a.setAttribute("fill", p), a.setAttribute("rx", "4"), a.setAttribute("ry", "4");
-        const o = 8, l = 1, u = b(
-          this.lines.bottom,
-          `${d}-distance-bottom-line-start`
-        );
-        u.setAttribute("x", String(e.x + e.w / 2 - o / 2)), u.setAttribute("y", String(e.y + e.h - l / 2)), u.setAttribute("width", String(o)), u.setAttribute("height", String(l)), u.setAttribute("fill", p);
-        const c = b(this.lines.bottom, `${d}-distance-bottom-line-end`);
-        c.setAttribute("x", String(e.x + e.w / 2 - o / 2)), c.setAttribute("y", String(t.y - l / 2)), c.setAttribute("width", String(o)), c.setAttribute("height", String(l)), c.setAttribute("fill", p);
-        const g = b(this.lines.bottom, `${d}-distance-bottom-dash-line`);
-        e.x < t.x ? (g.setAttribute("x1", String(e.x)), g.setAttribute("x2", String(t.x)), g.setAttribute("y1", String(t.y)), g.setAttribute("y2", String(t.y)), g.setAttribute("stroke", p), g.setAttribute("stroke-width", "1"), g.setAttribute("stroke-dasharray", "4 4"), g.setAttribute("style", "display: block;")) : e.x + e.w > t.x + t.w ? (g.setAttribute("x1", String(t.x + t.w)), g.setAttribute("x2", String(e.x + e.w)), g.setAttribute("y1", String(t.y)), g.setAttribute("y2", String(t.y)), g.setAttribute("stroke", p), g.setAttribute("stroke-width", "1"), g.setAttribute("stroke-dasharray", "4 4"), g.setAttribute("style", "display: block;")) : g.setAttribute("style", "display: none;");
+        const t = f.from(this.bottom.node), i = f.from(e.selected), n = b(this.lines.bottom, `${g}-distance-bottom-line`);
+        n.setAttribute("x1", String(i.x + i.w / 2)), n.setAttribute("x2", String(i.x + i.w / 2)), n.setAttribute("y1", String(i.y + i.h)), n.setAttribute("y2", String(t.y)), n.setAttribute("stroke", m), n.setAttribute("stroke-width", String(X / e.scale));
+        const l = b(this.lines.bottom, `${g}-distance-bottom-text`);
+        l.textContent = `${W(t.y - i.y - i.h, !0)}`;
+        const a = i.x + i.w / 2 + (l.getComputedTextLength() + 10) / 2 + 3 / e.scale;
+        l.setAttribute("x", String(a)), l.setAttribute("y", String((i.y + i.h + t.y) / 2 + 1 / e.scale)), l.setAttribute("fill", "#FFFFFF"), l.setAttribute("font-size", String(E / e.scale)), l.setAttribute("text-anchor", "middle"), l.setAttribute("alignment-baseline", "middle");
+        const c = b(this.lines.bottom, `${g}-distance-bottom-text-bg`);
+        c.setAttribute("x", String(i.x + i.w / 2 + 3 / e.scale)), c.setAttribute(
+          "y",
+          String((i.y + i.h + t.y) / 2 - (E / e.scale + 4) / 2)
+        ), c.setAttribute("width", String(l.getComputedTextLength() + 10)), c.setAttribute("height", String(E / e.scale + 4)), c.setAttribute("fill", m), c.setAttribute("rx", "4"), c.setAttribute("ry", "4");
+        const o = 8, r = 1, d = b(this.lines.bottom, `${g}-distance-bottom-line-start`);
+        d.setAttribute("x", String(i.x + i.w / 2 - o / 2)), d.setAttribute("y", String(i.y + i.h - r / 2)), d.setAttribute("width", String(o)), d.setAttribute("height", String(r)), d.setAttribute("fill", m);
+        const h = b(this.lines.bottom, `${g}-distance-bottom-line-end`);
+        h.setAttribute("x", String(i.x + i.w / 2 - o / 2)), h.setAttribute("y", String(t.y - r / 2)), h.setAttribute("width", String(o)), h.setAttribute("height", String(r)), h.setAttribute("fill", m);
+        const u = b(this.lines.bottom, `${g}-distance-bottom-dash-line`);
+        i.x < t.x ? (u.setAttribute("x1", String(i.x)), u.setAttribute("x2", String(t.x)), u.setAttribute("y1", String(t.y)), u.setAttribute("y2", String(t.y)), u.setAttribute("stroke", m), u.setAttribute("stroke-width", "1"), u.setAttribute("stroke-dasharray", "4 4"), u.setAttribute("style", "display: block;")) : i.x + i.w > t.x + t.w ? (u.setAttribute("x1", String(t.x + t.w)), u.setAttribute("x2", String(i.x + i.w)), u.setAttribute("y1", String(t.y)), u.setAttribute("y2", String(t.y)), u.setAttribute("stroke", m), u.setAttribute("stroke-width", "1"), u.setAttribute("stroke-dasharray", "4 4"), u.setAttribute("style", "display: block;")) : u.setAttribute("style", "display: none;");
       }
-      i.align.isHAlign && (G(this.left.length, this.right.length) ? (this.lines.left.style = "display: block;", this.lines.right.style = "display: block;") : this.left.length > this.right.length ? this.lines.right.style = "display: block;" : this.lines.left.style = "display: block;"), i.align.isVAlign && (G(this.top.length, this.bottom.length) ? (this.lines.top.style = "display: block;", this.lines.bottom.style = "display: block;") : this.top.length > this.bottom.length ? this.lines.bottom.style = "display: block;" : this.lines.top.style = "display: block;");
+      e.align.isHAlign && (V(this.left.length, this.right.length) ? (this.lines.left.style = "display: block;", this.lines.right.style = "display: block;") : this.left.length > this.right.length ? this.lines.right.style = "display: block;" : this.lines.left.style = "display: block;"), e.align.isVAlign && (V(this.top.length, this.bottom.length) ? (this.lines.top.style = "display: block;", this.lines.bottom.style = "display: block;") : this.top.length > this.bottom.length ? this.lines.bottom.style = "display: block;" : this.lines.top.style = "display: block;");
     }
   }
 }
-class kt {
-  constructor(i) {
-    f(this, "g");
-    this.g = x("g"), this.g.setAttribute("class", `${d}-gap`), i.append(this.g);
+function vt(s) {
+  const e = /* @__PURE__ */ new Map();
+  function t(a) {
+    var o;
+    const c = [];
+    a.toSorted((r, d) => r.x - d.x).forEach((r) => {
+      c.push({ value: r.x, type: "min", nodeRect: r }), c.push({ value: r.x + r.w, type: "max", nodeRect: r });
+    }), c.sort((r, d) => r.value - d.value);
+    for (let r = 0; r < c.length - 1; r++) {
+      const d = [], h = [];
+      if (c[r].type === "max" && c[r + 1].type === "min") {
+        for (let w = 0; w <= r && c[r].value === c[r - w].value; w++)
+          d.push(c[r - w]);
+        for (let w = r + 1; w <= c.length && c[r + 1].value === c[w].value; w++)
+          h.push(c[w]);
+        const u = h[0].value - d[0].value, y = d[0].nodeRect.x + d[0].nodeRect.w;
+        if (u > 0) {
+          const w = Math.min(...d.map((S) => S.nodeRect.y), ...h.map((S) => S.nodeRect.y)), $ = Math.max(
+            ...d.map((S) => S.nodeRect.y + S.nodeRect.h),
+            ...h.map((S) => S.nodeRect.y + S.nodeRect.h)
+          ), k = {
+            x: y,
+            y: w,
+            w: u,
+            h: $ - w,
+            rect1: d.map((S) => S.nodeRect),
+            rect2: h.map((S) => S.nodeRect)
+          };
+          e.has(u) ? (o = e.get(u)) == null || o.push(k) : e.set(u, [k]);
+        }
+      }
+    }
+  }
+  const i = [], n = f.from(s.selected);
+  s.nodes.forEach((a) => {
+    const c = f.from(a);
+    i.push(c);
+  }), i.sort((a, c) => a.x - c.x);
+  const l = [];
+  return i.forEach((a) => {
+    (a.y <= n.y && a.y + a.h >= n.y || a.y <= n.y + n.h / 2 && a.y + a.h >= n.y + n.h / 2 || a.y <= n.y + n.h && a.y + a.h >= n.y + n.h) && l.push(a);
+  }), t(l), e;
+}
+class Rt {
+  constructor(e) {
+    p(this, "g");
+    this.g = x("g"), this.g.setAttribute("class", `${g}-gap`), e.append(this.g);
   }
   clear() {
     this.g.innerHTML = "";
   }
-  reRender(i) {
-    if (!i.selected) return;
+  reRender(e) {
+    if (!e.selected) return;
     this.clear();
-    const { left: t, right: e, top: s, bottom: n } = i.distance, h = y.from(i.selected);
-    if (t.node && e.node) {
-      const a = y.from(e.node), o = y.from(t.node), l = (a.x - o.x - o.w - h.w) / 2;
-      Math.abs(h.x - o.x - o.w - l) <= 3 && (i.selected.style.left = A(o.x + o.w + l), h.sync());
+    const { left: t, right: i, top: n, bottom: l } = e.distance, a = f.from(e.selected), c = (o) => o < 0 ? 0 : o;
+    if (t.node && i.node && e.align.isHAlign && !e.align.isVAlign) {
+      const o = f.from(i.node), r = f.from(t.node), d = (o.x - r.x - r.w - a.w) / 2;
+      Math.abs(a.x - r.x - r.w - d) <= 3 && (e.selected.style.left = A(r.x + r.w + d), a.sync());
     }
-    if (s.node && n.node) {
-      const a = y.from(n.node), o = y.from(s.node), l = (a.y - o.y - o.h - h.h) / 2;
-      Math.abs(h.y - o.y - o.h - l) <= 3 && (i.selected.style.top = A(o.y + o.h + l), h.sync());
+    if (n.node && l.node && !e.align.isHAlign && e.align.isVAlign) {
+      const o = f.from(l.node), r = f.from(n.node), d = (o.y - r.y - r.h - a.h) / 2;
+      Math.abs(a.y - r.y - r.h - d) <= 3 && (e.selected.style.top = A(r.y + r.h + d), a.sync());
     }
-    i.align.reRender(i), i.distance.reRender(i), i.border.reRender(i);
+    if (e.align.reRender(e), e.distance.reRender(e), e.border.reRender(e), e.align.isHAlign) {
+      const o = [], r = vt(e), d = e.distance.left.length > e.distance.right.length ? i : t;
+      if (d.node) {
+        const h = f.from(d.node);
+        r.forEach((u, y) => {
+          if (Math.abs(d.length - y) <= 3 || y <= 20 && Math.abs(d.length - y) <= 4) {
+            if ([...u.map(($) => $.rect1.concat($.rect2))].flat().some(($) => {
+              var k;
+              return $.id === ((k = e.selected) == null ? void 0 : k.dataset.id);
+            })) {
+              o.push(...u);
+              return;
+            }
+            d.length === i.length ? (e.selected.style.left = A(h.x - y - a.w), e.distance.left.length = y, o.push(...u), a.sync()) : d.length === t.length && (e.selected.style.left = A(h.x + h.w + y), e.distance.right.length = y, o.push(...u), a.sync()), e.align.reRender(e), e.distance.reRender(e), e.border.reRender(e);
+          }
+        }), o.length > 1 && o.forEach((u) => {
+          const y = x("rect");
+          y.setAttribute("x", String(u.x)), y.setAttribute("y", String(u.y)), y.setAttribute(
+            "width",
+            String(
+              d.length === i.length ? c(h.x - a.x - a.w) : c(a.x - h.x - h.w)
+            )
+          ), y.setAttribute("height", String(u.h)), y.setAttribute("fill", "red"), y.setAttribute("opacity", "0.3"), d.length === i.length && y.setAttribute("width", String(c(h.x - a.x - a.w))), d.length === t.length && y.setAttribute("width", String(c(a.x - h.x - h.w))), this.g.append(y);
+        });
+      }
+    }
   }
 }
-const Lt = (r, i) => {
+const Lt = (s, e) => {
   const t = x("svg");
-  t.setAttribute("class", `${d}-svg`);
-  const e = r.getBoundingClientRect();
-  return t.setAttribute("width", A(e.width)), t.setAttribute("height", A(e.height)), t.style = "position: absolute; inset: 0;", r.className += ` ${d}-container`, i.forEach((s) => {
-    s.className += ` ${d}-movable-node`, s.setAttribute("data-id", ht()), /%$/.test(s.style.top) && (s.style.top = A(e.width * parseFloat(s.style.top) / 100)), /%$/.test(s.style.left) && (s.style.left = A(e.height * parseFloat(s.style.left) / 100)), /%$/.test(s.style.width) && (s.style.width = A(e.width * parseFloat(s.style.width) / 100)), /%$/.test(s.style.height) && (s.style.height = A(e.height * parseFloat(s.style.height) / 100));
+  t.setAttribute("class", `${g}-svg`);
+  const i = s.getBoundingClientRect();
+  return t.setAttribute("width", A(i.width)), t.setAttribute("height", A(i.height)), t.style = "position: absolute; inset: 0;", s.className += ` ${g}-container`, e.forEach((n) => {
+    n.className += ` ${g}-movable-node`, n.setAttribute("data-id", ct()), /%$/.test(n.style.top) && (n.style.top = A(i.width * parseFloat(n.style.top) / 100)), /%$/.test(n.style.left) && (n.style.left = A(i.height * parseFloat(n.style.left) / 100)), /%$/.test(n.style.width) && (n.style.width = A(i.width * parseFloat(n.style.width) / 100)), /%$/.test(n.style.height) && (n.style.height = A(i.height * parseFloat(n.style.height) / 100));
   }), {
-    container: r,
-    nodes: i,
+    container: s,
+    nodes: e,
     svg: t,
     selected: null,
-    setSelected(s) {
-      if (this.selected = s, !s) {
+    scale: 1,
+    scaleRange: [0.5, 2],
+    translateX: 0,
+    translateY: 0,
+    setSelected(n) {
+      if (this.selected = n, !n) {
         this.border.hidden();
         return;
       }
@@ -791,27 +893,27 @@ const Lt = (r, i) => {
     },
     searchError() {
       if (!this.selected) return;
-      const s = y.from(this.selected);
-      s.error = !1;
-      for (let n = 0; n < this.nodes.length; n++) {
-        const h = this.nodes[n];
-        if (h === this.selected) continue;
-        const a = y.from(h);
-        s.isIntersect(a) ? (s.error = !0, a.error = !0, this.align.hidden(), this.distance.hidden()) : a.error = !1;
+      const n = f.from(this.selected);
+      n.error = !1;
+      for (let l = 0; l < this.nodes.length; l++) {
+        const a = this.nodes[l];
+        if (a === this.selected) continue;
+        const c = f.from(a);
+        n.isIntersect(c) ? (n.error = !0, c.error = !0, this.align.hidden(), this.distance.hidden()) : c.error = !1;
       }
     },
-    gap: new kt(t),
-    align: new gt(t),
-    distance: new $t(t),
-    border: new ft(t),
-    resize: new pt(t, i),
-    selector: new wt(t)
+    gap: new Rt(t),
+    align: new bt(t),
+    distance: new Et(t),
+    border: new xt(t),
+    resize: new wt(t, e),
+    selector: new mt(t)
   };
 };
-class Rt {
-  constructor(i, t) {
-    f(this, "store");
-    this.store = Lt(i, t), nt(this.store);
+class Ft {
+  constructor(e, t) {
+    p(this, "store");
+    this.store = Lt(e, t), lt(this.store);
   }
   mount() {
     this.store.container.append(this.store.svg);
@@ -819,23 +921,23 @@ class Rt {
   unmount() {
     this.store.svg.remove();
   }
-  align(i) {
-    const { selected: t, container: e } = this.store;
+  align(e) {
+    const { selected: t, container: i } = this.store;
     if (!t) return;
-    const s = e.getBoundingClientRect(), n = y.from(t);
-    switch (i) {
+    const n = i.getBoundingClientRect(), l = f.from(t);
+    switch (e) {
       case "start":
         t.style.left = A(0);
         break;
       case "center":
-        t.style.left = A(s.width / 2 - n.w / 2);
+        t.style.left = A(n.width / 2 - l.w / 2);
         break;
       case "end":
-        t.style.left = A(s.width - n.w);
+        t.style.left = A(n.width - l.w);
         break;
     }
   }
 }
 export {
-  Rt as default
+  Ft as default
 };

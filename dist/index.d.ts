@@ -96,7 +96,6 @@ declare class Rect {
     get error(): boolean;
     isInSide(position: Position): boolean;
     isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
-    getAlignLinePostion(): Record<AlignLineType, number>;
     static from(node: HTMLElement): Rect;
 }
 
@@ -125,6 +124,10 @@ declare interface Store {
     container: HTMLElement;
     nodes: HTMLElement[];
     svg: SVGSVGElement;
+    scale: number;
+    scaleRange: [number, number];
+    translateX: number;
+    translateY: number;
     selected: HTMLElement | null;
     setSelected: (target: HTMLElement | null) => void;
     searchError: () => void;

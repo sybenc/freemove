@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Align } from "./align";
-import { NODE_CLASS_PREFIX } from "./const";
+import { NodeClassPrefix } from "./const";
 import { Border } from "./border";
 import { createElementNS, toPx } from "./utils";
 import { Resize } from "./resize";
@@ -13,6 +13,10 @@ export interface Store {
   container: HTMLElement;
   nodes: HTMLElement[];
   svg: SVGSVGElement;
+  scale: number;
+  scaleRange: [number, number];
+  translateX: number;
+  translateY: number;
   selected: HTMLElement | null;
   setSelected: (target: HTMLElement | null) => void;
   searchError: () => void;
@@ -27,16 +31,16 @@ export interface Store {
 
 export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store => {
   const svg = createElementNS<SVGSVGElement>("svg");
-  svg.setAttribute("class", `${NODE_CLASS_PREFIX}-svg`);
+  svg.setAttribute("class", `${NodeClassPrefix}-svg`);
 
   const containerRect = container.getBoundingClientRect();
   // this.render(config.nodes);
   svg.setAttribute("width", toPx(containerRect.width));
   svg.setAttribute("height", toPx(containerRect.height));
   svg.style = "position: absolute; inset: 0;";
-  container.className += ` ${NODE_CLASS_PREFIX}-container`;
+  container.className += ` ${NodeClassPrefix}-container`;
   nodes.forEach((node) => {
-    node.className += ` ${NODE_CLASS_PREFIX}-movable-node`;
+    node.className += ` ${NodeClassPrefix}-movable-node`;
     node.setAttribute("data-id", nanoid());
     if (/%$/.test(node.style.top)) node.style.top = toPx((containerRect.width * parseFloat(node.style.top)) / 100);
     if (/%$/.test(node.style.left)) node.style.left = toPx((containerRect.height * parseFloat(node.style.left)) / 100);
@@ -51,6 +55,10 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
     nodes,
     svg,
     selected: null,
+    scale: 1,
+    scaleRange: [0.5, 2],
+    translateX: 0,
+    translateY: 0,
     setSelected(target: HTMLElement | null) {
       this.selected = target;
       if (!target) {
@@ -64,20 +72,20 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
       if (!this.selected) return;
       const selectedRect = Rect.from(this.selected);
       selectedRect.error = false; // 先清除自身 error 状态
-    
+
       for (let i = 0; i < this.nodes.length; i++) {
         const node = this.nodes[i];
         if (node === this.selected) continue; // 避免和自己比较
-    
+
         const nodeRect = Rect.from(node);
         const isIntersect = selectedRect.isIntersect(nodeRect);
-    
+
         // 如果相交，标记两个都为 error
         if (isIntersect) {
           selectedRect.error = true;
           nodeRect.error = true;
-          this.align.hidden()
-          this.distance.hidden()
+          this.align.hidden();
+          this.distance.hidden();
         } else {
           nodeRect.error = false;
         }

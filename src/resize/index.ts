@@ -1,9 +1,9 @@
 import { Store } from "./../store";
-import { NODE_ABSORB_DELTA, NODE_CLASS_PREFIX, NODE_MIN_HEIGHT, NODE_MIN_WIDTH } from "../const";
+import { NodeAbsorbDelta, NodeClassPrefix, NodeMinHeight, NodeMinWidth } from "../const";
 import Rect from "../rect";
 import { createElementNS, getElement, showNumber, toPx } from "../utils"; // Ensure createElementNS is imported
 import { ResizeData } from "./type";
-import { RESIZE_COLOR, RESIZE_ENDPOINT_LENGTH, RESIZE_FONT_SIZE, RESIZE_OFFSET, RESIZE_WIDTH } from "./const";
+import { ResizeColor, ResizeEndpointLength, ResizeFontSize, ResizeOffset, ResizeWidth } from "./const";
 
 // 搜索相同宽高的数据映射
 function searchSameWidthHeight(store: Store): {
@@ -43,72 +43,72 @@ function renderResizeLine(store: Store) {
   store.nodes.forEach((node) => {
     const nodeRect = Rect.from(node);
     const g = store.resize.g.querySelector(`[data-ower-id="${nodeRect.id}"]`)!;
-    const widthLine = getElement<SVGLineElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line`);
-    const widthLineStart = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line-start`);
-    const widthLineEnd = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-line-end`);
-    const widthLineText = getElement<SVGTextElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-width-text`);
-    const heightLine = getElement<SVGLineElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line`);
-    const heightLineText = getElement<SVGTextElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-text`);
-    const heightLineStart = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line-start`);
-    const heightLineEnd = getElement<SVGRectElement>(g, `${NODE_CLASS_PREFIX}-resize-line-group-height-line-end`);
+    const widthLine = getElement<SVGLineElement>(g, `${NodeClassPrefix}-resize-line-group-width-line`);
+    const widthLineStart = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-width-line-start`);
+    const widthLineEnd = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-width-line-end`);
+    const widthLineText = getElement<SVGTextElement>(g, `${NodeClassPrefix}-resize-line-group-width-text`);
+    const heightLine = getElement<SVGLineElement>(g, `${NodeClassPrefix}-resize-line-group-height-line`);
+    const heightLineText = getElement<SVGTextElement>(g, `${NodeClassPrefix}-resize-line-group-height-text`);
+    const heightLineStart = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-height-line-start`);
+    const heightLineEnd = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-height-line-end`);
 
     widthLine.setAttribute("x1", String(nodeRect.x));
-    widthLine.setAttribute("y1", String(nodeRect.y - RESIZE_OFFSET));
+    widthLine.setAttribute("y1", String(nodeRect.y - ResizeOffset));
     widthLine.setAttribute("x2", String(nodeRect.x + nodeRect.w));
-    widthLine.setAttribute("y2", String(nodeRect.y - RESIZE_OFFSET));
+    widthLine.setAttribute("y2", String(nodeRect.y - ResizeOffset));
 
-    widthLineStart.setAttribute("x", String(nodeRect.x - RESIZE_WIDTH / 2));
-    widthLineStart.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    widthLineStart.setAttribute("width", String(RESIZE_WIDTH));
-    widthLineStart.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
-    widthLineStart.setAttribute("fill", String(RESIZE_COLOR));
+    widthLineStart.setAttribute("x", String(nodeRect.x - ResizeWidth / store.scale / 2));
+    widthLineStart.setAttribute("y", String(nodeRect.y - ResizeOffset - ResizeEndpointLength / store.scale / 2));
+    widthLineStart.setAttribute("width", String(ResizeWidth / store.scale));
+    widthLineStart.setAttribute("height", String(ResizeEndpointLength));
+    widthLineStart.setAttribute("fill", String(ResizeColor));
 
-    widthLineEnd.setAttribute("x", String(nodeRect.x + nodeRect.w - RESIZE_WIDTH / 2));
-    widthLineEnd.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    widthLineEnd.setAttribute("width", String(RESIZE_WIDTH));
-    widthLineEnd.setAttribute("height", String(RESIZE_ENDPOINT_LENGTH));
-    widthLineEnd.setAttribute("fill", String(RESIZE_COLOR));
+    widthLineEnd.setAttribute("x", String(nodeRect.x + nodeRect.w - ResizeWidth / store.scale / 2));
+    widthLineEnd.setAttribute("y", String(nodeRect.y - ResizeOffset - ResizeEndpointLength / store.scale / 2));
+    widthLineEnd.setAttribute("width", String(ResizeWidth / store.scale));
+    widthLineEnd.setAttribute("height", String(ResizeEndpointLength));
+    widthLineEnd.setAttribute("fill", String(ResizeColor));
 
     widthLineText.textContent = `${showNumber(nodeRect.w)}`;
     widthLineText.setAttribute("x", String(nodeRect.x + nodeRect.w / 2));
-    widthLineText.setAttribute("y", String(nodeRect.y - RESIZE_OFFSET - 8));
-    widthLineText.setAttribute("fill", String(RESIZE_COLOR));
-    widthLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
+    widthLineText.setAttribute("y", String(nodeRect.y - ResizeOffset - 8));
+    widthLineText.setAttribute("fill", String(ResizeColor));
+    widthLineText.setAttribute("font-size", String(ResizeFontSize / store.scale));
     widthLineText.setAttribute("text-anchor", "middle");
     widthLineText.setAttribute("alignment-baseline", "middle");
 
-    heightLine.setAttribute("x1", String(nodeRect.x - RESIZE_OFFSET));
+    heightLine.setAttribute("x1", String(nodeRect.x - ResizeOffset));
     heightLine.setAttribute("y1", String(nodeRect.y));
-    heightLine.setAttribute("x2", String(nodeRect.x - RESIZE_OFFSET));
+    heightLine.setAttribute("x2", String(nodeRect.x - ResizeOffset));
     heightLine.setAttribute("y2", String(nodeRect.y + nodeRect.h));
 
-    heightLineStart.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    heightLineStart.setAttribute("y", String(nodeRect.y - RESIZE_WIDTH / 2));
-    heightLineStart.setAttribute("width", String(RESIZE_ENDPOINT_LENGTH));
-    heightLineStart.setAttribute("height", String(RESIZE_WIDTH));
-    heightLineStart.setAttribute("fill", String(RESIZE_COLOR));
+    heightLineStart.setAttribute("x", String(nodeRect.x - ResizeOffset - ResizeEndpointLength / store.scale / 2));
+    heightLineStart.setAttribute("y", String(nodeRect.y - ResizeWidth / store.scale / 2));
+    heightLineStart.setAttribute("width", String(ResizeEndpointLength));
+    heightLineStart.setAttribute("height", String(ResizeWidth / store.scale));
+    heightLineStart.setAttribute("fill", String(ResizeColor));
 
-    heightLineEnd.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - RESIZE_ENDPOINT_LENGTH / 2));
-    heightLineEnd.setAttribute("y", String(nodeRect.y + nodeRect.h - RESIZE_WIDTH / 2));
-    heightLineEnd.setAttribute("width", String(RESIZE_ENDPOINT_LENGTH));
-    heightLineEnd.setAttribute("height", String(RESIZE_WIDTH));
-    heightLineEnd.setAttribute("fill", String(RESIZE_COLOR));
+    heightLineEnd.setAttribute("x", String(nodeRect.x - ResizeOffset - ResizeEndpointLength / store.scale / 2));
+    heightLineEnd.setAttribute("y", String(nodeRect.y + nodeRect.h - ResizeWidth / store.scale / 2));
+    heightLineEnd.setAttribute("width", String(ResizeEndpointLength));
+    heightLineEnd.setAttribute("height", String(ResizeWidth / store.scale));
+    heightLineEnd.setAttribute("fill", String(ResizeColor));
 
     heightLineText.textContent = `${showNumber(nodeRect.h)}`;
-    heightLineText.setAttribute("x", String(nodeRect.x - RESIZE_OFFSET - 8));
+    heightLineText.setAttribute("x", String(nodeRect.x - ResizeOffset - 8));
     heightLineText.setAttribute("y", String(nodeRect.y + nodeRect.h / 2));
-    heightLineText.setAttribute("fill", String(RESIZE_COLOR));
-    heightLineText.setAttribute("font-size", String(RESIZE_FONT_SIZE));
+    heightLineText.setAttribute("fill", String(ResizeColor));
+    heightLineText.setAttribute("font-size", String(ResizeFontSize / store.scale));
     heightLineText.setAttribute("text-anchor", "middle");
     heightLineText.setAttribute("alignment-baseline", "middle");
     heightLineText.setAttribute(
       "transform",
-      `rotate(-90 ${nodeRect.x - RESIZE_OFFSET - 8} ${nodeRect.y + nodeRect.h / 2})`
+      `rotate(-90 ${nodeRect.x - ResizeOffset - 8} ${nodeRect.y + nodeRect.h / 2})`
     );
 
     [widthLine, heightLine].forEach((line) => {
-      line.setAttribute("stroke", RESIZE_COLOR);
-      line.setAttribute("stroke-width", String(RESIZE_WIDTH));
+      line.setAttribute("stroke", ResizeColor);
+      line.setAttribute("stroke-width", String(ResizeWidth / store.scale));
     });
   });
 }
@@ -118,48 +118,48 @@ export class Resize {
   lines: SVGGElement[];
   constructor(svg: SVGSVGElement, nodes: HTMLElement[]) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize`);
+    this.g.setAttribute("class", `${NodeClassPrefix}-resize`);
     const result: SVGGElement[] = [];
     nodes.forEach((node) => {
       const nodeRect = Rect.from(node);
 
       const g = createElementNS<SVGGElement>("g");
-      g.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line`);
+      g.setAttribute("class", `${NodeClassPrefix}-resize-line`);
       g.setAttribute("data-ower-id", nodeRect.id);
 
       // Create width group
       const widthGroup = createElementNS<SVGGElement>("g");
-      widthGroup.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+      widthGroup.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width`);
 
       const widthLine = createElementNS<SVGLineElement>("line");
-      widthLine.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line`);
+      widthLine.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line`);
 
       const widthLineText = createElementNS<SVGTextElement>("text");
-      widthLineText.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-text`);
+      widthLineText.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-text`);
 
       const widthLineStart = createElementNS<SVGRectElement>("rect");
-      widthLineStart.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line-start`);
+      widthLineStart.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line-start`);
 
       const widthLineEnd = createElementNS<SVGRectElement>("rect");
-      widthLineEnd.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-width-line-end`);
+      widthLineEnd.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line-end`);
 
       widthGroup.append(widthLine, widthLineText, widthLineStart, widthLineEnd);
 
       // Create height group
       const heightGroup = createElementNS<SVGGElement>("g");
-      heightGroup.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+      heightGroup.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height`);
 
       const heightLine = createElementNS<SVGLineElement>("line");
-      heightLine.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line`);
+      heightLine.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line`);
 
       const heightLineText = createElementNS<SVGTextElement>("text");
-      heightLineText.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-text`);
+      heightLineText.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-text`);
 
       const heightLineStart = createElementNS<SVGRectElement>("rect");
-      heightLineStart.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line-start`);
+      heightLineStart.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line-start`);
 
       const heightLineEnd = createElementNS<SVGRectElement>("rect");
-      heightLineEnd.setAttribute("class", `${NODE_CLASS_PREFIX}-resize-line-group-height-line-end`);
+      heightLineEnd.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line-end`);
 
       heightGroup.append(heightLine, heightLineText, heightLineStart, heightLineEnd);
 
@@ -202,7 +202,7 @@ export class Resize {
       if (value.length === 1) {
         if (value[0].nodeRect.id === store.selected?.dataset.id) return;
       }
-      if (Math.abs(newWidth - key) <= NODE_ABSORB_DELTA) {
+      if (Math.abs(newWidth - key) <= NodeAbsorbDelta) {
         alternateAbsorbWidth.push(key);
       }
     });
@@ -210,7 +210,7 @@ export class Resize {
       if (value.length === 1) {
         if (value[0].nodeRect.id === store.selected?.dataset.id) return;
       }
-      if (Math.abs(newHeight - key) <= NODE_ABSORB_DELTA) {
+      if (Math.abs(newHeight - key) <= NodeAbsorbDelta) {
         alternateAbsorbHeight.push(key);
       }
     });
@@ -220,8 +220,8 @@ export class Resize {
     const absorbHeight = alternateAbsorbHeight.length === 0 ? newHeight : Math.max(...alternateAbsorbHeight);
 
     // 根据拖拽方向设置大小和位置
-    const finalWidth = Math.max(absorbWidth, NODE_MIN_WIDTH);
-    const finalHeight = Math.max(absorbHeight, NODE_MIN_HEIGHT);
+    const finalWidth = Math.max(absorbWidth, NodeMinWidth);
+    const finalHeight = Math.max(absorbHeight, NodeMinHeight);
 
     // 保持右边缘不动
     if (direction.includes("left")) {
@@ -250,20 +250,20 @@ export class Resize {
 
     newWidthMap.get(currentWidth)?.forEach((item) => {
       const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-      const widthLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
+      const widthLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-width`);
       widthLine.style.display = "block";
     });
 
     newHeightMap.get(currentHeight)?.forEach((item) => {
       const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-      const heightLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+      const heightLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-height`);
       heightLine.style.display = "block";
     });
 
     // * 确保当前选择的节点宽高一直显示，不加的话safari和chrome显示不一致，不知道原因
     const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`)!;
-    const widthLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-width`);
-    const heightLine = getElement<SVGLineElement>(lineGroup, `${NODE_CLASS_PREFIX}-resize-line-group-height`);
+    const widthLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-width`);
+    const heightLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-height`);
     heightLine.style.display = "block";
     widthLine.style.display = "block";
 
