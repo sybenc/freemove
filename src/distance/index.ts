@@ -12,12 +12,14 @@ function searchDistanceLine(store: Store) {
   const seletedRect = Rect.from(store.selected!);
   // 获取节点参数
   store.nodes.forEach((node) => {
+    if (seletedRect.node === node) return
     const nodeRect = Rect.from(node);
     nodeRects.push(nodeRect);
   });
 
   // 初始化活动矩形
   nodeRects.forEach((nodeRect) => {
+    if (nodeRect.isIntersect(seletedRect)) return
     const isInline =
       (nodeRect.y <= seletedRect.y && nodeRect.y + nodeRect.h >= seletedRect.y) ||
       (nodeRect.y <= seletedRect.y + seletedRect.h / 2 &&
@@ -44,6 +46,7 @@ function searchDistanceLine(store: Store) {
 
   // 初始化活动矩形
   nodeRects.forEach((nodeRect) => {
+    if (nodeRect.isIntersect(seletedRect)) return
     const isActive =
       (nodeRect.x <= seletedRect.x && nodeRect.x + nodeRect.w >= seletedRect.x) ||
       (nodeRect.x <= seletedRect.x + seletedRect.w / 2 &&
@@ -370,6 +373,7 @@ export class Distance {
         if (absorbDistance !== this.top.length) {
           store.selected.style.top = toPx(parseFloat(store.selected.style.top) - this.top.length + absorbDistance);
           this.top.length = absorbDistance;
+          store.align.reRender(store);
           store.border.reRender(store);
         }
       }
@@ -454,6 +458,7 @@ export class Distance {
         if (absorbDistance !== this.bottom.length) {
           store.selected.style.top = toPx(parseFloat(store.selected.style.top) + this.bottom.length - absorbDistance);
           this.bottom.length = absorbDistance;
+          store.align.reRender(store);
           store.border.reRender(store);
         }
       }

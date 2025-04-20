@@ -3,9 +3,20 @@ declare class Align {
     lines: Record<AlignLineType | "vertical", SVGLineElement>;
     isHAlign: boolean;
     isVAlign: boolean;
+    alternateNodes: Record<AlignLineType, AlignLineData[]>;
+    showContainerAlignLine: boolean;
     constructor(svg: SVGSVGElement);
     hidden(): void;
     reRender(store: Store): void;
+}
+
+declare interface AlignLineData {
+    type: AlignLineType;
+    source: number;
+    target: number;
+    absorbDistance: number;
+    absorbPosition: number;
+    nodeRects: ReadonlyArray<Rect>;
 }
 
 declare type AlignLineType = "vl" | "vc" | "vr" | "ht" | "hc" | "hb";
@@ -61,6 +72,34 @@ declare class Gap {
     reRender(store: Store): void;
 }
 
+declare interface Position {
+    x: number;
+    y: number;
+}
+
+declare class Rect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    id: string;
+    node: HTMLElement;
+    constructor({ x, y, h, w, node }: {
+        x: number;
+        y: number;
+        h: number;
+        w: number;
+        node: HTMLElement;
+    });
+    sync(): void;
+    set error(value: boolean);
+    get error(): boolean;
+    isInSide(position: Position): boolean;
+    isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
+    getAlignLinePostion(): Record<AlignLineType, number>;
+    static from(node: HTMLElement): Rect;
+}
+
 declare class Resize {
     g: SVGGElement;
     lines: SVGGElement[];
@@ -88,6 +127,7 @@ declare interface Store {
     svg: SVGSVGElement;
     selected: HTMLElement | null;
     setSelected: (target: HTMLElement | null) => void;
+    searchError: () => void;
     gap: Gap;
     align: Align;
     distance: Distance;

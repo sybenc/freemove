@@ -6,10 +6,13 @@ import { toPx } from "./utils";
 function handleMoveNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
   const containerRect = store.container.getBoundingClientRect();
-  store.align.reRender(store);
+
+  if (store.selected.dataset.error === "false") {
+    store.align.reRender(store);
+    store.distance.reRender(store);
+    store.gap.reRender(store);
+  }
   store.border.reRender(store);
-  store.distance.reRender(store);
-  // store.gap.reRender(store);
   const rect = store.selected.getBoundingClientRect();
   let startX = event.clientX - rect.left;
   let startY = event.clientY - rect.top;
@@ -32,10 +35,13 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 
       store.selected.style.left = toPx(newX);
       store.selected.style.top = toPx(newY);
-      store.align.reRender(store);
+      store.searchError();
+      if (store.selected.dataset.error === "false") {
+        store.align.reRender(store);
+        store.distance.reRender(store);
+        store.gap.reRender(store);
+      }
       store.border.reRender(store);
-      store.distance.reRender(store);
-      // store.gap.reRender(store);
 
       animationFrameId = null;
     });
@@ -46,7 +52,7 @@ function handleMoveNode(store: Store, event: PointerEvent) {
     document.removeEventListener("pointerup", handlePointerUp);
     store.align.hidden();
     store.distance.hidden();
-    // store.gap.clear()
+    store.gap.clear()
 
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);
@@ -161,7 +167,6 @@ export function addPointerListener(store: Store) {
     event.preventDefault();
 
     const target = event.target as HTMLElement;
-
     // 如果点击啊到被选择边框的resize点
     if (target.classList[0].includes(`${NODE_CLASS_PREFIX}-border-point-`)) {
       const ownerId = target.dataset.ownerId;
@@ -194,6 +199,7 @@ export function addPointerListener(store: Store) {
       if (seleted && seleted.node.classList.contains(`${NODE_CLASS_PREFIX}-movable-node`)) {
         store.selector.hiddenPreview();
         store.setSelected(seleted.node);
+        store.searchError();
         handleMoveNode(store, event);
       }
 

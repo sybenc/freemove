@@ -1,4 +1,3 @@
-import { Gap } from "./gap/index";
 import { nanoid } from "nanoid";
 import { Align } from "./align";
 import { NODE_CLASS_PREFIX } from "./const";
@@ -7,6 +6,8 @@ import { createElementNS, toPx } from "./utils";
 import { Resize } from "./resize";
 import { Selector } from "./selector";
 import { Distance } from "./distance";
+import Rect from "./rect";
+import { Gap } from "./gap";
 
 export interface Store {
   container: HTMLElement;
@@ -14,6 +15,7 @@ export interface Store {
   svg: SVGSVGElement;
   selected: HTMLElement | null;
   setSelected: (target: HTMLElement | null) => void;
+  searchError: () => void;
 
   gap: Gap;
   align: Align;
@@ -56,6 +58,30 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
         return;
       }
       this.border.reRender(this);
+      this.searchError();
+    },
+    searchError() {
+      if (!this.selected) return;
+      const selectedRect = Rect.from(this.selected);
+      selectedRect.error = false; // 先清除自身 error 状态
+    
+      for (let i = 0; i < this.nodes.length; i++) {
+        const node = this.nodes[i];
+        if (node === this.selected) continue; // 避免和自己比较
+    
+        const nodeRect = Rect.from(node);
+        const isIntersect = selectedRect.isIntersect(nodeRect);
+    
+        // 如果相交，标记两个都为 error
+        if (isIntersect) {
+          selectedRect.error = true;
+          nodeRect.error = true;
+          this.align.hidden()
+          this.distance.hidden()
+        } else {
+          nodeRect.error = false;
+        }
+      }
     },
 
     gap: new Gap(svg),

@@ -1,6 +1,6 @@
 import { AlignLineType } from "./align/type";
 
-const Tolerance = 3;
+const Tolerance = 0.01;
 
 export interface Position {
   x: number;
@@ -25,11 +25,19 @@ export default class Rect {
   }
 
   // 将rect的几何信息和node节点同步
-  sync(){
-    this.x =parseFloat(this.node.style.left)
-    this.y =parseFloat(this.node.style.top)
-    this.w =parseFloat(this.node.style.width)
-    this.h =parseFloat(this.node.style.height)
+  sync() {
+    this.x = parseFloat(this.node.style.left);
+    this.y = parseFloat(this.node.style.top);
+    this.w = parseFloat(this.node.style.width);
+    this.h = parseFloat(this.node.style.height);
+  }
+
+  set error(value: boolean) {
+    this.node.setAttribute("data-error", String(value));
+  }
+
+  get error(): boolean {
+    return Boolean(this.node.getAttribute("data-error"));
   }
 
   // 判断一个点是否在矩形里面
@@ -45,9 +53,8 @@ export default class Rect {
     return false;
   }
 
-  // 判断两个矩形是否相交，Tolerance为容差
-  isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
-  isIntersect(rect: Rect): boolean {
+  // 判断两个矩形是否相交
+  isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean {
     const x1A = this.x + Tolerance;
     const y1A = this.y + Tolerance;
     const x2A = this.x + this.w - Tolerance;
@@ -57,10 +64,7 @@ export default class Rect {
     const x2B = rect.x + rect.w;
     const y2B = rect.y + rect.h;
 
-    if (x2A < x1B || x1A > x2B || y2A < y1B || y1A > y2B) {
-      return false;
-    }
-    return true;
+    return !(x2A < x1B || x1A > x2B || y2A < y1B || y1A > y2B);
   }
 
   getAlignLinePostion(): Record<AlignLineType, number> {
@@ -84,6 +88,4 @@ export default class Rect {
       node,
     });
   }
-
-  static error(svg: SVGSVGElement, nodeRects: Rect[]) {}
 }

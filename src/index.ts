@@ -2,6 +2,7 @@ import { addPointerListener } from "./add-listener";
 import Rect from "./rect";
 import { initStore, Store } from "./store";
 import { toPx } from "./utils";
+import "./style.css"
 
 export default class FreeMove {
   store: Store;
