@@ -5,7 +5,7 @@ import { toPx } from "./utils";
 
 function handleMoveNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
+  const canvasRect = store.canvas.getBoundingClientRect();
 
   if (store.selected.dataset.error === "false") {
     store.align.reRender(store);
@@ -24,11 +24,11 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 
     animationFrameId = requestAnimationFrame(() => {
       if (!store.selected) return;
-      let newX = (ev.clientX - containerRect.left) / store.scale - startX;
-      let newY = (ev.clientY - containerRect.top) / store.scale - startY;
+      let newX = (ev.clientX - canvasRect.left) / store.scale - startX;
+      let newY = (ev.clientY - canvasRect.top) / store.scale - startY;
 
-      const maxLeft = store.container.clientWidth - store.selected.offsetWidth
-      const maxTop = store.container.clientHeight - store.selected.offsetHeight
+      const maxLeft = store.canvas.clientWidth - store.selected.offsetWidth;
+      const maxTop = store.canvas.clientHeight - store.selected.offsetHeight;
 
       newX = Math.max(0, Math.min(newX, maxLeft));
       newY = Math.max(0, Math.min(newY, maxTop));
@@ -66,7 +66,7 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 
 function handleResizeNode(store: Store, event: PointerEvent) {
   if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
+  const canvasRect = store.canvas.getBoundingClientRect();
   const target = event.target as HTMLElement;
   const direction = target.dataset.direction;
   if (!direction) return;
@@ -79,8 +79,8 @@ function handleResizeNode(store: Store, event: PointerEvent) {
   let startLeft = rect.x;
   let startTop = rect.y;
 
-  const containerWidth = containerRect.width;
-  const containerHeight = containerRect.height;
+  const canvasWidth = canvasRect.width;
+  const canvasHeight = canvasRect.height;
 
   function resize(ev: PointerEvent) {
     let deltaX = (ev.clientX - startX) / store.scale;
@@ -115,11 +115,11 @@ function handleResizeNode(store: Store, event: PointerEvent) {
       newHeight += newTop;
       newTop = 0;
     }
-    if (newLeft + newWidth > containerWidth/store.scale) {
-      newWidth = containerWidth/store.scale - newLeft;
+    if (newLeft + newWidth > canvasWidth / store.scale) {
+      newWidth = canvasWidth / store.scale - newLeft;
     }
-    if (newTop + newHeight > containerHeight/store.scale) {
-      newHeight = containerHeight/store.scale - newTop;
+    if (newTop + newHeight > canvasHeight / store.scale) {
+      newHeight = canvasHeight / store.scale - newTop;
     }
 
     // 限制最小尺寸
@@ -141,13 +141,13 @@ function handleResizeNode(store: Store, event: PointerEvent) {
 }
 
 function handleSelector(store: Store, event: PointerEvent) {
-  const containerRect = store.container.getBoundingClientRect();
-  const startX = (event.clientX - containerRect.left) / store.scale;
-  const startY = (event.clientY - containerRect.top) / store.scale;
+  const canvasRect = store.canvas.getBoundingClientRect();
+  const startX = (event.clientX - canvasRect.left) / store.scale;
+  const startY = (event.clientY - canvasRect.top) / store.scale;
 
   function select(ep: PointerEvent) {
-    const endX = (ep.clientX - containerRect.left) / store.scale;
-    const endY = (ep.clientY - containerRect.top) / store.scale;
+    const endX = (ep.clientX - canvasRect.left) / store.scale;
+    const endY = (ep.clientY - canvasRect.top) / store.scale;
     store.selector.reRender(store, startX, startY, endX, endY);
     store.selector.showPreview();
   }
@@ -184,57 +184,67 @@ export function addPointerListener(store: Store) {
     // 如果点击到svg画布
     if (target.classList.contains(`${NodeClassPrefix}-svg`)) {
       // 判断点击位置是否在某个节点内部
-      let seleted: Rect | null = null;
+      let selected: Rect | null = null;
 
       // 查找被点击的节点
       for (const node of store.nodes) {
         const nodeRect = Rect.from(node);
         if (nodeRect.isInSide({ x: event.offsetX, y: event.offsetY })) {
-          seleted = nodeRect;
+          selected = nodeRect;
           break;
         }
       }
 
       // 如果点击到节点，处理节点拖拽动作
-      if (seleted && seleted.node.classList.contains(`${NodeClassPrefix}-movable-node`)) {
+      if (selected && selected.node.classList.contains(`${NodeClassPrefix}-movable-node`)) {
         store.selector.hiddenPreview();
-        store.setSelected(seleted.node);
+        store.setSelected(selected.node);
         store.searchError();
         handleMoveNode(store, event);
       }
 
       // 此外，绘画选择框、清除被选择节点选择边框
-      if (!seleted) {
+      if (!selected) {
         store.border.hidden();
+        store.selected = null;
         handleSelector(store, event);
       }
     }
   });
 
   // 滚轮事件监听，用于画布缩放
-  document.body.addEventListener("wheel", (event) => {
+  store.board.addEventListener("wheel", (event: WheelEvent) => {
     event.preventDefault();
     const [minScale, maxScale] = store.scaleRange;
-    const rect = store.container.getBoundingClientRect();
-    const fixedX = event.clientX - rect.left;
-    const fixedY = event.clientY - rect.top;
 
     function applyTransform() {
-      store.container.style.transform = `translate(${store.translateX}px, ${store.translateY}px) scale(${store.scale})`;
-      store.container.style.transformOrigin = "0 0";
+      store.canvas.style.transform = `translate(${store.translateX}px, ${store.translateY}px) scale(${store.scale})`;
+      store.canvas.style.transformOrigin = "0 0";
       store.border.reRender(store);
     }
 
     if (event.ctrlKey) {
       // 缩放操作
-      let zoomDelta = event.deltaY * -0.001 * 5;
+      const rect = store.canvas.getBoundingClientRect();
+      const offsetX = event.clientX - rect.left;
+      const offsetY = event.clientY - rect.top;
+
+      const beforeScaleX = offsetX / store.scale
+      const beforeScaleY = offsetY / store.scale
+
+      let zoomDelta = event.deltaY * -0.01;
       let newScale = store.scale + zoomDelta;
       newScale = Math.max(minScale, Math.min(maxScale, newScale));
 
       // 计算平移调整以保持鼠标位置固定
-      const scaleRatio = newScale / store.scale;
-      store.translateX = fixedX - (fixedX - store.translateX) * scaleRatio;
-      store.translateY = fixedY - (fixedY - store.translateY) * scaleRatio;
+      store.scale = newScale
+      const afterScaleX = offsetX / store.scale
+      const afterScaleY = offsetY / store.scale
+
+      const deltaX = (afterScaleX - beforeScaleX) * store.scale
+      const deltaY = (afterScaleY - beforeScaleY) * store.scale
+      store.translateX += deltaX
+      store.translateY += deltaY
       // 更新缩放比例
       store.scale = newScale;
       applyTransform();
@@ -245,4 +255,8 @@ export function addPointerListener(store: Store) {
       applyTransform();
     }
   });
+
+  // store.svg.addEventListener('contextmenu', (event)=>{
+  //   event.preventDefault()
+  // })
 }

@@ -15,27 +15,34 @@
 
     .container {
       width: 1000px;
-      height: 1000px;
+      height: 650px;
       background-color: #AADAFA;
     }
   </style>
 </head>
 <!-- 在html中生成100个大小不一，位置不一 -->
+
 <body>
-  <div id="example" class="container" style="position: relative;">
-    <div class="node-style" style="top: 40px;left: 20%; width: 10%;height: 100px;background-color: white;"></div>
-    <div class="node-style" style="top: 140px;left: 333px; width: 200px;height: 100px;background-color: #C5947C;"></div>
-    <div class="node-style" style="top: 190px;left: 222px; width: 150px;height: 100px;background-color: #442973;"></div>
-    <div class="node-style" style="top: 234px;left: 111px; width: 100px;height: 100px;background-color: #22947C;"></div>
-    <div class="node-style" style="top: 400px;left: 111px; width: 100px;height: 100px;background-color: #229;"></div>
-    <div class="node-style" style="top: 20px;left: 250px; width: 100px;height: 100px;background-color: #229;"></div>
+  <div id="example-board" style="width: 100vw;height: 100vh;">
+    <div id="example-canvas" class="container">
+      <div class="node-style" style="top: 40px;left: 20%; width: 10%;height: 100px;background-color: white;"></div>
+      <div class="node-style" style="top: 140px;left: 333px; width: 200px;height: 100px;background-color: #C5947C;">
+      </div>
+      <div class="node-style" style="top: 190px;left: 222px; width: 150px;height: 100px;background-color: #442973;">
+      </div>
+      <div class="node-style" style="top: 234px;left: 111px; width: 100px;height: 100px;background-color: #22947C;">
+      </div>
+      <div class="node-style" style="top: 400px;left: 111px; width: 100px;height: 100px;background-color: #229;"></div>
+      <div class="node-style" style="top: 20px;left: 250px; width: 100px;height: 100px;background-color: #229;"></div>
+    </div>
   </div>
   <script src="../dist/freemove.umd.js"></script>
   <script>
-    const dom = document.getElementById('example')
+    const board = document.getElementById('example-board')
+    const canvas = document.getElementById('example-canvas')
     const freemove = new FreeMove(
-      dom,
-      Array.from(dom.getElementsByTagName('div'))
+      board,
+      canvas
     )
     freemove.mount()
   </script>

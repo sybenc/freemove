@@ -1,7 +1,31 @@
+body {
+  user-select: none;
+}
+
+/* 画板样式 */
+.board {
+  position: relative;
+  overflow: auto;
+}
+
+/* 画布样式 */
+.canvas {
+  position: absolute;
+  z-index: 1;
+}
+
+/* 辅助线svg样式 */
+.svg {
+  position: absolute;
+  inset: 0;
+}
+
+/* 节点样式 */
 .movable-node {
   position: absolute;
 }
 
+/* 节点重合/发生错误时的样式 */
 .movable-node[data-error="true"]::before {
   content: "";
   position: absolute;

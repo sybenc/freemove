@@ -310,64 +310,64 @@ export class Gap {
     store.distance.reRender(store);
     store.border.reRender(store);
 
-    if (store.align.isHAlign) {
-      const showBlockH: GapRegion[] = [];
-      const blockHData = searchDistanceBlockHData(store);
-      const line = store.distance.left.length > store.distance.right.length ? right : left;
-      if (line.node) {
-        const nodeRect = Rect.from(line.node!);
-        blockHData.forEach((value, key) => {
-          if (Math.abs(line.length - key) <= NodeAbsorbDelta || (key <= 20 && Math.abs(line.length - key) <= 4)) {
-            const nodeArray = [...value.map((item) => item.rect1.concat(item.rect2))].flat();
-            if (nodeArray.some((node) => node.id === store.selected?.dataset.id)) {
-              showBlockH.push(...value);
-              return;
-            }
-            if (line.length === right.length) {
-              store.selected!.style.left = toPx(nodeRect.x - key - selectedRect.w);
-              store.distance.left.length = key;
-              showBlockH.push(...value);
-              selectedRect.sync();
-            } else if (line.length === left.length) {
-              store.selected!.style.left = toPx(nodeRect.x + nodeRect.w + key);
-              store.distance.right.length = key;
-              showBlockH.push(...value);
-              selectedRect.sync();
-            }
+    // if (store.align.isHAlign) {
+    //   const showBlockH: GapRegion[] = [];
+    //   const blockHData = searchDistanceBlockHData(store);
+    //   const line = store.distance.left.length > store.distance.right.length ? right : left;
+    //   if (line.node) {
+    //     const nodeRect = Rect.from(line.node!);
+    //     blockHData.forEach((value, key) => {
+    //       if (Math.abs(line.length - key) <= NodeAbsorbDelta || (key <= 20 && Math.abs(line.length - key) <= 4)) {
+    //         const nodeArray = [...value.map((item) => item.rect1.concat(item.rect2))].flat();
+    //         if (nodeArray.some((node) => node.id === store.selected?.dataset.id)) {
+    //           showBlockH.push(...value);
+    //           return;
+    //         }
+    //         if (line.length === right.length) {
+    //           store.selected!.style.left = toPx(nodeRect.x - key - selectedRect.w);
+    //           store.distance.left.length = key;
+    //           showBlockH.push(...value);
+    //           selectedRect.sync();
+    //         } else if (line.length === left.length) {
+    //           store.selected!.style.left = toPx(nodeRect.x + nodeRect.w + key);
+    //           store.distance.right.length = key;
+    //           showBlockH.push(...value);
+    //           selectedRect.sync();
+    //         }
 
-            store.align.reRender(store);
-            store.distance.reRender(store);
-            store.border.reRender(store);
-          }
-        });
+    //         store.align.reRender(store);
+    //         store.distance.reRender(store);
+    //         store.border.reRender(store);
+    //       }
+    //     });
 
-        if (showBlockH.length > 1) {
-          showBlockH.forEach((block) => {
-            const rect = createElementNS<SVGRectElement>("rect");
-            rect.setAttribute("x", String(block.x));
-            rect.setAttribute("y", String(block.y));
-            rect.setAttribute(
-              "width",
-              String(
-                line.length === right.length
-                  ? getLegalValue(nodeRect.x - selectedRect.x - selectedRect.w)
-                  : getLegalValue(selectedRect.x - nodeRect.x - nodeRect.w)
-              )
-            );
-            rect.setAttribute("height", String(block.h));
-            rect.setAttribute("fill", "red");
-            rect.setAttribute("opacity", "0.3");
-            if (line.length === right.length) {
-              rect.setAttribute("width", String(getLegalValue(nodeRect.x - selectedRect.x - selectedRect.w)));
-            }
-            if (line.length === left.length) {
-              rect.setAttribute("width", String(getLegalValue(selectedRect.x - nodeRect.x - nodeRect.w)));
-            }
-            this.g.append(rect);
-          });
-        }
-      }
-    }
+    //     if (showBlockH.length > 1) {
+    //       showBlockH.forEach((block) => {
+    //         const rect = createElementNS<SVGRectElement>("rect");
+    //         rect.setAttribute("x", String(block.x));
+    //         rect.setAttribute("y", String(block.y));
+    //         rect.setAttribute(
+    //           "width",
+    //           String(
+    //             line.length === right.length
+    //               ? getLegalValue(nodeRect.x - selectedRect.x - selectedRect.w)
+    //               : getLegalValue(selectedRect.x - nodeRect.x - nodeRect.w)
+    //           )
+    //         );
+    //         rect.setAttribute("height", String(block.h));
+    //         rect.setAttribute("fill", "red");
+    //         rect.setAttribute("opacity", "0.3");
+    //         if (line.length === right.length) {
+    //           rect.setAttribute("width", String(getLegalValue(nodeRect.x - selectedRect.x - selectedRect.w)));
+    //         }
+    //         if (line.length === left.length) {
+    //           rect.setAttribute("width", String(getLegalValue(selectedRect.x - nodeRect.x - nodeRect.w)));
+    //         }
+    //         this.g.append(rect);
+    //       });
+    //     }
+    //   }
+    // }
 
     // if (store.align.isVAlign) {
     //   const showBlockV: GapRegion[] = [];

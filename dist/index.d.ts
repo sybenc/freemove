@@ -58,7 +58,7 @@ declare type DistanceType = 'left' | 'right' | 'bottom' | 'top';
 
 declare class FreeMove {
     store: Store;
-    constructor(container: HTMLElement, nodes: HTMLElement[]);
+    constructor(border: HTMLElement, canvas: HTMLElement);
     mount(): void;
     unmount(): void;
     align(option: "start" | "center" | "end"): void;
@@ -121,7 +121,8 @@ declare class Selector {
 }
 
 declare interface Store {
-    container: HTMLElement;
+    board: HTMLElement;
+    canvas: HTMLElement;
     nodes: HTMLElement[];
     svg: SVGSVGElement;
     scale: number;
@@ -131,6 +132,7 @@ declare interface Store {
     selected: HTMLElement | null;
     setSelected: (target: HTMLElement | null) => void;
     searchError: () => void;
+    syncNodes: () => void;
     gap: Gap;
     align: Align;
     distance: Distance;

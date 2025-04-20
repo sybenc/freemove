@@ -10,7 +10,8 @@ import Rect from "./rect";
 import { Gap } from "./gap";
 
 export interface Store {
-  container: HTMLElement;
+  board: HTMLElement;
+  canvas: HTMLElement;
   nodes: HTMLElement[];
   svg: SVGSVGElement;
   scale: number;
@@ -20,6 +21,7 @@ export interface Store {
   selected: HTMLElement | null;
   setSelected: (target: HTMLElement | null) => void;
   searchError: () => void;
+  syncNodes: () => void;
 
   gap: Gap;
   align: Align;
@@ -29,29 +31,36 @@ export interface Store {
   selector: Selector;
 }
 
-export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store => {
+export const initStore = (board: HTMLElement, canvas: HTMLElement): Store => {
   const svg = createElementNS<SVGSVGElement>("svg");
   svg.setAttribute("class", `${NodeClassPrefix}-svg`);
 
-  const containerRect = container.getBoundingClientRect();
-  // this.render(config.nodes);
-  svg.setAttribute("width", toPx(containerRect.width));
-  svg.setAttribute("height", toPx(containerRect.height));
-  svg.style = "position: absolute; inset: 0;";
-  container.className += ` ${NodeClassPrefix}-container`;
+  const boardRect = board.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+
+  board.className += ` ${NodeClassPrefix}-board`;
+  canvas.className += ` ${NodeClassPrefix}-canvas`;
+
+  // 居中 canvas
+  canvas.style.left = toPx((boardRect.width - canvasRect.width) / 2);
+  canvas.style.top = toPx((boardRect.height - canvasRect.height) / 2);
+  svg.setAttribute("width", toPx(canvasRect.width));
+  svg.setAttribute("height", toPx(canvasRect.height));
+
+  const nodes = Array.from(canvas.getElementsByTagName("div")) as HTMLElement[];
   nodes.forEach((node) => {
     node.className += ` ${NodeClassPrefix}-movable-node`;
     node.setAttribute("data-id", nanoid());
-    if (/%$/.test(node.style.top)) node.style.top = toPx((containerRect.width * parseFloat(node.style.top)) / 100);
-    if (/%$/.test(node.style.left)) node.style.left = toPx((containerRect.height * parseFloat(node.style.left)) / 100);
-    if (/%$/.test(node.style.width))
-      node.style.width = toPx((containerRect.width * parseFloat(node.style.width)) / 100);
+    if (/%$/.test(node.style.top)) node.style.top = toPx((canvasRect.width * parseFloat(node.style.top)) / 100);
+    if (/%$/.test(node.style.left)) node.style.left = toPx((canvasRect.height * parseFloat(node.style.left)) / 100);
+    if (/%$/.test(node.style.width)) node.style.width = toPx((canvasRect.width * parseFloat(node.style.width)) / 100);
     if (/%$/.test(node.style.height))
-      node.style.height = toPx((containerRect.height * parseFloat(node.style.height)) / 100);
+      node.style.height = toPx((canvasRect.height * parseFloat(node.style.height)) / 100);
   });
 
   return {
-    container,
+    board,
+    canvas,
     nodes,
     svg,
     selected: null,
@@ -90,6 +99,10 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
           nodeRect.error = false;
         }
       }
+    },
+
+    syncNodes() {
+      this.nodes = Array.from(canvas.getElementsByTagName("div")) as HTMLElement[];
     },
 
     gap: new Gap(svg),

@@ -151,9 +151,9 @@ function handleAlignLineAbsorb(store: Store, align: Align, data: AlignLineData) 
 
 function handleContainerAlignLineAbsorb(store: Store, align: Align) {
   if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
+  const canvasRect = store.canvas.getBoundingClientRect();
   const selectedRect = Rect.from(store.selected!);
-  const absorbPosition = containerRect.width / store.scale / 2;
+  const absorbPosition = canvasRect.width / store.scale / 2;
   if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NodeAbsorbDelta) {
     store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
     align.showContainerAlignLine = true;
@@ -166,7 +166,7 @@ function handleContainerAlignLineAbsorb(store: Store, align: Align) {
 
 function handleDraw(store: Store, align: Align) {
   if (!store.selected) return;
-  const containerRect = store.container.getBoundingClientRect();
+  const canvasRect = store.canvas.getBoundingClientRect();
   const selectedRect = Rect.from(store.selected!);
 
   const alternateNodesFlat = Object.values(align.alternateNodes).flat();
@@ -223,10 +223,10 @@ function handleDraw(store: Store, align: Align) {
 
   if (align.showContainerAlignLine) {
     const line = align.lines["vertical"];
-    line.setAttribute("x1", String((containerRect.width / store.scale) / 2));
+    line.setAttribute("x1", String((canvasRect.width / store.scale) / 2));
     line.setAttribute("y1", String(0));
-    line.setAttribute("x2", String((containerRect.width / store.scale) / 2));
-    line.setAttribute("y2", String(containerRect.height / store.scale));
+    line.setAttribute("x2", String((canvasRect.width / store.scale) / 2));
+    line.setAttribute("y2", String(canvasRect.height / store.scale));
     line.setAttribute("stroke-width", String(AlignLineWidth / store.scale));
     line?.setAttribute("style", "display: 'block");
   }

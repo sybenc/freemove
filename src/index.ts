@@ -2,18 +2,18 @@ import { addPointerListener } from "./add-listener";
 import Rect from "./rect";
 import { initStore, Store } from "./store";
 import { toPx } from "./utils";
-import "./style.css"
+import "./style.css";
 
 export default class FreeMove {
   store: Store;
 
-  constructor(container: HTMLElement, nodes: HTMLElement[]) {
-    this.store = initStore(container, nodes);
+  constructor(border: HTMLElement, canvas: HTMLElement) {
+    this.store = initStore(border, canvas);
     addPointerListener(this.store);
   }
 
   mount() {
-    this.store.container.append(this.store.svg);
+    this.store.canvas.append(this.store.svg);
   }
 
   unmount() {
@@ -21,7 +21,7 @@ export default class FreeMove {
   }
 
   align(option: "start" | "center" | "end") {
-    const { selected, container } = this.store;
+    const { selected, canvas: container } = this.store;
     if (!selected) return;
     const containerRect = container.getBoundingClientRect();
     const selectedRect = Rect.from(selected);
