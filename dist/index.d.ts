@@ -22,13 +22,19 @@ declare class Border {
 declare class Distance {
     g: SVGGElement;
     lines: Record<DistanceType, SVGGElement>;
-    x: {
-        type: "left" | "right";
+    left: {
         length: number;
         node: HTMLElement | null;
     };
-    y: {
-        type: "top" | "bottom";
+    right: {
+        length: number;
+        node: HTMLElement | null;
+    };
+    top: {
+        length: number;
+        node: HTMLElement | null;
+    };
+    bottom: {
         length: number;
         node: HTMLElement | null;
     };
@@ -82,12 +88,12 @@ declare interface Store {
     svg: SVGSVGElement;
     selected: HTMLElement | null;
     setSelected: (target: HTMLElement | null) => void;
+    gap: Gap;
     align: Align;
     distance: Distance;
     border: Border;
     resize: Resize;
     selector: Selector;
-    gap: Gap;
 }
 
 export { }

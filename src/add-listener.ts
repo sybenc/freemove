@@ -8,8 +8,8 @@ function handleMoveNode(store: Store, event: PointerEvent) {
   const containerRect = store.container.getBoundingClientRect();
   store.align.reRender(store);
   store.border.reRender(store);
-  store.gap.reRender(store);
   store.distance.reRender(store);
+  // store.gap.reRender(store);
   const rect = store.selected.getBoundingClientRect();
   let startX = event.clientX - rect.left;
   let startY = event.clientY - rect.top;
@@ -34,8 +34,8 @@ function handleMoveNode(store: Store, event: PointerEvent) {
       store.selected.style.top = toPx(newY);
       store.align.reRender(store);
       store.border.reRender(store);
-      store.gap.reRender(store);
       store.distance.reRender(store);
+      // store.gap.reRender(store);
 
       animationFrameId = null;
     });
@@ -46,6 +46,7 @@ function handleMoveNode(store: Store, event: PointerEvent) {
     document.removeEventListener("pointerup", handlePointerUp);
     store.align.hidden();
     store.distance.hidden();
+    // store.gap.clear()
 
     if (animationFrameId !== null) {
       cancelAnimationFrame(animationFrameId);

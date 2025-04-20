@@ -15,12 +15,12 @@ export interface Store {
   selected: HTMLElement | null;
   setSelected: (target: HTMLElement | null) => void;
 
+  gap: Gap;
   align: Align;
   distance: Distance;
   border: Border;
   resize: Resize;
   selector: Selector;
-  gap: Gap;
 }
 
 export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store => {
@@ -58,11 +58,11 @@ export const initStore = (container: HTMLElement, nodes: HTMLElement[]): Store =
       this.border.reRender(this);
     },
 
+    gap: new Gap(svg),
     align: new Align(svg),
     distance: new Distance(svg),
     border: new Border(svg),
     resize: new Resize(svg, nodes),
     selector: new Selector(svg),
-    gap: new Gap(svg),
   };
 };

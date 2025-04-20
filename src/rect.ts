@@ -24,6 +24,14 @@ export default class Rect {
     this.id = node.dataset.id!;
   }
 
+  // 将rect的几何信息和node节点同步
+  sync(){
+    this.x =parseFloat(this.node.style.left)
+    this.y =parseFloat(this.node.style.top)
+    this.w =parseFloat(this.node.style.width)
+    this.h =parseFloat(this.node.style.height)
+  }
+
   // 判断一个点是否在矩形里面
   isInSide(position: Position): boolean {
     if (
