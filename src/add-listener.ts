@@ -1,4 +1,4 @@
-import { NodeClassPrefix, NodeMinHeight, NodeMinWidth } from "./const";
+import { ClassPrefix, NodeMinHeight, NodeMinWidth } from "./const";
 import Rect from "./rect";
 import { Store } from "./store";
 import { toPx } from "./utils";
@@ -168,7 +168,7 @@ export function addPointerListener(store: Store) {
 
     const target = event.target as HTMLElement;
     // 如果点击啊到被选择边框的resize点
-    if (target.classList[0].includes(`${NodeClassPrefix}-border-point-`)) {
+    if (target.classList[0].includes(`${ClassPrefix}-border-point-`)) {
       const ownerId = target.dataset.ownerId;
       for (let i = 0; i < store.nodes.length; i++) {
         if (ownerId === store.nodes[i].dataset.ownerId) {
@@ -182,7 +182,7 @@ export function addPointerListener(store: Store) {
     }
 
     // 如果点击到svg画布
-    if (target.classList.contains(`${NodeClassPrefix}-svg`)) {
+    if (target.classList.contains(`${ClassPrefix}-svg`)) {
       // 判断点击位置是否在某个节点内部
       let selected: Rect | null = null;
 
@@ -196,7 +196,7 @@ export function addPointerListener(store: Store) {
       }
 
       // 如果点击到节点，处理节点拖拽动作
-      if (selected && selected.node.classList.contains(`${NodeClassPrefix}-movable-node`)) {
+      if (selected && selected.node.classList.contains(`${ClassPrefix}-movable-node`)) {
         store.selector.hiddenPreview();
         store.setSelected(selected.node);
         store.searchError();

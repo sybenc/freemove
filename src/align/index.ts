@@ -1,5 +1,5 @@
 // align-line.ts
-import { NodeAbsorbDelta, NodeClassPrefix } from "../const";
+import { NodeAbsorbDelta, ClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, toPx } from "../utils";
@@ -249,11 +249,11 @@ export class Align {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NodeClassPrefix}-align`);
+    this.g.setAttribute("class", `${ClassPrefix}-align`);
     this.lines = {} as any;
     [...alignLineTypes, "vertical"].forEach((type) => {
       const line = createElementNS<SVGLineElement>("line");
-      line.setAttribute("class", `${NodeClassPrefix}-align-${type}`);
+      line.setAttribute("class", `${ClassPrefix}-align-${type}`);
       line.setAttribute("stroke", AlignLineColor);
       line.style.display = "none";
       this.g.append(line);

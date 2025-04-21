@@ -1,5 +1,5 @@
 import { Store } from "./../store";
-import { NodeClassPrefix } from "../const";
+import { ClassPrefix } from "../const";
 import { Quadrant } from "./type";
 import Rect from "../rect";
 import { createElementNS } from "../utils";
@@ -21,16 +21,16 @@ export class Selector {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>('g');
-    this.g.setAttribute("class", `${NodeClassPrefix}-selector`);
+    this.g.setAttribute("class", `${ClassPrefix}-selector`);
     this.selectorRect = createElementNS<SVGRectElement>('rect');
-    this.selectorRect.setAttribute("class", `${NodeClassPrefix}-selector-rect`);
+    this.selectorRect.setAttribute("class", `${ClassPrefix}-selector-rect`);
     this.selectorRect.setAttribute("stroke", "#919191");
     this.selectorRect.setAttribute("stroke-width", "1px");
     this.selectorRect.setAttribute("fill", "rgba(255,255,255,0.3)");
     this.selectorRect.style.display = "none";
 
     this.previewRect = createElementNS<SVGRectElement>('rect');
-    this.previewRect.setAttribute("class", `${NodeClassPrefix}-selector-preview`);
+    this.previewRect.setAttribute("class", `${ClassPrefix}-selector-preview`);
     this.previewRect.setAttribute("stroke", "#000");
     this.previewRect.setAttribute("stroke-width", "1px");
     this.previewRect.setAttribute("fill", "transparent");

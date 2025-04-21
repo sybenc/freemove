@@ -1,4 +1,4 @@
-import { NodeClassPrefix } from "../const";
+import { ClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, getElement, toPx } from "../utils";
@@ -32,14 +32,14 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
   const lines: SVGLineElement[] = [];
   selectedBorderLineTypes.forEach((type) => {
     const line = createElementNS<SVGLineElement>("line");
-    line.setAttribute("class", `${NodeClassPrefix}-border-line-${type}`);
+    line.setAttribute("class", `${ClassPrefix}-border-line-${type}`);
     line.setAttribute("stroke", BorderColor);
     lines.push(line);
   });
 
   selectedBorderPointTypes.forEach((type, index) => {
     const rect = createElementNS<SVGRectElement>("rect");
-    rect.setAttribute("class", `${NodeClassPrefix}-border-point-${type}`);
+    rect.setAttribute("class", `${ClassPrefix}-border-point-${type}`);
     rect.setAttribute("fill", "white");
     rect.setAttribute("stroke", BorderColor);
     rect.setAttribute("style", `cursor: ${selectedBorderLineCursor[index]}`);
@@ -53,7 +53,7 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
 function renderSelectedBorder(g: SVGGElement, store: Store) {
   const seletedRect = Rect.from(store.selected!);
   selectedBorderLineTypes.forEach((type) => {
-    const line = getElement<SVGLineElement>(g, `${NodeClassPrefix}-border-line-${type}`);
+    const line = getElement<SVGLineElement>(g, `${ClassPrefix}-border-line-${type}`);
     line.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
     switch (type) {
       case "left":
@@ -83,7 +83,7 @@ function renderSelectedBorder(g: SVGGElement, store: Store) {
     }
   });
   selectedBorderPointTypes.forEach((type, index) => {
-    const rect = getElement<SVGRectElement>(g, `${NodeClassPrefix}-border-point-${type}`);
+    const rect = getElement<SVGRectElement>(g, `${ClassPrefix}-border-point-${type}`);
     rect.setAttribute("data-owner-id", store.selected!.dataset.id!);
     rect.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
     rect.setAttribute("width", toPx(BorderPointsSideLength / store.scale));
@@ -134,7 +134,7 @@ export class Border {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NodeClassPrefix}-border`);
+    this.g.setAttribute("class", `${ClassPrefix}-border`);
     svg.append(this.g);
     const [points, lines] = createSeletedBorderDom();
     this.points = points;

@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { Align } from "./align";
-import { NodeClassPrefix } from "./const";
+import { ClassPrefix } from "./const";
 import { Border } from "./border";
 import { createElementNS, toPx } from "./utils";
 import { Resize } from "./resize";
@@ -33,13 +33,13 @@ export interface Store {
 
 export const initStore = (board: HTMLElement, canvas: HTMLElement): Store => {
   const svg = createElementNS<SVGSVGElement>("svg");
-  svg.setAttribute("class", `${NodeClassPrefix}-svg`);
+  svg.setAttribute("class", `${ClassPrefix}-svg`);
 
   const boardRect = board.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
 
-  board.className += ` ${NodeClassPrefix}-board`;
-  canvas.className += ` ${NodeClassPrefix}-canvas`;
+  board.className += ` ${ClassPrefix}-board`;
+  canvas.className += ` ${ClassPrefix}-canvas`;
 
   // 居中 canvas
   canvas.style.left = toPx((boardRect.width - canvasRect.width) / 2);
@@ -49,7 +49,7 @@ export const initStore = (board: HTMLElement, canvas: HTMLElement): Store => {
 
   const nodes = Array.from(canvas.getElementsByTagName("div")) as HTMLElement[];
   nodes.forEach((node) => {
-    node.className += ` ${NodeClassPrefix}-movable-node`;
+    node.className += ` ${ClassPrefix}-movable-node`;
     node.setAttribute("data-id", nanoid());
     if (/%$/.test(node.style.top)) node.style.top = toPx((canvasRect.width * parseFloat(node.style.top)) / 100);
     if (/%$/.test(node.style.left)) node.style.left = toPx((canvasRect.height * parseFloat(node.style.left)) / 100);

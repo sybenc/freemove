@@ -1,5 +1,5 @@
 import { Store } from "./../store";
-import { NodeAbsorbDelta, NodeClassPrefix, NodeMinHeight, NodeMinWidth } from "../const";
+import { NodeAbsorbDelta, ClassPrefix, NodeMinHeight, NodeMinWidth } from "../const";
 import Rect from "../rect";
 import { createElementNS, getElement, showNumber, toPx } from "../utils"; // Ensure createElementNS is imported
 import { ResizeData } from "./type";
@@ -43,14 +43,14 @@ function renderResizeLine(store: Store) {
   store.nodes.forEach((node) => {
     const nodeRect = Rect.from(node);
     const g = store.resize.g.querySelector(`[data-ower-id="${nodeRect.id}"]`)!;
-    const widthLine = getElement<SVGLineElement>(g, `${NodeClassPrefix}-resize-line-group-width-line`);
-    const widthLineStart = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-width-line-start`);
-    const widthLineEnd = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-width-line-end`);
-    const widthLineText = getElement<SVGTextElement>(g, `${NodeClassPrefix}-resize-line-group-width-text`);
-    const heightLine = getElement<SVGLineElement>(g, `${NodeClassPrefix}-resize-line-group-height-line`);
-    const heightLineText = getElement<SVGTextElement>(g, `${NodeClassPrefix}-resize-line-group-height-text`);
-    const heightLineStart = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-height-line-start`);
-    const heightLineEnd = getElement<SVGRectElement>(g, `${NodeClassPrefix}-resize-line-group-height-line-end`);
+    const widthLine = getElement<SVGLineElement>(g, `${ClassPrefix}-resize-line-group-width-line`);
+    const widthLineStart = getElement<SVGRectElement>(g, `${ClassPrefix}-resize-line-group-width-line-start`);
+    const widthLineEnd = getElement<SVGRectElement>(g, `${ClassPrefix}-resize-line-group-width-line-end`);
+    const widthLineText = getElement<SVGTextElement>(g, `${ClassPrefix}-resize-line-group-width-text`);
+    const heightLine = getElement<SVGLineElement>(g, `${ClassPrefix}-resize-line-group-height-line`);
+    const heightLineText = getElement<SVGTextElement>(g, `${ClassPrefix}-resize-line-group-height-text`);
+    const heightLineStart = getElement<SVGRectElement>(g, `${ClassPrefix}-resize-line-group-height-line-start`);
+    const heightLineEnd = getElement<SVGRectElement>(g, `${ClassPrefix}-resize-line-group-height-line-end`);
 
     widthLine.setAttribute("x1", String(nodeRect.x));
     widthLine.setAttribute("y1", String(nodeRect.y - ResizeOffset));
@@ -118,48 +118,48 @@ export class Resize {
   lines: SVGGElement[];
   constructor(svg: SVGSVGElement, nodes: HTMLElement[]) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NodeClassPrefix}-resize`);
+    this.g.setAttribute("class", `${ClassPrefix}-resize`);
     const result: SVGGElement[] = [];
     nodes.forEach((node) => {
       const nodeRect = Rect.from(node);
 
       const g = createElementNS<SVGGElement>("g");
-      g.setAttribute("class", `${NodeClassPrefix}-resize-line`);
+      g.setAttribute("class", `${ClassPrefix}-resize-line`);
       g.setAttribute("data-ower-id", nodeRect.id);
 
       // Create width group
       const widthGroup = createElementNS<SVGGElement>("g");
-      widthGroup.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width`);
+      widthGroup.setAttribute("class", `${ClassPrefix}-resize-line-group-width`);
 
       const widthLine = createElementNS<SVGLineElement>("line");
-      widthLine.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line`);
+      widthLine.setAttribute("class", `${ClassPrefix}-resize-line-group-width-line`);
 
       const widthLineText = createElementNS<SVGTextElement>("text");
-      widthLineText.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-text`);
+      widthLineText.setAttribute("class", `${ClassPrefix}-resize-line-group-width-text`);
 
       const widthLineStart = createElementNS<SVGRectElement>("rect");
-      widthLineStart.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line-start`);
+      widthLineStart.setAttribute("class", `${ClassPrefix}-resize-line-group-width-line-start`);
 
       const widthLineEnd = createElementNS<SVGRectElement>("rect");
-      widthLineEnd.setAttribute("class", `${NodeClassPrefix}-resize-line-group-width-line-end`);
+      widthLineEnd.setAttribute("class", `${ClassPrefix}-resize-line-group-width-line-end`);
 
       widthGroup.append(widthLine, widthLineText, widthLineStart, widthLineEnd);
 
       // Create height group
       const heightGroup = createElementNS<SVGGElement>("g");
-      heightGroup.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height`);
+      heightGroup.setAttribute("class", `${ClassPrefix}-resize-line-group-height`);
 
       const heightLine = createElementNS<SVGLineElement>("line");
-      heightLine.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line`);
+      heightLine.setAttribute("class", `${ClassPrefix}-resize-line-group-height-line`);
 
       const heightLineText = createElementNS<SVGTextElement>("text");
-      heightLineText.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-text`);
+      heightLineText.setAttribute("class", `${ClassPrefix}-resize-line-group-height-text`);
 
       const heightLineStart = createElementNS<SVGRectElement>("rect");
-      heightLineStart.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line-start`);
+      heightLineStart.setAttribute("class", `${ClassPrefix}-resize-line-group-height-line-start`);
 
       const heightLineEnd = createElementNS<SVGRectElement>("rect");
-      heightLineEnd.setAttribute("class", `${NodeClassPrefix}-resize-line-group-height-line-end`);
+      heightLineEnd.setAttribute("class", `${ClassPrefix}-resize-line-group-height-line-end`);
 
       heightGroup.append(heightLine, heightLineText, heightLineStart, heightLineEnd);
 
@@ -250,20 +250,20 @@ export class Resize {
 
     newWidthMap.get(currentWidth)?.forEach((item) => {
       const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-      const widthLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-width`);
+      const widthLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-width`);
       widthLine.style.display = "block";
     });
 
     newHeightMap.get(currentHeight)?.forEach((item) => {
       const lineGroup = this.g.querySelector(`[data-ower-id="${item.nodeRect.id}"]`)!;
-      const heightLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-height`);
+      const heightLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-height`);
       heightLine.style.display = "block";
     });
 
     // * 确保当前选择的节点宽高一直显示，不加的话safari和chrome显示不一致，不知道原因
     const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`)!;
-    const widthLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-width`);
-    const heightLine = getElement<SVGLineElement>(lineGroup, `${NodeClassPrefix}-resize-line-group-height`);
+    const widthLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-width`);
+    const heightLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-height`);
     heightLine.style.display = "block";
     widthLine.style.display = "block";
 

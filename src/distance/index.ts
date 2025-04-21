@@ -1,4 +1,4 @@
-import { NodeClassPrefix } from "../const";
+import { ClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, getElement, showNumber, toPx } from "../utils";
@@ -118,30 +118,30 @@ export class Distance {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS<SVGGElement>("g");
-    this.g.setAttribute("class", `${NodeClassPrefix}-distance`);
+    this.g.setAttribute("class", `${ClassPrefix}-distance`);
     this.lines = {} as Record<DistanceType, SVGGElement>;
 
     const createGroup = (direction: DistanceType) => {
       const group = createElementNS<SVGGElement>("g");
-      group.setAttribute("class", `${NodeClassPrefix}-distance-${direction}`);
+      group.setAttribute("class", `${ClassPrefix}-distance-${direction}`);
 
       const line = createElementNS<SVGLineElement>("line");
-      line.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-line`);
+      line.setAttribute("class", `${ClassPrefix}-distance-${direction}-line`);
 
       const dashLine = createElementNS<SVGLineElement>("line");
-      dashLine.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-dash-line`);
+      dashLine.setAttribute("class", `${ClassPrefix}-distance-${direction}-dash-line`);
 
       const text = createElementNS<SVGTextElement>("text");
-      text.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-text`);
+      text.setAttribute("class", `${ClassPrefix}-distance-${direction}-text`);
 
       const textBg = createElementNS<SVGRectElement>("rect");
-      textBg.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-text-bg`);
+      textBg.setAttribute("class", `${ClassPrefix}-distance-${direction}-text-bg`);
 
       const startRect = createElementNS<SVGRectElement>("rect");
-      startRect.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-line-start`);
+      startRect.setAttribute("class", `${ClassPrefix}-distance-${direction}-line-start`);
 
       const endRect = createElementNS<SVGRectElement>("rect");
-      endRect.setAttribute("class", `${NodeClassPrefix}-distance-${direction}-line-end`);
+      endRect.setAttribute("class", `${ClassPrefix}-distance-${direction}-line-end`);
 
       group.appendChild(line);
       group.appendChild(dashLine);
@@ -204,7 +204,7 @@ export class Distance {
       const nodeRect = Rect.from(this.left.node);
       const seletedRect = Rect.from(store.selected);
       // 主线（水平距离线）
-      const line = getElement<SVGLineElement>(this.lines.left, `${NodeClassPrefix}-distance-left-line`);
+      const line = getElement<SVGLineElement>(this.lines.left, `${ClassPrefix}-distance-left-line`);
       line.setAttribute("x1", String(nodeRect.x + nodeRect.w));
       line.setAttribute("x2", String(seletedRect.x));
       line.setAttribute("y1", String(seletedRect.y + seletedRect.h / 2));
@@ -213,7 +213,7 @@ export class Distance {
       line.setAttribute("stroke-width", String(DistanceWidth / store.scale));
 
       // 距离文本
-      const text = getElement<SVGTextElement>(this.lines.left, `${NodeClassPrefix}-distance-left-text`);
+      const text = getElement<SVGTextElement>(this.lines.left, `${ClassPrefix}-distance-left-text`);
       text.textContent = `${showNumber(seletedRect.x - nodeRect.x - nodeRect.w, true)}`;
       text.setAttribute("x", String((nodeRect.x + nodeRect.w + seletedRect.x) / 2));
       text.setAttribute(
@@ -226,7 +226,7 @@ export class Distance {
       text.setAttribute("alignment-baseline", "middle");
 
       // 文本背景
-      const textBg = getElement<SVGRectElement>(this.lines.left, `${NodeClassPrefix}-distance-left-text-bg`);
+      const textBg = getElement<SVGRectElement>(this.lines.left, `${ClassPrefix}-distance-left-text-bg`);
       textBg.setAttribute(
         "x",
         String((nodeRect.x + nodeRect.w + seletedRect.x) / 2 - (text.getComputedTextLength() + 10) / 2)
@@ -244,7 +244,7 @@ export class Distance {
       // 起点矩形
       const rectWidth = 1;
       const rectHeight = 8;
-      const lineStart = getElement<SVGRectElement>(this.lines.left, `${NodeClassPrefix}-distance-left-line-start`);
+      const lineStart = getElement<SVGRectElement>(this.lines.left, `${ClassPrefix}-distance-left-line-start`);
       lineStart.setAttribute("x", String(nodeRect.x + nodeRect.w - rectWidth / 2));
       lineStart.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - rectHeight / 2));
       lineStart.setAttribute("width", String(rectWidth));
@@ -252,7 +252,7 @@ export class Distance {
       lineStart.setAttribute("fill", DistanceColor);
 
       // 终点矩形
-      const lineEnd = getElement<SVGRectElement>(this.lines.left, `${NodeClassPrefix}-distance-left-line-end`);
+      const lineEnd = getElement<SVGRectElement>(this.lines.left, `${ClassPrefix}-distance-left-line-end`);
       lineEnd.setAttribute("x", String(seletedRect.x - rectWidth / 2));
       lineEnd.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - rectHeight / 2));
       lineEnd.setAttribute("width", String(rectWidth));
@@ -260,7 +260,7 @@ export class Distance {
       lineEnd.setAttribute("fill", DistanceColor);
 
       // 虚线（辅助线）
-      const lineDash = getElement<SVGLineElement>(this.lines.left, `${NodeClassPrefix}-distance-left-dash-line`);
+      const lineDash = getElement<SVGLineElement>(this.lines.left, `${ClassPrefix}-distance-left-dash-line`);
       if (seletedRect.y < nodeRect.y) {
         lineDash.setAttribute("x1", String(nodeRect.x + nodeRect.w));
         lineDash.setAttribute("x2", String(nodeRect.x + nodeRect.w));
@@ -298,7 +298,7 @@ export class Distance {
       const nodeRect = Rect.from(this.right.node);
       const seletedRect = Rect.from(store.selected);
       // 主线（水平距离线）
-      const line = getElement<SVGLineElement>(this.lines.right, `${NodeClassPrefix}-distance-right-line`);
+      const line = getElement<SVGLineElement>(this.lines.right, `${ClassPrefix}-distance-right-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
       line.setAttribute("x2", String(nodeRect.x));
       line.setAttribute("y1", String(seletedRect.y + seletedRect.h / 2));
@@ -307,7 +307,7 @@ export class Distance {
       line.setAttribute("stroke-width", String(DistanceWidth / store.scale));
 
       // 距离文本
-      const text = getElement<SVGTextElement>(this.lines.right, `${NodeClassPrefix}-distance-right-text`);
+      const text = getElement<SVGTextElement>(this.lines.right, `${ClassPrefix}-distance-right-text`);
       text.textContent = `${showNumber(nodeRect.x - seletedRect.x - seletedRect.w, true)}`;
       text.setAttribute("x", String((seletedRect.x + seletedRect.w + nodeRect.x) / 2));
       text.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - (DistanceFontSize + 4) / 2 / store.scale - 2 / store.scale));
@@ -317,7 +317,7 @@ export class Distance {
       text.setAttribute("alignment-baseline", "middle");
 
       // 文本背景
-      const textBg = getElement<SVGRectElement>(this.lines.right, `${NodeClassPrefix}-distance-right-text-bg`);
+      const textBg = getElement<SVGRectElement>(this.lines.right, `${ClassPrefix}-distance-right-text-bg`);
       textBg.setAttribute(
         "x",
         String((seletedRect.x + seletedRect.w + nodeRect.x) / 2 - (text.getComputedTextLength() + 10) / 2)
@@ -335,7 +335,7 @@ export class Distance {
       // 起点矩形
       const rectWidth = 1;
       const rectHeight = 8;
-      const lineStart = getElement<SVGRectElement>(this.lines.right, `${NodeClassPrefix}-distance-right-line-start`);
+      const lineStart = getElement<SVGRectElement>(this.lines.right, `${ClassPrefix}-distance-right-line-start`);
       lineStart.setAttribute("x", String(seletedRect.x + seletedRect.w - rectWidth / 2));
       lineStart.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - rectHeight / 2));
       lineStart.setAttribute("width", String(rectWidth));
@@ -343,7 +343,7 @@ export class Distance {
       lineStart.setAttribute("fill", DistanceColor);
 
       // 终点矩形
-      const lineEnd = getElement<SVGRectElement>(this.lines.right, `${NodeClassPrefix}-distance-right-line-end`);
+      const lineEnd = getElement<SVGRectElement>(this.lines.right, `${ClassPrefix}-distance-right-line-end`);
       lineEnd.setAttribute("x", String(nodeRect.x - rectWidth / 2));
       lineEnd.setAttribute("y", String(seletedRect.y + seletedRect.h / 2 - rectHeight / 2));
       lineEnd.setAttribute("width", String(rectWidth));
@@ -351,7 +351,7 @@ export class Distance {
       lineEnd.setAttribute("fill", DistanceColor);
 
       // 虚线（辅助线）
-      const lineDash = getElement<SVGLineElement>(this.lines.right, `${NodeClassPrefix}-distance-right-dash-line`);
+      const lineDash = getElement<SVGLineElement>(this.lines.right, `${ClassPrefix}-distance-right-dash-line`);
       if (seletedRect.y < nodeRect.y) {
         lineDash.setAttribute("x1", String(nodeRect.x));
         lineDash.setAttribute("x2", String(nodeRect.x));
@@ -389,7 +389,7 @@ export class Distance {
       const nodeRect = Rect.from(this.top.node);
       const seletedRect = Rect.from(store.selected);
       // 主线（水平距离线）
-      const line = getElement<SVGLineElement>(this.lines.top, `${NodeClassPrefix}-distance-top-line`);
+      const line = getElement<SVGLineElement>(this.lines.top, `${ClassPrefix}-distance-top-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));
       line.setAttribute("x2", String(seletedRect.x + seletedRect.w / 2));
       line.setAttribute("y1", String(seletedRect.y));
@@ -398,7 +398,7 @@ export class Distance {
       line.setAttribute("stroke-width", String(DistanceWidth / store.scale));
 
       // 距离文本
-      const text = getElement<SVGTextElement>(this.lines.top, `${NodeClassPrefix}-distance-top-text`);
+      const text = getElement<SVGTextElement>(this.lines.top, `${ClassPrefix}-distance-top-text`);
       text.textContent = `${showNumber(seletedRect.y - nodeRect.h - nodeRect.y, true)}`;
       text.setAttribute(
         "x",
@@ -411,7 +411,7 @@ export class Distance {
       text.setAttribute("alignment-baseline", "middle");
 
       // 文本背景
-      const textBg = getElement<SVGRectElement>(this.lines.top, `${NodeClassPrefix}-distance-top-text-bg`);
+      const textBg = getElement<SVGRectElement>(this.lines.top, `${ClassPrefix}-distance-top-text-bg`);
       textBg.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 + 3 / store.scale));
       textBg.setAttribute(
         "y",
@@ -426,7 +426,7 @@ export class Distance {
       // 起点矩形
       const rectWidth = 8;
       const rectHeight = 1;
-      const lineStart = getElement<SVGRectElement>(this.lines.top, `${NodeClassPrefix}-distance-top-line-start`);
+      const lineStart = getElement<SVGRectElement>(this.lines.top, `${ClassPrefix}-distance-top-line-start`);
       lineStart.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - rectWidth / 2));
       lineStart.setAttribute("y", String(nodeRect.y + nodeRect.h - rectHeight / 2));
       lineStart.setAttribute("width", String(rectWidth));
@@ -434,7 +434,7 @@ export class Distance {
       lineStart.setAttribute("fill", DistanceColor);
 
       // 终点矩形
-      const lineEnd = getElement<SVGRectElement>(this.lines.top, `${NodeClassPrefix}-distance-top-line-end`);
+      const lineEnd = getElement<SVGRectElement>(this.lines.top, `${ClassPrefix}-distance-top-line-end`);
       lineEnd.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - rectWidth / 2));
       lineEnd.setAttribute("y", String(seletedRect.y - rectHeight / 2));
       lineEnd.setAttribute("width", String(rectWidth));
@@ -442,7 +442,7 @@ export class Distance {
       lineEnd.setAttribute("fill", DistanceColor);
 
       // 虚线（辅助线）
-      const lineDash = getElement<SVGLineElement>(this.lines.top, `${NodeClassPrefix}-distance-top-dash-line`);
+      const lineDash = getElement<SVGLineElement>(this.lines.top, `${ClassPrefix}-distance-top-dash-line`);
       if (seletedRect.x < nodeRect.x) {
         lineDash.setAttribute("x1", String(seletedRect.x));
         lineDash.setAttribute("x2", String(nodeRect.x));
@@ -480,7 +480,7 @@ export class Distance {
       const nodeRect = Rect.from(this.bottom.node);
       const seletedRect = Rect.from(store.selected);
       // 主线（垂直距离线）
-      const line = getElement<SVGLineElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-line`);
+      const line = getElement<SVGLineElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));
       line.setAttribute("x2", String(seletedRect.x + seletedRect.w / 2));
       line.setAttribute("y1", String(seletedRect.y + seletedRect.h));
@@ -489,7 +489,7 @@ export class Distance {
       line.setAttribute("stroke-width", String(DistanceWidth / store.scale));
 
       // 距离文本
-      const text = getElement<SVGTextElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-text`);
+      const text = getElement<SVGTextElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-text`);
       text.textContent = `${showNumber(nodeRect.y - seletedRect.y - seletedRect.h, true)}`;
       const textX = seletedRect.x + seletedRect.w / 2 + (text.getComputedTextLength() + 10) / 2 + 3 / store.scale;
       text.setAttribute("x", String(textX));
@@ -500,7 +500,7 @@ export class Distance {
       text.setAttribute("alignment-baseline", "middle");
 
       // 文本背景
-      const textBg = getElement<SVGRectElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-text-bg`);
+      const textBg = getElement<SVGRectElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-text-bg`);
       textBg.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 + 3 / store.scale));
       textBg.setAttribute(
         "y",
@@ -515,7 +515,7 @@ export class Distance {
       // 起点矩形
       const rectWidth = 8;
       const rectHeight = 1;
-      const lineStart = getElement<SVGRectElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-line-start`);
+      const lineStart = getElement<SVGRectElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-line-start`);
       lineStart.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - rectWidth / 2));
       lineStart.setAttribute("y", String(seletedRect.y + seletedRect.h - rectHeight / 2));
       lineStart.setAttribute("width", String(rectWidth));
@@ -523,7 +523,7 @@ export class Distance {
       lineStart.setAttribute("fill", DistanceColor);
 
       // 终点矩形
-      const lineEnd = getElement<SVGRectElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-line-end`);
+      const lineEnd = getElement<SVGRectElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-line-end`);
       lineEnd.setAttribute("x", String(seletedRect.x + seletedRect.w / 2 - rectWidth / 2));
       lineEnd.setAttribute("y", String(nodeRect.y - rectHeight / 2));
       lineEnd.setAttribute("width", String(rectWidth));
@@ -531,7 +531,7 @@ export class Distance {
       lineEnd.setAttribute("fill", DistanceColor);
 
       // 虚线（辅助线）
-      const lineDash = getElement<SVGLineElement>(this.lines.bottom, `${NodeClassPrefix}-distance-bottom-dash-line`);
+      const lineDash = getElement<SVGLineElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-dash-line`);
       if (seletedRect.x < nodeRect.x) {
         lineDash.setAttribute("x1", String(seletedRect.x));
         lineDash.setAttribute("x2", String(nodeRect.x));

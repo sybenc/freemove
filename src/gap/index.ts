@@ -1,4 +1,4 @@
-import { NodeAbsorbDelta, NodeClassPrefix } from "../const";
+import { NodeAbsorbDelta, ClassPrefix } from "../const";
 import Rect from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, toPx } from "../utils";
@@ -272,7 +272,7 @@ export class Gap {
 
   constructor(svg: SVGSVGElement) {
     this.g = createElementNS("g");
-    this.g.setAttribute("class", `${NodeClassPrefix}-gap`);
+    this.g.setAttribute("class", `${ClassPrefix}-gap`);
     svg.append(this.g);
   }
 

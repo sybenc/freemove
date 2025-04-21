@@ -854,7 +854,7 @@ class Ft {
     this.store = Rt(e, t), lt(this.store);
   }
   mount() {
-    this.store.canvas.append(this.store.svg);
+    this.store.board.append(this.store.svg);
   }
   unmount() {
     this.store.svg.remove();
