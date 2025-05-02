@@ -1,6 +1,6 @@
 import { Store } from "./../store";
 import { NodeAbsorbDelta, ClassPrefix, NodeMinHeight, NodeMinWidth } from "../const";
-import Rect from "../rect";
+import Node from "../rect";
 import { createElementNS, getElement, showNumber, toPx } from "../utils"; // Ensure createElementNS is imported
 import { ResizeData } from "./type";
 import { ResizeColor, ResizeEndpointLength, ResizeFontSize, ResizeOffset, ResizeWidth } from "./const";
@@ -10,7 +10,7 @@ function searchSameWidthHeight(store: Store): {
   widthMap: Map<number, ResizeData[]>;
   heightMap: Map<number, ResizeData[]>;
 } {
-  const nodeRects = store.nodes.map((item) => Rect.from(item));
+  const nodeRects = store.nodes.map((item) => Node.from(item));
   const widthMap = new Map<number, ResizeData[]>();
   const heightMap = new Map<number, ResizeData[]>();
   nodeRects.forEach((nodeRect) => {
@@ -41,7 +41,7 @@ function searchSameWidthHeight(store: Store): {
 
 function renderResizeLine(store: Store) {
   store.nodes.forEach((node) => {
-    const nodeRect = Rect.from(node);
+    const nodeRect = Node.from(node);
     const g = store.resize.g.querySelector(`[data-ower-id="${nodeRect.id}"]`)!;
     const widthLine = getElement<SVGLineElement>(g, `${ClassPrefix}-resize-line-group-width-line`);
     const widthLineStart = getElement<SVGRectElement>(g, `${ClassPrefix}-resize-line-group-width-line-start`);
@@ -121,7 +121,7 @@ export class Resize {
     this.g.setAttribute("class", `${ClassPrefix}-resize`);
     const result: SVGGElement[] = [];
     nodes.forEach((node) => {
-      const nodeRect = Rect.from(node);
+      const nodeRect = Node.from(node);
 
       const g = createElementNS<SVGGElement>("g");
       g.setAttribute("class", `${ClassPrefix}-resize-line`);
@@ -190,7 +190,7 @@ export class Resize {
     startWidth: number,
     startHeight: number
   ) {
-    if (!store.selected) return;
+    if (!store.selectedRect) return;
     this.hidden();
 
     // 查找可吸附的尺寸
@@ -200,7 +200,7 @@ export class Resize {
 
     widthMap.forEach((value, key) => {
       if (value.length === 1) {
-        if (value[0].nodeRect.id === store.selected?.dataset.id) return;
+        if (value[0].nodeRect.id === store.selectedRect?.dataset.id) return;
       }
       if (Math.abs(newWidth - key) <= NodeAbsorbDelta) {
         alternateAbsorbWidth.push(key);
@@ -208,7 +208,7 @@ export class Resize {
     });
     heightMap.forEach((value, key) => {
       if (value.length === 1) {
-        if (value[0].nodeRect.id === store.selected?.dataset.id) return;
+        if (value[0].nodeRect.id === store.selectedRect?.dataset.id) return;
       }
       if (Math.abs(newHeight - key) <= NodeAbsorbDelta) {
         alternateAbsorbHeight.push(key);
@@ -226,24 +226,24 @@ export class Resize {
     // 保持右边缘不动
     if (direction.includes("left")) {
       const rightEdge = startLeft + startWidth; // 向右或向下拉伸时左边缘固定
-      store.selected.style.left = toPx(rightEdge - finalWidth);
+      store.selectedRect.style.left = toPx(rightEdge - finalWidth);
     } else {
-      store.selected.style.left = toPx(startLeft); // 向右或向下拉伸时左边缘固定
+      store.selectedRect.style.left = toPx(startLeft); // 向右或向下拉伸时左边缘固定
     }
-    store.selected.style.width = toPx(finalWidth);
+    store.selectedRect.style.width = toPx(finalWidth);
 
     // 保持下边缘不动
     if (direction.includes("top")) {
       const bottomEdge = startTop + startHeight; // 向右或向下拉伸时上边缘固定
-      store.selected.style.top = toPx(bottomEdge - finalHeight);
+      store.selectedRect.style.top = toPx(bottomEdge - finalHeight);
     } else {
-      store.selected.style.top = toPx(startTop); // 向右或向下拉伸时上边缘固定
+      store.selectedRect.style.top = toPx(startTop); // 向右或向下拉伸时上边缘固定
     }
-    store.selected.style.height = toPx(finalHeight);
+    store.selectedRect.style.height = toPx(finalHeight);
 
     // 根据最终尺寸更新辅助线
-    const currentWidth = parseFloat(store.selected.style.width);
-    const currentHeight = parseFloat(store.selected.style.height);
+    const currentWidth = parseFloat(store.selectedRect.style.width);
+    const currentHeight = parseFloat(store.selectedRect.style.height);
     // console.log(widthMap, finalWidth, newWidth, absorbWidth)
 
     const { widthMap: newWidthMap, heightMap: newHeightMap } = searchSameWidthHeight(store);
@@ -261,7 +261,7 @@ export class Resize {
     });
 
     // * 确保当前选择的节点宽高一直显示，不加的话safari和chrome显示不一致，不知道原因
-    const lineGroup = this.g.querySelector(`[data-ower-id="${store.selected.dataset.id}"]`)!;
+    const lineGroup = this.g.querySelector(`[data-ower-id="${store.selectedRect.dataset.id}"]`)!;
     const widthLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-width`);
     const heightLine = getElement<SVGLineElement>(lineGroup, `${ClassPrefix}-resize-line-group-height`);
     heightLine.style.display = "block";

@@ -1,5 +1,5 @@
 import { ClassPrefix } from "../const";
-import Rect from "../rect";
+import Node from "../rect";
 import { Store } from "../store";
 import { createElementNS, getElement, toPx } from "../utils";
 import { BorderColor, BorderPointsSideLength, BorderWidth } from "./const";
@@ -51,7 +51,7 @@ function createSeletedBorderDom(): [points: SVGRectElement[], lines: SVGLineElem
 }
 
 function renderSelectedBorder(g: SVGGElement, store: Store) {
-  const seletedRect = Rect.from(store.selected!);
+  const seletedRect = Node.from(store.selectedRect!);
   selectedBorderLineTypes.forEach((type) => {
     const line = getElement<SVGLineElement>(g, `${ClassPrefix}-border-line-${type}`);
     line.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
@@ -84,7 +84,7 @@ function renderSelectedBorder(g: SVGGElement, store: Store) {
   });
   selectedBorderPointTypes.forEach((type, index) => {
     const rect = getElement<SVGRectElement>(g, `${ClassPrefix}-border-point-${type}`);
-    rect.setAttribute("data-owner-id", store.selected!.dataset.id!);
+    rect.setAttribute("data-owner-id", store.selectedRect!.dataset.id!);
     rect.setAttribute("stroke-width", toPx(BorderWidth / store.scale));
     rect.setAttribute("width", toPx(BorderPointsSideLength / store.scale));
     rect.setAttribute("height", toPx(BorderPointsSideLength / store.scale));
@@ -148,7 +148,7 @@ export class Border {
   }
 
   reRender(store: Store) {
-    if (!store.selected) return;
+    if (!store.selectedRect) return;
     this.g.style.display = "block";
     renderSelectedBorder(this.g, store);
   }

@@ -1,6 +1,6 @@
 // align-line.ts
 import { NodeAbsorbDelta, ClassPrefix } from "../const";
-import Rect from "../rect";
+import Node from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, toPx } from "../utils";
 import { AlignLineColor, AlignLineWidth } from "./const";
@@ -8,7 +8,7 @@ import { AlignLineData, AlignLineType } from "./type";
 
 const alignLineTypes: AlignLineType[] = ["vl", "vc", "vr", "ht", "hc", "hb"];
 
-function getAlignLinePostion(rect: Rect): Record<AlignLineType, number> {
+function getAlignLinePostion(rect: Node): Record<AlignLineType, number> {
   return {
     vl: rect.x,
     vc: rect.x + rect.w / 2,
@@ -20,8 +20,8 @@ function getAlignLinePostion(rect: Rect): Record<AlignLineType, number> {
 }
 
 function handleSearchAlternateNodes(store: Store, align: Align) {
-  const selectedRect = Rect.from(store.selected!);
-  const nodeRects = store.nodes.filter((n) => n !== store.selected).map((n) => Rect.from(n));
+  const selectedRect = Node.from(store.selectedRect!);
+  const nodeRects = store.nodes.filter((n) => n !== store.selectedRect).map((n) => Node.from(n));
 
   alignLineTypes.forEach((type) => (align.alternateNodes[type] = []));
 
@@ -122,7 +122,7 @@ function handleSearchAlternateNodes(store: Store, align: Align) {
 
 function handleAlignLineAbsorb(store: Store, align: Align, data: AlignLineData) {
   const { absorbPosition, type } = data;
-  const selected = store.selected!;
+  const selected = store.selectedRect!;
   switch (type) {
     case "ht":
       selected.style.top = toPx(absorbPosition);
@@ -150,12 +150,12 @@ function handleAlignLineAbsorb(store: Store, align: Align, data: AlignLineData) 
 }
 
 function handleContainerAlignLineAbsorb(store: Store, align: Align) {
-  if (!store.selected) return;
+  if (!store.selectedRect) return;
   const canvasRect = store.canvas.getBoundingClientRect();
-  const selectedRect = Rect.from(store.selected!);
+  const selectedRect = Node.from(store.selectedRect!);
   const absorbPosition = canvasRect.width / store.scale / 2;
   if (Math.abs(selectedRect.x + selectedRect.w / 2 - absorbPosition) <= NodeAbsorbDelta) {
-    store.selected.style.left = toPx(absorbPosition - selectedRect.w / 2);
+    store.selectedRect.style.left = toPx(absorbPosition - selectedRect.w / 2);
     align.showContainerAlignLine = true;
   }
 
@@ -165,9 +165,9 @@ function handleContainerAlignLineAbsorb(store: Store, align: Align) {
 }
 
 function handleDraw(store: Store, align: Align) {
-  if (!store.selected) return;
+  if (!store.selectedRect) return;
   const canvasRect = store.canvas.getBoundingClientRect();
-  const selectedRect = Rect.from(store.selected!);
+  const selectedRect = Node.from(store.selectedRect!);
 
   const alternateNodesFlat = Object.values(align.alternateNodes).flat();
   if ([...align.alternateNodes.hb, ...align.alternateNodes.hc, ...align.alternateNodes.ht].length === 0)
@@ -269,7 +269,7 @@ export class Align {
   }
 
   reRender(store: Store) {
-    if (!store.selected) return;
+    if (!store.selectedRect) return;
     this.hidden();
     this.alternateNodes = {
       ht: [],

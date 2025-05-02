@@ -1,7 +1,7 @@
 import { Store } from "./../store";
 import { ClassPrefix } from "../const";
 import { Quadrant } from "./type";
-import Rect from "../rect";
+import Node from "../rect";
 import { createElementNS } from "../utils";
 
 function getQuadrant(startX: number, startY: number, endX: number, endY: number): Quadrant {
@@ -92,7 +92,7 @@ export class Selector {
 
     // 将被选中的元素放入selectedGroup中
     store.nodes.forEach((node) => {
-      const nodeRect = Rect.from(node);
+      const nodeRect = Node.from(node);
       if (
         nodeRect.isIntersect({
           x,
@@ -111,7 +111,7 @@ export class Selector {
     const alternateY2: number[] = [];
 
     this.selectedGroup.forEach((node) => {
-      const { x, y, w, h } = Rect.from(node);
+      const { x, y, w, h } = Node.from(node);
       // console.log(Rect.from(node));
       alternateX1.push(x);
       alternateY1.push(y);

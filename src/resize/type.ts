@@ -1,6 +1,6 @@
-import Rect from "../rect"
+import Node from "../rect"
 
 export interface ResizeData {
   type: 'height' | 'width'
-  nodeRect: Rect
+  nodeRect: Node
 }

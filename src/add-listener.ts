@@ -1,19 +1,19 @@
 import { ClassPrefix, NodeMinHeight, NodeMinWidth } from "./const";
-import Rect from "./rect";
+import Node from "./rect";
 import { Store } from "./store";
 import { toPx } from "./utils";
 
 function handleMoveNode(store: Store, event: PointerEvent) {
-  if (!store.selected) return;
+  if (!store.selectedRect) return;
   const canvasRect = store.canvas.getBoundingClientRect();
 
-  if (store.selected.dataset.error === "false") {
+  if (store.selectedRect.dataset.error === "false") {
     store.align.reRender(store);
     store.distance.reRender(store);
     store.gap.reRender(store);
   }
   store.border.reRender(store);
-  const rect = store.selected.getBoundingClientRect();
+  const rect = store.selectedRect.getBoundingClientRect();
   let startX = (event.clientX - rect.left) / store.scale;
   let startY = (event.clientY - rect.top) / store.scale;
 
@@ -23,20 +23,20 @@ function handleMoveNode(store: Store, event: PointerEvent) {
     if (animationFrameId) return;
 
     animationFrameId = requestAnimationFrame(() => {
-      if (!store.selected) return;
+      if (!store.selectedRect) return;
       let newX = (ev.clientX - canvasRect.left) / store.scale - startX;
       let newY = (ev.clientY - canvasRect.top) / store.scale - startY;
 
-      const maxLeft = store.canvas.clientWidth - store.selected.offsetWidth;
-      const maxTop = store.canvas.clientHeight - store.selected.offsetHeight;
+      const maxLeft = store.canvas.clientWidth - store.selectedRect.offsetWidth;
+      const maxTop = store.canvas.clientHeight - store.selectedRect.offsetHeight;
 
       newX = Math.max(0, Math.min(newX, maxLeft));
       newY = Math.max(0, Math.min(newY, maxTop));
 
-      store.selected.style.left = toPx(newX);
-      store.selected.style.top = toPx(newY);
+      store.selectedRect.style.left = toPx(newX);
+      store.selectedRect.style.top = toPx(newY);
       store.searchError();
-      if (store.selected.dataset.error === "false") {
+      if (store.selectedRect.dataset.error === "false") {
         store.align.reRender(store);
         store.distance.reRender(store);
         store.gap.reRender(store);
@@ -65,13 +65,13 @@ function handleMoveNode(store: Store, event: PointerEvent) {
 }
 
 function handleResizeNode(store: Store, event: PointerEvent) {
-  if (!store.selected) return;
+  if (!store.selectedRect) return;
   const canvasRect = store.canvas.getBoundingClientRect();
   const target = event.target as HTMLElement;
   const direction = target.dataset.direction;
   if (!direction) return;
 
-  const rect = Rect.from(store.selected);
+  const rect = Node.from(store.selectedRect);
   let startX = event.clientX;
   let startY = event.clientY;
   let startWidth = rect.w;
@@ -175,7 +175,7 @@ export function addPointerListener(store: Store) {
           store.setSelected(store.nodes[i]);
         }
       }
-      if (store.selected) {
+      if (store.selectedRect) {
         handleResizeNode(store, event);
       }
       return;
@@ -184,11 +184,11 @@ export function addPointerListener(store: Store) {
     // 如果点击到svg画布
     if (target.classList.contains(`${ClassPrefix}-svg`)) {
       // 判断点击位置是否在某个节点内部
-      let selected: Rect | null = null;
+      let selected: Node | null = null;
 
       // 查找被点击的节点
       for (const node of store.nodes) {
-        const nodeRect = Rect.from(node);
+        const nodeRect = Node.from(node);
         if (nodeRect.isInSide({ x: event.offsetX, y: event.offsetY })) {
           selected = nodeRect;
           break;
@@ -206,7 +206,7 @@ export function addPointerListener(store: Store) {
       // 此外，绘画选择框、清除被选择节点选择边框
       if (!selected) {
         store.border.hidden();
-        store.selected = null;
+        store.selectedRect = null;
         handleSelector(store, event);
       }
     }
@@ -215,11 +215,13 @@ export function addPointerListener(store: Store) {
   // 滚轮事件监听，用于画布缩放
   store.board.addEventListener("wheel", (event: WheelEvent) => {
     event.preventDefault();
-    const [minScale, maxScale] = store.scaleRange;
+    const [minScale, maxScale] = store.scaleExtent;
 
     function applyTransform() {
       store.canvas.style.transform = `translate(${store.translateX}px, ${store.translateY}px) scale(${store.scale})`;
       store.canvas.style.transformOrigin = "0 0";
+      store.svg.style.transform = `translate(${store.translateX}px, ${store.translateY}px) scale(${store.scale})`;
+      store.svg.style.transformOrigin = "0 0";
       store.border.reRender(store);
     }
 

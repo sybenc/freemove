@@ -1,144 +1,83 @@
-declare class Align {
-    g: SVGGElement;
-    lines: Record<AlignLineType | "vertical", SVGLineElement>;
-    isHAlign: boolean;
-    isVAlign: boolean;
-    alternateNodes: Record<AlignLineType, AlignLineData[]>;
-    showContainerAlignLine: boolean;
-    constructor(svg: SVGSVGElement);
-    hidden(): void;
-    reRender(store: Store): void;
+declare interface Coord {
+    x: number;
+    y: number;
 }
-
-declare interface AlignLineData {
-    type: AlignLineType;
-    source: number;
-    target: number;
-    absorbDistance: number;
-    absorbPosition: number;
-    nodeRects: ReadonlyArray<Rect>;
-}
-
-declare type AlignLineType = "vl" | "vc" | "vr" | "ht" | "hc" | "hb";
-
-declare class Border {
-    g: SVGGElement;
-    points: SVGRectElement[];
-    lines: SVGLineElement[];
-    constructor(svg: SVGSVGElement);
-    hidden(): void;
-    reRender(store: Store): void;
-}
-
-declare class Distance {
-    g: SVGGElement;
-    lines: Record<DistanceType, SVGGElement>;
-    left: {
-        length: number;
-        node: HTMLElement | null;
-    };
-    right: {
-        length: number;
-        node: HTMLElement | null;
-    };
-    top: {
-        length: number;
-        node: HTMLElement | null;
-    };
-    bottom: {
-        length: number;
-        node: HTMLElement | null;
-    };
-    constructor(svg: SVGSVGElement);
-    hidden(): void;
-    reRender(store: Store): void;
-}
-
-declare type DistanceType = 'left' | 'right' | 'bottom' | 'top';
 
 declare class FreeMove {
     store: Store;
-    constructor(border: HTMLElement, canvas: HTMLElement);
+    constructor(root: HTMLElement, board: HTMLElement);
     mount(): void;
     unmount(): void;
-    align(option: "start" | "center" | "end"): void;
 }
 export default FreeMove;
 
-declare class Gap {
-    g: SVGGElement;
-    constructor(svg: SVGSVGElement);
-    clear(): void;
-    reRender(store: Store): void;
-}
-
-declare interface Position {
-    x: number;
-    y: number;
-}
-
 declare class Rect {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    id: string;
+    #private;
     node: HTMLElement;
-    constructor({ x, y, h, w, node }: {
-        x: number;
-        y: number;
-        h: number;
-        w: number;
-        node: HTMLElement;
-    });
-    sync(): void;
+    parent: Rect | null;
+    children: Rect[];
+    constructor({ x, y, h, w, node }: RectConstrustor);
+    get id(): string;
+    get x(): number;
+    set x(value: number);
+    get y(): number;
+    set y(value: number);
+    get w(): number;
+    set w(value: number);
+    get h(): number;
+    set h(value: number);
     set error(value: boolean);
     get error(): boolean;
-    isInSide(position: Position): boolean;
+    set lock(value: boolean);
+    get lock(): boolean;
+    isInSide(coord: Coord): boolean;
     isIntersect(rect: Pick<Rect, "x" | "y" | "w" | "h">): boolean;
+    isBoard(): boolean;
+    isNode(): boolean;
+    isContainer(): boolean;
+    align(type: "h-start" | "h-center" | "h-end" | "v-top" | "v-center" | "v-bottom"): void;
+    classed(name: string, value: boolean): void;
+    isClassed(name: string): boolean;
+    style<K extends keyof Omit<CSSStyleDeclaration, "top" | "left" | "width" | "height">>(name: K, value: CSSStyleDeclaration[K]): this;
+    attr(name: string, value: string): Rect;
+    getAttr(value: string): string | null;
     static from(node: HTMLElement): Rect;
+    static isBoard(node: HTMLElement): boolean;
+    static isNode(node: HTMLElement): boolean;
+    static isContainer(node: HTMLElement): boolean;
 }
 
-declare class Resize {
-    g: SVGGElement;
-    lines: SVGGElement[];
-    constructor(svg: SVGSVGElement, nodes: HTMLElement[]);
-    hidden(): void;
-    reRender(store: Store, newWidth: number, newHeight: number, direction: string, startLeft: number, startTop: number, startWidth: number, startHeight: number): void;
+declare interface RectConstrustor {
+    x: number;
+    y: number;
+    h: number;
+    w: number;
+    node: HTMLElement;
 }
 
-declare class Selector {
-    g: SVGGElement;
-    selectorRect: SVGRectElement;
-    previewRect: SVGRectElement;
-    selectedGroup: HTMLElement[];
-    constructor(svg: SVGSVGElement);
-    hiddenSelector(): void;
-    showSelector(): void;
-    hiddenPreview(): void;
-    showPreview(): void;
-    reRender(store: Store, startX: number, startY: number, endX: number, endY: number): void;
-}
-
-declare interface Store {
+declare class Store {
+    #private;
+    root: HTMLElement;
+    rootDOMRect: DOMRect;
     board: HTMLElement;
-    canvas: HTMLElement;
-    nodes: HTMLElement[];
+    boardDOMRect: DOMRect;
     svg: SVGSVGElement;
+    svgDOMRect: DOMRect;
+    nodeRects: Rect;
+    get boardCoord(): Coord;
+    syncRootDOMRect(): void;
+    syncSvgDOMRect(): void;
+    syncBoardDOMRect(): void;
+    syncNodeRects(): void;
+    get selectedRect(): Rect;
+    set selectedRect(nodeRect: Rect);
+    searchError(): void;
+    scaleExtent: [number, number];
     scale: number;
-    scaleRange: [number, number];
     translateX: number;
     translateY: number;
-    selected: HTMLElement | null;
-    setSelected: (target: HTMLElement | null) => void;
-    searchError: () => void;
-    syncNodes: () => void;
-    gap: Gap;
-    align: Align;
-    distance: Distance;
-    border: Border;
-    resize: Resize;
-    selector: Selector;
+    applyTransform(): void;
+    constructor(root: HTMLElement, board: HTMLElement);
 }
 
 export { }

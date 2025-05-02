@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>D3 可放缩坐标轴</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .axis path, .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+    .axis text {
+      font-family: sans-serif;
+      font-size: 12px;
+    }
+    svg {
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <script>
+    // SVG 画布尺寸
+    const width = 800;
+    const height = 600;
+
+    // 设置坐标轴原点位置（相对于 SVG 左上角）
+    const originX = width / 2; // 原点 x 坐标（画布中间）
+    const originY = height / 2; // 原点 y 坐标（画布中间）
+
+    // 定义比例尺
+    const xScale = d3.scaleLinear()
+      .domain([-50, 50]) // 世界坐标范围
+      .range([-width / 2, width / 2]); // 映射到画布坐标（以原点为中心）
+
+    const yScale = d3.scaleLinear()
+      .domain([-50, 50]) // 世界坐标范围
+      .range([height / 2, -height / 2]); // 映射到画布坐标（y 轴向上为正）
+
+    // 创建 SVG 画布
+    const svg = d3.select("#chart")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    // 创建一个组元素 (g) 用于坐标轴，初始平移到原点位置
+    const g = svg.append("g")
+      .attr("transform", `translate(${originX}, ${originY})`);
+
+    // 定义坐标轴
+    const xAxis = d3.axisBottom(xScale)
+      .ticks(10); // x 轴刻度数量
+    const yAxis = d3.axisLeft(yScale)
+      .ticks(10); // y 轴刻度数量
+
+    // 绘制 x 轴
+    const xAxisGroup = g.append("g")
+      .attr("class", "axis x-axis")
+      .call(xAxis);
+
+    // 绘制 y 轴
+    const yAxisGroup = g.append("g")
+      .attr("class", "axis y-axis")
+      .call(yAxis);
+
+    // 定义缩放行为
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 5]) // 缩放范围：0.5x 到 5x
+      .on("zoom", (event) => {
+        // 获取缩放和拖动的变换
+        const transform = event.transform;
+
+        // 更新比例尺
+        const newXScale = transform.rescaleX(xScale);
+        const newYScale = transform.rescaleY(yScale);
+
+        // 更新坐标轴
+        xAxisGroup.call(xAxis.scale(newXScale));
+        yAxisGroup.call(yAxis.scale(newYScale));
+
+        // 应用变换到整个坐标轴组
+        g.attr("transform", `translate(${originX + transform.x}, ${originY + transform.y}) scale(${transform.k})`);
+      });
+
+    // 应用缩放行为到 SVG
+    svg.call(zoom)
+      // 初始化缩放和平移到原点位置
+      .call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(1));
+  </script>
+</body>
+</html>

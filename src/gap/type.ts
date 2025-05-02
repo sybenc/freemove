@@ -1,4 +1,4 @@
-import Rect from "../rect";
+import Node from "../rect";
 
 // 间距区域接口
 export interface GapRegion {
@@ -6,12 +6,12 @@ export interface GapRegion {
   y: number;
   w: number;
   h: number;
-  rect1: Rect[];
-  rect2: Rect[];
+  rect1: Node[];
+  rect2: Node[];
 }
 
 export interface EdgeCoord {
   value: number;
   type: "min" | "max";
-  nodeRect: Readonly<Rect>;
+  nodeRect: Readonly<Node>;
 }

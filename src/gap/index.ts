@@ -1,5 +1,5 @@
 import { NodeAbsorbDelta, ClassPrefix } from "../const";
-import Rect from "../rect";
+import Node from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, toPx } from "../utils";
 import { GapRegion, EdgeCoord } from "./type";
@@ -7,7 +7,7 @@ import { GapRegion, EdgeCoord } from "./type";
 function searchDistanceBlockHData(store: Store): Map<number, GapRegion[]> {
   const xGapRegions = new Map<number, GapRegion[]>();
 
-  function getGapRegions(currActiveRects: Rect[]) {
+  function getGapRegions(currActiveRects: Node[]) {
     const xEdgeCoords: EdgeCoord[] = [];
 
     // 根据活动矩形在x轴、y轴排序
@@ -97,21 +97,21 @@ function searchDistanceBlockHData(store: Store): Map<number, GapRegion[]> {
   //     xGapRegions.set(gapKey, Array.from(xMap.values()).flat());
   //   });
   // }
-  const nodeRects: Rect[] = [];
-  const seletedRect = Rect.from(store.selected!);
+  const nodeRects: Node[] = [];
+  const seletedRect = Node.from(store.selectedRect!);
 
   // 获取节点参数
   store.nodes.forEach((node) => {
-    const nodeRect = Rect.from(node);
+    const nodeRect = Node.from(node);
     nodeRects.push(nodeRect);
   });
 
   nodeRects.sort((a, b) => a.x - b.x);
 
   // 和当前被选择矩形在同一行的矩形集合
-  const activeRects: Rect[] = [];
+  const activeRects: Node[] = [];
   // 在活动矩形上面的矩形
-  const inactiveRects: Rect[] = [];
+  const inactiveRects: Node[] = [];
   // 初始化活动矩形
   nodeRects.forEach((nodeRect) => {
     const isActive =
@@ -281,28 +281,28 @@ export class Gap {
   }
 
   reRender(store: Store) {
-    if (!store.selected) return;
+    if (!store.selectedRect) return;
     this.clear();
     const { left, right, top, bottom } = store.distance;
-    const selectedRect = Rect.from(store.selected);
+    const selectedRect = Node.from(store.selectedRect);
     const getLegalValue = (value: number) => {
       return value < 0 ? 0 : value;
     };
     if (left.node && right.node && store.align.isHAlign && !store.align.isVAlign) {
-      const rightRect = Rect.from(right.node);
-      const leftRect = Rect.from(left.node);
+      const rightRect = Node.from(right.node);
+      const leftRect = Node.from(left.node);
       const gap = (rightRect.x - leftRect.x - leftRect.w - selectedRect.w) / 2;
       if (Math.abs(selectedRect.x - leftRect.x - leftRect.w - gap) <= NodeAbsorbDelta) {
-        store.selected.style.left = toPx(leftRect.x + leftRect.w + gap);
+        store.selectedRect.style.left = toPx(leftRect.x + leftRect.w + gap);
         selectedRect.sync();
       }
     }
     if (top.node && bottom.node && !store.align.isHAlign && store.align.isVAlign) {
-      const bottomRect = Rect.from(bottom.node);
-      const topRect = Rect.from(top.node);
+      const bottomRect = Node.from(bottom.node);
+      const topRect = Node.from(top.node);
       const gap = (bottomRect.y - topRect.y - topRect.h - selectedRect.h) / 2;
       if (Math.abs(selectedRect.y - topRect.y - topRect.h - gap) <= NodeAbsorbDelta) {
-        store.selected.style.top = toPx(topRect.y + topRect.h + gap);
+        store.selectedRect.style.top = toPx(topRect.y + topRect.h + gap);
         selectedRect.sync();
       }
     }

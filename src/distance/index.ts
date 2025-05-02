@@ -1,5 +1,5 @@
 import { ClassPrefix } from "../const";
-import Rect from "../rect";
+import Node from "../rect";
 import { Store } from "../store";
 import { createElementNS, epsilonEqual, getElement, showNumber, toPx } from "../utils";
 import { DistanceColor, DistanceFontSize, DistanceWidth } from "./const";
@@ -9,7 +9,7 @@ const distanceTypes: DistanceType[] = ["left", "right", "top", "bottom"];
 
 function searchDistanceLine(store: Store) {
   // 边界检查：确保 store.selected 和 store.nodes 有效
-  if (!store.selected || !store.nodes || store.nodes.length === 0) {
+  if (!store.selectedRect || !store.nodes || store.nodes.length === 0) {
     return;
   }
 
@@ -30,13 +30,13 @@ function searchDistanceLine(store: Store) {
     node: null,
   };
 
-  const nodeRects: Rect[] = [];
-  const seletedRect = Rect.from(store.selected);
+  const nodeRects: Node[] = [];
+  const seletedRect = Node.from(store.selectedRect);
 
   // 收集所有非选中节点的矩形
   store.nodes.forEach((node) => {
     if (seletedRect.node === node) return;
-    const nodeRect = Rect.from(node);
+    const nodeRect = Node.from(node);
     nodeRects.push(nodeRect);
   });
 
@@ -186,23 +186,23 @@ export class Distance {
   }
 
   reRender(store: Store) {
-    if (!store.selected) return;
+    if (!store.selectedRect) return;
     this.hidden();
     searchDistanceLine(store);
 
     // Handle left distance
-    if (this.left.node && this.left.node.id !== store.selected.dataset.id) {
+    if (this.left.node && this.left.node.id !== store.selectedRect.dataset.id) {
       if (store.align.isHAlign && !store.align.isVAlign) {
         const absorbDistance = getAbsorbDistance(this.left.length);
         if (absorbDistance !== this.left.length) {
-          store.selected.style.left = toPx(parseFloat(store.selected.style.left) - this.left.length + absorbDistance);
+          store.selectedRect.style.left = toPx(parseFloat(store.selectedRect.style.left) - this.left.length + absorbDistance);
           this.left.length = absorbDistance;
           store.align.reRender(store);
           store.border.reRender(store);
         }
       }
-      const nodeRect = Rect.from(this.left.node);
-      const seletedRect = Rect.from(store.selected);
+      const nodeRect = Node.from(this.left.node);
+      const seletedRect = Node.from(store.selectedRect);
       // 主线（水平距离线）
       const line = getElement<SVGLineElement>(this.lines.left, `${ClassPrefix}-distance-left-line`);
       line.setAttribute("x1", String(nodeRect.x + nodeRect.w));
@@ -285,18 +285,18 @@ export class Distance {
     }
 
     // Handle right distance
-    if (this.right.node && this.right.node.id !== store.selected.dataset.id) {
+    if (this.right.node && this.right.node.id !== store.selectedRect.dataset.id) {
       if (store.align.isHAlign && !store.align.isVAlign) {
         const absorbDistance = getAbsorbDistance(this.right.length);
         if (absorbDistance !== this.right.length) {
-          store.selected.style.left = toPx(parseFloat(store.selected.style.left) + this.right.length - absorbDistance);
+          store.selectedRect.style.left = toPx(parseFloat(store.selectedRect.style.left) + this.right.length - absorbDistance);
           this.right.length = absorbDistance;
           store.align.reRender(store);
           store.border.reRender(store);
         }
       }
-      const nodeRect = Rect.from(this.right.node);
-      const seletedRect = Rect.from(store.selected);
+      const nodeRect = Node.from(this.right.node);
+      const seletedRect = Node.from(store.selectedRect);
       // 主线（水平距离线）
       const line = getElement<SVGLineElement>(this.lines.right, `${ClassPrefix}-distance-right-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w));
@@ -376,18 +376,18 @@ export class Distance {
     }
 
     // Handle top distance
-    if (this.top.node && this.top.node.id !== store.selected.dataset.id) {
+    if (this.top.node && this.top.node.id !== store.selectedRect.dataset.id) {
       if (store.align.isVAlign && !store.align.isHAlign) {
         const absorbDistance = getAbsorbDistance(this.top.length);
         if (absorbDistance !== this.top.length) {
-          store.selected.style.top = toPx(parseFloat(store.selected.style.top) - this.top.length + absorbDistance);
+          store.selectedRect.style.top = toPx(parseFloat(store.selectedRect.style.top) - this.top.length + absorbDistance);
           this.top.length = absorbDistance;
           store.align.reRender(store);
           store.border.reRender(store);
         }
       }
-      const nodeRect = Rect.from(this.top.node);
-      const seletedRect = Rect.from(store.selected);
+      const nodeRect = Node.from(this.top.node);
+      const seletedRect = Node.from(store.selectedRect);
       // 主线（水平距离线）
       const line = getElement<SVGLineElement>(this.lines.top, `${ClassPrefix}-distance-top-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));
@@ -467,18 +467,18 @@ export class Distance {
     }
 
     // Handle bottom distance
-    if (this.bottom.node && this.bottom.node.id !== store.selected.dataset.id) {
+    if (this.bottom.node && this.bottom.node.id !== store.selectedRect.dataset.id) {
       if (store.align.isVAlign && !store.align.isHAlign) {
         const absorbDistance = getAbsorbDistance(this.bottom.length);
         if (absorbDistance !== this.bottom.length) {
-          store.selected.style.top = toPx(parseFloat(store.selected.style.top) + this.bottom.length - absorbDistance);
+          store.selectedRect.style.top = toPx(parseFloat(store.selectedRect.style.top) + this.bottom.length - absorbDistance);
           this.bottom.length = absorbDistance;
           store.align.reRender(store);
           store.border.reRender(store);
         }
       }
-      const nodeRect = Rect.from(this.bottom.node);
-      const seletedRect = Rect.from(store.selected);
+      const nodeRect = Node.from(this.bottom.node);
+      const seletedRect = Node.from(store.selectedRect);
       // 主线（垂直距离线）
       const line = getElement<SVGLineElement>(this.lines.bottom, `${ClassPrefix}-distance-bottom-line`);
       line.setAttribute("x1", String(seletedRect.x + seletedRect.w / 2));

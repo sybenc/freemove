@@ -6,7 +6,6 @@
   "style": "dist/freemove.css",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "vite build"
   },
   "keywords": [],
@@ -14,6 +13,12 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/d3-axis": "^3.0.6",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-scale": "^4.0.9",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-zoom": "^3.0.8",
     "@types/node": "^22.14.1",
     "postcss-modules": "^6.0.1",
     "postcss-prefixer": "^3.0.0",
@@ -22,6 +27,12 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "dependencies": {
+    "d3-axis": "^3.0.0",
+    "d3-drag": "^3.0.0",
+    "d3-interpolate": "^3.0.1",
+    "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
     "nanoid": "^5.1.5"
   }
 }

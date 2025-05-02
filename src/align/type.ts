@@ -1,4 +1,4 @@
-import Rect from "../rect";
+import Node from "../rect";
 
 // 分别对应六条对齐线
 // vl   vertical-left       竖直方向，左侧对齐线
@@ -22,5 +22,5 @@ export interface AlignLineData {
   // 吸附位置（目标节点的对齐点坐标）
   absorbPosition: number;
   // 关联的矩形列表（触发对齐线的节点）
-  nodeRects: ReadonlyArray<Rect>;
+  nodeRects: ReadonlyArray<Node>;
 }
