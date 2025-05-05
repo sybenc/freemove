@@ -1,1 +1,0 @@
-export type DistanceType = 'left' | 'right' | 'bottom' | 'top'

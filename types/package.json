@@ -1,0 +1,9 @@
+{
+  "name": "@sybenc/freemove-types",
+  "version": "1.0.3",
+  "types": "src/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "freemove的类型声明文件"
+}

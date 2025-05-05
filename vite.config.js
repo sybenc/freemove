@@ -23,7 +23,7 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      outputDir: "dist",
+      outputDir: "types",
       rollupTypes: true,
     })
   ],

@@ -1,0 +1,37 @@
+import { DomSelection } from "./utils/d3";
+import { Rect } from "./rect";
+import { Observer } from "./observer";
+import { Transform } from "./transform";
+import { store_search_error } from "./store_search_error";
+import { store_apply_transform } from "./store_apply_transform";
+import { Manager } from "./manager";
+import { Hook, hook_on_after_init, hook_on_after_transform, hook_on_before_init } from "./hook";
+import { store_plugin } from "./store_plugin";
+import { Plugins } from "./plugins";
+import { store_mount } from "./store_mount";
+import { Ruler } from "@sybenc/ruler";
+export declare const hooks: unique symbol;
+export declare const plugin: unique symbol;
+export declare class Store {
+    #private;
+    root: DomSelection;
+    board: DomSelection;
+    assist: DomSelection;
+    transform: Transform;
+    observer: Observer;
+    rect: Rect;
+    manager: Manager;
+    ruler?: Ruler;
+    get selectedRect(): Rect;
+    set selectedRect(rect: Rect);
+    [hooks]: Hook;
+    [plugin]: Plugins;
+    searchError: typeof store_search_error;
+    applyTransform: typeof store_apply_transform;
+    plugin: typeof store_plugin;
+    mount: typeof store_mount;
+    onAfterTransform: typeof hook_on_after_transform;
+    onBeforeMount: typeof hook_on_before_init;
+    onAfterMount: typeof hook_on_after_init;
+    constructor(root: HTMLElement, board: HTMLElement);
+}

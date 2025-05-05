@@ -6,7 +6,7 @@
   "style": "dist/freemove.css",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build & tsc"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "vite-plugin-dts": "^4.5.3"
   },
   "dependencies": {
+    "@sybenc/ruler": "^1.0.4",
     "d3-axis": "^3.0.0",
     "d3-drag": "^3.0.0",
     "d3-interpolate": "^3.0.1",
