@@ -1,7 +1,7 @@
-import { Store } from "../store";
-import { HookNames } from "./hook_names";
+import {Store} from "@/store";
+import {HookNames} from "@/hook/index";
 
-export type HookCallback<T extends any[] = any[]> = (this: Store, ...args: T) => void;
+export type HookCallback<T extends any[] = any[]> = (store?: Store, ...args: T) => void;
 
 export class Hook {
   private storage: Map<HookNames, Set<HookCallback>> = new Map();
@@ -14,8 +14,9 @@ export class Hook {
   execute(store: Store, name: HookNames, ...args: any[]) {
     if (!this.storage.has(name)) return;
     this.storage.get(name)?.forEach((func) => {
-      func.apply(store, args);
+      func(store, ...args)
     });
   }
 }
-export { HookNames } from "./hook_names";
+
+export {HookNames} from "./hook_names";

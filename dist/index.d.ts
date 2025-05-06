@@ -1,3 +1,4 @@
+import { Align } from '@sybenc/assist-align/dist/align/align';
 import { DomSelection as DomSelection_2 } from '@sybenc/ruler/dist/d3';
 import { Ruler } from '@sybenc/ruler';
 import { Selection as Selection_2 } from 'd3-selection';
@@ -37,7 +38,7 @@ export declare class CommandRemoveRect implements Command {
 }
 
 export declare class CompositeCommand implements Command {
-    private commands;
+    private readonly commands;
     record: boolean;
     constructor(commands: Command[]);
     exec(): void;
@@ -57,21 +58,42 @@ export declare class Hook {
     execute(store: Store, name: HookNames, ...args: any[]): void;
 }
 
-export declare function hook_on_after_init(this: Store, func: HookCallback): void;
+export declare const hook: unique symbol;
 
-export declare function hook_on_after_transform(this: Store, func: HookCallback): void;
+declare function hook_on_drag_leave(this: Store, func: HookCallback<[DragEvent]>): void;
 
-export declare function hook_on_before_init(this: Store, func: HookCallback): void;
+declare function hook_on_drag_over(this: Store, func: HookCallback<[DragEvent]>): void;
 
-export declare type HookCallback = (this: Store, ...args: any[]) => void;
+declare function hook_on_drop(this: Store, func: HookCallback<[DragEvent]>): void;
+
+declare function hook_on_mount_end(this: Store, func: HookCallback): void;
+
+declare function hook_on_mount_start(this: Store, func: HookCallback): void;
+
+declare function hook_on_move_rect(this: Store, func: HookCallback<[number, number]>): void;
+
+declare function hook_on_move_rect_end(this: Store, func: HookCallback<[number, number]>): void;
+
+declare function hook_on_move_rect_start(this: Store, func: HookCallback<[number, number]>): void;
+
+declare function hook_on_selected(this: Store, func: HookCallback<[number, number]>): void;
+
+declare function hook_on_transform(this: Store, func: HookCallback): void;
+
+export declare type HookCallback<T extends any[] = any[]> = (store?: Store, ...args: T) => void;
 
 export declare enum HookNames {
-    onAfterTransform = "onAfterTransform",
-    onBeforeMount = "onBeforeMount",
-    onAfterMount = "onAfterMount"
+    onTransform = "onTransform",
+    onMountStart = "onMountStart",
+    onMountEnd = "onMountEnd",
+    onMoveRect = "onMoveRect",
+    onMoveRectEnd = "onMoveRectEnd",
+    onMoveRectStart = "onMoveRectStart",
+    onSelected = "onSelected",
+    onDrop = "onDrop",
+    onDragLeave = "onDragLeave",
+    onDragOver = "onDragOver"
 }
-
-export declare const hooks: unique symbol;
 
 export declare class Manager {
     private undoStack;
@@ -95,26 +117,28 @@ export declare class Observer {
     constructor(root: Element, board: Element);
 }
 
-export declare const plugin: unique symbol;
-
-export declare type PluginOptions = {
+export declare type PluginOptions<T> = {
     name: string;
-    install: (this: Store, options: any) => void;
-    uninstall: (this: Store) => void;
+    data: T;
+    install: (store: Store, options: any) => void;
+    uninstall: (store: Store) => void;
 };
 
 export declare class Plugins {
     private storage;
-    add(name: string, plugin: PluginOptions): void;
-    get(): Map<string, PluginOptions>;
+    add(name: string, plugin: PluginOptions<any>): void;
+    getAll(): Map<string, PluginOptions<any>>;
+    get<T>(name: string): PluginOptions<T>;
 }
+
+export declare const plugins: unique symbol;
 
 export declare class Rect {
     #private;
     node: DomSelection_2;
     parent: Rect | null;
     children: Rect[];
-    constructor({ x, y, h, w, node }: RectConstrustor);
+    constructor({ x, y, h, w, node }: RectConstructor);
     get id(): string;
     get x(): number;
     set x(value: number);
@@ -170,7 +194,7 @@ declare function rect_remove(this: Rect): void;
 
 declare function rect_traverse(rect: Rect, callback: (item: Rect, depth: number) => void, algorithm?: "bfs" | "dfs", depth?: number): void;
 
-declare interface RectConstrustor {
+declare interface RectConstructor {
     x: number;
     y: number;
     h: number;
@@ -188,6 +212,7 @@ export declare enum RectType {
 
 export declare class Store {
     #private;
+    [key: string]: any;
     root: DomSelection;
     board: DomSelection;
     assist: DomSelection;
@@ -195,18 +220,27 @@ export declare class Store {
     observer: Observer;
     rect: Rect;
     manager: Manager;
-    ruler?: Ruler;
+    ruler: Ruler;
+    align: Align;
     get selectedRect(): Rect;
     set selectedRect(rect: Rect);
-    [hooks]: Hook;
-    [plugin]: Plugins;
+    [hook]: Hook;
+    [plugins]: Plugins;
     searchError: typeof store_search_error;
     applyTransform: typeof store_apply_transform;
     plugin: typeof store_plugin;
+    pluginData: typeof store_plugin_data;
     mount: typeof store_mount;
-    onAfterTransform: typeof hook_on_after_transform;
-    onBeforeMount: typeof hook_on_before_init;
-    onAfterMount: typeof hook_on_after_init;
+    onTransform: typeof hook_on_transform;
+    onMountStart: typeof hook_on_mount_start;
+    onMountEnd: typeof hook_on_mount_end;
+    onMoveRect: typeof hook_on_move_rect;
+    onMoveRectEnd: typeof hook_on_move_rect_end;
+    onMoveRectStart: typeof hook_on_move_rect_start;
+    onSelected: typeof hook_on_selected;
+    onDrop: typeof hook_on_drop;
+    onDragOver: typeof hook_on_drag_over;
+    onDragLeave: typeof hook_on_drag_leave;
     constructor(root: HTMLElement, board: HTMLElement);
 }
 
@@ -214,7 +248,9 @@ declare function store_apply_transform(this: Store): void;
 
 declare function store_mount(this: Store): void;
 
-declare function store_plugin(this: Store, plugin: PluginOptions, options?: any): void;
+declare function store_plugin(this: Store, plugin: PluginOptions<any>, options?: any): Store;
+
+declare function store_plugin_data<T>(this: Store, name: string): T;
 
 declare function store_search_error(this: Store): void;
 

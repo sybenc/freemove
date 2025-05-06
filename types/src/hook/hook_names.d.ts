@@ -1,5 +1,12 @@
 export declare enum HookNames {
-    onAfterTransform = "onAfterTransform",
-    onBeforeMount = "onBeforeMount",
-    onAfterMount = "onAfterMount"
+    onTransform = "onTransform",
+    onMountStart = "onMountStart",
+    onMountEnd = "onMountEnd",
+    onMoveRect = "onMoveRect",
+    onMoveRectEnd = "onMoveRectEnd",
+    onMoveRectStart = "onMoveRectStart",
+    onSelected = "onSelected",
+    onDrop = "onDrop",
+    onDragLeave = "onDragLeave",
+    onDragOver = "onDragOver"
 }

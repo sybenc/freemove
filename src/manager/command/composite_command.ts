@@ -1,7 +1,8 @@
-import { Command } from "./command";
+import {Command} from "@/manager";
+
 
 export class CompositeCommand implements Command {
-  private commands: Command[];
+  private readonly commands: Command[];
   record: boolean = true;
 
   constructor(commands: Command[]) {

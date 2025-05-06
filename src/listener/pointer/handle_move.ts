@@ -1,6 +1,6 @@
-import { HookNames } from "../../hook";
-import { CommandMoveRect } from "../../manager/command/command_move_rect";
-import { hooks, Store } from "../../store";
+import { HookNames } from "@/hook";
+import { CommandMoveRect } from "@/manager";
+import { hook, Store } from "@/store";
 
 export function handle_move(store: Store, event: PointerEvent) {
   const boardRect = store.observer.boardDOMRect;
@@ -15,7 +15,7 @@ export function handle_move(store: Store, event: PointerEvent) {
     y: store.selectedRect.y,
   };
   const value = Object.assign({}, snapshot);
-  store[hooks].execute(store, HookNames.onMoveRectStart, value.x, value.y);
+  store[hook].execute(store, HookNames.onMoveRectStart, value.x, value.y);
 
   function move(ev: PointerEvent) {
     if (!store.selectedRect) return;
@@ -28,7 +28,7 @@ export function handle_move(store: Store, event: PointerEvent) {
     value.x = Math.max(0, Math.min(value.x, maxLeft));
     value.y = Math.max(0, Math.min(value.y, maxTop));
 
-    store[hooks].execute(store, HookNames.onMoveRect, value.x, value.y);
+    store[hook].execute(store, HookNames.onMoveRect, value.x, value.y);
 
     const commandMove = new CommandMoveRect(store.selectedRect, value, snapshot);
     commandMove.record = false;
@@ -38,7 +38,7 @@ export function handle_move(store: Store, event: PointerEvent) {
   function stop() {
     const commandMove = new CommandMoveRect(store.selectedRect, value, snapshot);
     store.manager.execute(commandMove);
-    store[hooks].execute(store, HookNames.onMoveRectEnd, value.x, value.y);
+    store[hook].execute(store, HookNames.onMoveRectEnd, value.x, value.y);
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", stop);
   }

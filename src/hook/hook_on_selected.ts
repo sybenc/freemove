@@ -1,6 +1,6 @@
-import { HookCallback, HookNames } from ".";
-import { hooks, Store } from "../store";
+import {hook, Store} from "@/store";
+import {HookCallback, HookNames} from "@/hook/index";
 
 export function hook_on_selected(this: Store, func: HookCallback<[number, number]>) {
-  this[hooks].add(HookNames.onMoveRect, func);
+  this[hook].add(HookNames.onMoveRect, func);
 }

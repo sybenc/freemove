@@ -14,7 +14,7 @@ import { rect_clone } from "./rect_clone";
 import { rect_is_assist } from "./rect_is_assist";
 import { rect_is_root } from "./rect_is_root";
 
-export interface RectConstrustor {
+export interface RectConstructor {
   x: number;
   y: number;
   h: number;
@@ -37,7 +37,7 @@ export default class Rect {
   parent: Rect | null = null;
   children: Rect[] = [];
 
-  constructor({ x, y, h, w, node }: RectConstrustor) {
+  constructor({ x, y, h, w, node }: RectConstructor) {
     this.#x = x;
     this.#y = y;
     this.#h = h;

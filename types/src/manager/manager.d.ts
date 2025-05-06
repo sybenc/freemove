@@ -1,4 +1,4 @@
-import { Command } from "./command/command";
+import { Command } from "@/manager/command/command";
 export default class Manager {
     private undoStack;
     private redoStack;

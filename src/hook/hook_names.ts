@@ -5,5 +5,8 @@ export enum HookNames {
   onMoveRect = "onMoveRect",
   onMoveRectEnd = "onMoveRectEnd",
   onMoveRectStart = "onMoveRectStart",
-  onSelected = "onSelected"
+  onSelected = "onSelected",
+  onDrop = "onDrop",
+  onDragLeave = "onDragLeave",
+  onDragOver = "onDragOver"
 }

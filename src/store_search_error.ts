@@ -1,4 +1,4 @@
-import {Store} from "./store";
+import {Store} from "@/store";
 
 export function store_search_error(this: Store) {
   if (!this.selectedRect || !this.selectedRect.parent) return;

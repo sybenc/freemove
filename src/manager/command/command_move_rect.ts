@@ -1,6 +1,6 @@
-import { Rect } from "../../rect";
-import { Coord } from "../../rect/rect";
-import { Command } from "./command";
+import {Command} from "@/manager";
+import {Rect} from "@/rect";
+import {Coord} from "@/rect/rect";
 
 export class CommandMoveRect implements Command {
   private selectedRect: Rect;

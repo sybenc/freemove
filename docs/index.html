@@ -8,8 +8,9 @@
   <style>
     body {
       margin: 0;
-      padding:  0;
+      padding: 0;
     }
+
     .node-style {
       position: absolute;
       width: 50px;
@@ -26,17 +27,28 @@
 <!-- 在html中生成100个大小不一，位置不一 -->
 
 <body>
-  <div id="example-root" style="width: 100vw;height: 100vh;">
-    <div id="example-board" class="container">
-      <div data-type="movable" class="node-style" style="top: 140px;left: 333px; width: 200px;height: 100px;background-color: #C5947C;">
+  <div style="display: flex;width: 100vw;height: 100vh;overflow: hidden;">
+    <div style="width: 200px;height: 100%;">
+      
+    </div>
+    <div id="example-root" style="flex: 1;height: 100%;overflow: hidden;">
+      <div id="example-board" class="container">
+        <div data-type="movable" class="node-style"
+          style="top: 140px;left: 333px; width: 200px;height: 100px;background-color: #C5947C;">
+        </div>
+        <div data-type="movable" class="node-style"
+          style="top: 190px;left: 222px; width: 150px;height: 100px;background-color: #442973;">
+        </div>
+        <div data-type="movable" class="node-style"
+          style="top: 234px;left: 111px; width: 100px;height: 100px;background-color: #22947C;">
+        </div>
+        <div data-type="movable" class="node-style"
+          style="top: 400px;left: 111px; width: 100px;height: 100px;background-color: #229;"></div>
+        <div data-type="movable" class="node-style"
+          style="top: 20px;left: 250px; width: 100px;height: 100px;background-color: #229;"></div>
+        <div data-type="movable" id="first" class="node-style"
+          style="top: 40px;left: 200px; width: 10%;height: 100px;background-color: white;"></div>
       </div>
-      <div data-type="movable" class="node-style" style="top: 190px;left: 222px; width: 150px;height: 100px;background-color: #442973;">
-      </div>
-      <div data-type="movable" class="node-style" style="top: 234px;left: 111px; width: 100px;height: 100px;background-color: #22947C;">
-      </div>
-      <div data-type="movable" class="node-style" style="top: 400px;left: 111px; width: 100px;height: 100px;background-color: #229;"></div>
-      <div data-type="movable" class="node-style" style="top: 20px;left: 250px; width: 100px;height: 100px;background-color: #229;"></div>
-      <div data-type="movable" id="first" class="node-style" style="top: 40px;left: 200px; width: 10%;height: 100px;background-color: white;"></div>
     </div>
   </div>
   <script src="../dist/freemove.umd.js"></script>

@@ -1,11 +1,12 @@
-import d3 from "../../utils/d3";
-import { Rect } from "../../rect";
-import { Store } from "../../store";
-import { handle_move } from "./handle_move";
+import {Store} from "@/store";
+import d3 from "@utils/d3";
+import {Rect} from "@/rect";
+import {handle_move} from "@/listener/pointer/handle_move";
 
 export function handle_pointer(store: Store) {
   store.assist.on("pointerdown", (event: PointerEvent) => {
     event.preventDefault();
+    event.stopPropagation();
 
     const target = d3.select(event.target as HTMLElement);
     const [mouseX, mouseY] = d3.pointer(event, store.assist.node());

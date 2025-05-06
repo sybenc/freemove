@@ -1,5 +1,5 @@
-import { Rect } from "../../rect";
-import { Command } from "./command";
+import { Command } from "@/manager";
+import { Rect } from "@/rect";
 export declare class CommandRemoveRect implements Command {
     parent: Rect;
     rect: Rect;

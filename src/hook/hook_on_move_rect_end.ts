@@ -1,6 +1,6 @@
-import { HookCallback, HookNames } from ".";
-import { hooks, Store } from "../store";
+import {hook, Store} from "@/store";
+import {HookCallback, HookNames} from "@/hook/index";
 
 export function hook_on_move_rect_end(this: Store, func: HookCallback<[number, number]>) {
-  this[hooks].add(HookNames.onMoveRectEnd, func);
+  this[hook].add(HookNames.onMoveRectEnd, func);
 }

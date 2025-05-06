@@ -1,8 +1,10 @@
-import { Store } from "../../store";
+import {Store} from "@/store";
 
 export function handle_wheel(store: Store) {
-  store.root.node().addEventListener("wheel", (event: WheelEvent) => {
+  store.root.on("wheel", (event: WheelEvent) => {
     event.preventDefault();
+    event.stopPropagation();
+
     const [minScale, maxScale] = store.transform.scaleExtent;
     if (event.ctrlKey) {
       // 缩放操作
