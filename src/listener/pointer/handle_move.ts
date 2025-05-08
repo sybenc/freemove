@@ -1,6 +1,6 @@
-import { HookNames } from "@/hook";
-import { CommandMoveRect } from "@/manager";
-import { hook, Store } from "@/store";
+import {HookNames} from "@/hook";
+import {CommandMoveRect} from "@/manager";
+import {hook, Store} from "@/store";
 
 export function handle_move(store: Store, event: PointerEvent) {
   const boardRect = store.observer.boardDOMRect;
@@ -10,35 +10,46 @@ export function handle_move(store: Store, event: PointerEvent) {
     x: (event.clientX - rect.left) / scale,
     y: (event.clientY - rect.top) / scale,
   };
-  const snapshot = {
+  // 上一次的坐标
+  const last = {
     x: store.selectedRect.x,
     y: store.selectedRect.y,
   };
-  const value = Object.assign({}, snapshot);
-  store[hook].execute(store, HookNames.onMoveRectStart, value.x, value.y);
+  // 现在的坐标
+  const curr = Object.assign({}, last);
+  // 留存的起始位置
+  const snapshot = Object.assign({}, last);
+  store[hook].execute(HookNames.onMoveRectStart);
 
   function move(ev: PointerEvent) {
     if (!store.selectedRect) return;
-    value.x = Math.round((ev.clientX - boardRect.left) / scale - start.x);
-    value.y = Math.round((ev.clientY - boardRect.top) / scale - start.y);
+    curr.x = Math.round((ev.clientX - boardRect.left) / scale - start.x);
+    curr.y = Math.round((ev.clientY - boardRect.top) / scale - start.y);
 
-    const maxLeft = boardRect.width - store.selectedRect.w;
-    const maxTop = boardRect.height - store.selectedRect.h;
+    const maxLeft = boardRect.width / scale - store.selectedRect.w;
+    const maxTop = boardRect.height / scale - store.selectedRect.h;
 
-    value.x = Math.max(0, Math.min(value.x, maxLeft));
-    value.y = Math.max(0, Math.min(value.y, maxTop));
+    curr.x = Math.max(0, Math.min(curr.x, maxLeft));
+    curr.y = Math.max(0, Math.min(curr.y, maxTop));
 
-    store[hook].execute(store, HookNames.onMoveRect, value.x, value.y);
+    store.selectedRect.x = curr.x
+    store.selectedRect.y = curr.y
+    store[hook].execute(HookNames.onMoveRect, {
+      dx: curr.x - last.x,
+      dy: curr.y - last.y
+    });
 
-    const commandMove = new CommandMoveRect(store.selectedRect, value, snapshot);
-    commandMove.record = false;
-    store.manager.execute(commandMove);
+    last.x = curr.x
+    last.y = curr.y
   }
 
   function stop() {
-    const commandMove = new CommandMoveRect(store.selectedRect, value, snapshot);
+    const commandMove = new CommandMoveRect(store.selectedRect, {
+      x: store.selectedRect.x,
+      y: store.selectedRect.y
+    }, snapshot);
     store.manager.execute(commandMove);
-    store[hook].execute(store, HookNames.onMoveRectEnd, value.x, value.y);
+    store[hook].execute(HookNames.onMoveRectEnd);
     document.removeEventListener("pointermove", move);
     document.removeEventListener("pointerup", stop);
   }

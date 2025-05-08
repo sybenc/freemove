@@ -29,7 +29,7 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      outputDir: "types",
+      outputDir: "types/src",
       rollupTypes: true,
     }),
   ],

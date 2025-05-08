@@ -3,7 +3,6 @@
     "target": "ESNext",
     "module": "ESNext",
     "declaration": true,
-    "declarationDir": "types/src",
     "emitDeclarationOnly": true,
     "strict": true,
     "moduleResolution": "Node",

@@ -3,7 +3,6 @@ import {Transform} from "@/transform";
 import {Observer} from "@/observer";
 import {Rect} from "@/rect";
 import {Manager} from "@/manager";
-import {Ruler, ruler} from "@sybenc/ruler";
 import {Hook, HookNames} from "@/hook";
 import {Plugins} from "@/plugins";
 import {store_search_error} from "@/store_search_error";
@@ -20,15 +19,12 @@ import {hook_on_selected} from "@/hook/hook_on_selected";
 import {hook_on_drop} from "@/hook/hook_on_drop";
 import {hook_on_drag_over} from "@/hook/hook_on_drag_over";
 import {hook_on_drag_leave} from "@/hook/hook_on_drag_leave";
-import {Align} from "@sybenc/assist-align/dist/align/align";
-import {assistAlign} from "@sybenc/assist-align"
 import {store_plugin_data} from "@/store_plugin_data";
 
 export const hook = Symbol("hooks");
 export const plugins = Symbol("plugin");
 
 export class Store {
-  [key: string]: any;
   root: DomSelection;
   board: DomSelection;
   assist: DomSelection;
@@ -36,8 +32,6 @@ export class Store {
   observer!: Observer;
   rect: Rect;
   manager: Manager;
-  ruler!: Ruler;
-  align!: Align
 
   #selectedRect: Rect;
   get selectedRect(): Rect {
@@ -47,7 +41,7 @@ export class Store {
   set selectedRect(rect: Rect) {
     rect.node.raise()
     this.#selectedRect = rect;
-    this[hook].execute(this, HookNames.onSelected);
+    this[hook].execute(HookNames.onSelected);
     this.searchError();
   }
 
@@ -81,7 +75,5 @@ export class Store {
     this[plugins] = new Plugins();
     this.transform = new Transform(1, 0, 0);
     this.manager = new Manager();
-    this.plugin(ruler)
-        .plugin(assistAlign);
   }
 }

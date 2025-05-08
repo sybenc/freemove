@@ -1,6 +1,4 @@
-import { Align } from '@sybenc/assist-align/dist/align/align';
 import { DomSelection as DomSelection_2 } from '@sybenc/ruler/dist/d3';
-import { Ruler } from '@sybenc/ruler';
 import { Selection as Selection_2 } from 'd3-selection';
 
 export declare interface Command {
@@ -55,7 +53,7 @@ declare type DomSelection = Selection_2<any, any, any, any>;
 export declare class Hook {
     private storage;
     add(name: HookNames, func: HookCallback): void;
-    execute(store: Store, name: HookNames, ...args: any[]): void;
+    execute(name: HookNames, ...args: any[]): void;
 }
 
 export declare const hook: unique symbol;
@@ -70,7 +68,14 @@ declare function hook_on_mount_end(this: Store, func: HookCallback): void;
 
 declare function hook_on_mount_start(this: Store, func: HookCallback): void;
 
-declare function hook_on_move_rect(this: Store, func: HookCallback<[number, number]>): void;
+declare function hook_on_move_rect(this: Store, func: HookCallback<[
+    {
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+}
+]>): void;
 
 declare function hook_on_move_rect_end(this: Store, func: HookCallback<[number, number]>): void;
 
@@ -80,7 +85,7 @@ declare function hook_on_selected(this: Store, func: HookCallback<[number, numbe
 
 declare function hook_on_transform(this: Store, func: HookCallback): void;
 
-export declare type HookCallback<T extends any[] = any[]> = (store?: Store, ...args: T) => void;
+export declare type HookCallback<T extends any[] = any[]> = (...args: T) => void;
 
 export declare enum HookNames {
     onTransform = "onTransform",
@@ -117,11 +122,13 @@ export declare class Observer {
     constructor(root: Element, board: Element);
 }
 
+export declare type PluginCreator<T> = (store: Store) => PluginOptions<T>;
+
 export declare type PluginOptions<T> = {
     name: string;
     data: T;
-    install: (store: Store, options: any) => void;
-    uninstall: (store: Store) => void;
+    install: (options?: any) => void;
+    uninstall: () => void;
 };
 
 export declare class Plugins {
@@ -212,7 +219,6 @@ export declare enum RectType {
 
 export declare class Store {
     #private;
-    [key: string]: any;
     root: DomSelection;
     board: DomSelection;
     assist: DomSelection;
@@ -220,8 +226,6 @@ export declare class Store {
     observer: Observer;
     rect: Rect;
     manager: Manager;
-    ruler: Ruler;
-    align: Align;
     get selectedRect(): Rect;
     set selectedRect(rect: Rect);
     [hook]: Hook;
@@ -248,7 +252,7 @@ declare function store_apply_transform(this: Store): void;
 
 declare function store_mount(this: Store): void;
 
-declare function store_plugin(this: Store, plugin: PluginOptions<any>, options?: any): Store;
+declare function store_plugin(this: Store, plugin: PluginCreator<any>, options?: any): Store;
 
 declare function store_plugin_data<T>(this: Store, name: string): T;
 

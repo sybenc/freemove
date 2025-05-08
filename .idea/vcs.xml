@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/packages/assist-align" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/packages/ruler" vcs="Git" />
   </component>
 </project>

@@ -3,9 +3,11 @@ import {Store} from "@/store";
 export type PluginOptions<T> = {
   name: string;
   data: T;
-  install: (store: Store, options: any) => void;
-  uninstall: (store: Store) => void;
-};
+  install: (options?: any) => void;
+  uninstall: () => void;
+}
+
+export type PluginCreator<T> = (store: Store) => PluginOptions<T>
 
 export class Plugins {
   private storage: Map<string, PluginOptions<any>> = new Map();

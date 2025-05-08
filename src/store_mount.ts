@@ -4,9 +4,11 @@ import {handle_wheel} from "@/listener/wheel";
 import {Observer} from "@/observer";
 import {hook, Store} from "@/store";
 import {handle_drag} from "@/listener/drag";
+import {ruler} from "@sybenc/ruler";
+import {assistAlign} from "@sybenc/assist-align";
 
 export function store_mount(this: Store) {
-  this[hook].execute(this, HookNames.onMountStart);
+  this[hook].execute(HookNames.onMountStart);
   const root = this.root.node() as Element;
   const board = this.board.node() as Element;
   const assist = this.assist.node() as Element;
@@ -24,7 +26,7 @@ export function store_mount(this: Store) {
       .attr("data-type", "assist")
       .attr("width", boardRect.width)
       .attr("height", boardRect.height)
-      .attr("viewbox", [0, 0, boardRect.width, boardRect.height])
+      .attr("viewBox", [0, 0, boardRect.width, boardRect.height].join(' '))
       .style("position", "absolute")
       .style("left", `${(rootRect.width - boardRect.width) / 2}px`)
       .style("top", `${(rootRect.height - boardRect.height) / 2}px`)
@@ -34,5 +36,7 @@ export function store_mount(this: Store) {
   handle_wheel(this);
   handle_pointer(this);
   handle_drag(this)
-  this[hook].execute(this, HookNames.onMountEnd);
+  this.plugin(assistAlign).plugin(ruler)
+      ;
+  this[hook].execute(HookNames.onMountEnd);
 }
